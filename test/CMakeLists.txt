@@ -4,7 +4,7 @@ set(CTL_TEST ctl_test)
 
 add_executable(
   ${CTL_TEST}
-  list.cpp
+  list_features.cpp
 )
 
 target_include_directories(
