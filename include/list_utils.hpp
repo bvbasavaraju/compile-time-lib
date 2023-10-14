@@ -112,6 +112,12 @@ struct push_back{
 template <typename T1, typename T2>
 using push_back_t = push_back<T1, T2>::type;
 
+template <typename T1, typename T2>
+using append = push_back<T1, T2>;
+
+template <typename T1, typename T2>
+using append_t = push_back<T1, T2>::type;
+
 // first
 template <typename List>
 struct first {
@@ -207,6 +213,12 @@ using front = head<List>;
 template <typename List>
 using front_t = front<List>::type;
 
+template <typename List>
+using pop_back = head<List>;
+
+template <typename List>
+using pop_back_t = pop_back<List>::type;
+
 // tail or back
 template <typename List>
 struct tail {
@@ -241,6 +253,89 @@ using back = tail<List>;
 
 template <typename List>
 using back_t = back<List>::type;
+
+template <typename List>
+using pop_front = tail<List>;
+
+template <typename List>
+using pop_front_t = pop_front<List>::type;
+
+template <typename List>
+struct size {
+  private:
+    template <typename L>
+    struct size_impl;
+
+    template <template <typename...> typename L>
+    struct size_impl<L<>> {
+      using type = std::integral_constant<uint32_t, 0>;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct size_impl<L<T, Ts...>> {
+      using type = std::integral_constant<uint32_t, 1 + size_impl<L<Ts...>>::type::value>;
+    };
+
+  public:
+    using type = size_impl<List>::type;
+};
+
+template <typename List>
+using size_t = size<List>::type;
+
+template <typename List>
+using count = size<List>;
+
+template <typename List>
+using count_t = count<List>::type;
+
+template <typename List>
+struct empty {
+  private:
+    template <typename L>
+    struct empty_impl;
+
+    template <template <typename...> typename L>
+    struct empty_impl<L<>> {
+      // using type = std::integral_constant<bool, true>;
+      using type = std::true_type;
+    };
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct empty_impl<L<Ts...>> {
+      // using type = std::integral_constant<bool, false>;
+      using type = std::false_type;
+    };
+
+  public:
+    using type = empty_impl<List>::type;
+};
+
+template <typename List>
+using empty_t = empty<List>::type;
+
+template <typename List>
+struct clear {
+  private:
+    template <typename L>
+    struct clear_impl;
+
+    template <template <typename...> typename L>
+    struct clear_impl<L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct clear_impl<L<Ts...>> {
+      using type = L<>;
+    };
+
+  public:
+    using type = clear_impl<List>::type;
+};
+
+template <typename List>
+using clear_t = clear<List>::type;
 
 } // namespace list
 } // namespace ctl
