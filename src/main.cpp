@@ -13,11 +13,19 @@ struct type1 : public super_type {
   auto operator()() {
     std::cout << "inside type1\n";
   }
+
+  auto operator||(auto val) {
+    return val || false;
+  }
 };
 
 struct type2 : public super_type {
   auto operator()() {
     std::cout << "inside type2\n";
+  }
+
+  auto operator||(auto val) {
+    return val || false;
   }
 };
 
@@ -31,16 +39,28 @@ int main() {
 
   static_assert(std::is_same_v<types_all, ctl::list<type1, type2> >, "Type1 or Type2 are not in list");
 
+  // instantiable list
   using itypes_all = ctl::ilist<type1, type2>;
   itypes_all ita{};
 
-  using ctypes_all = ctl::clist<type1, type2>;
-  ctypes_all{}();
+  {
+    //Callable list
+    using ctypes_all = ctl::clist<type1, type2>;
+    ctypes_all{}();
 
-  constexpr auto fn = [](auto const& obj) {
-    obj.attendence();
-  };
-  ctypes_all{}(fn);
+    // with predicate!
+    constexpr auto fn = [](auto const& obj) {
+      obj.attendence();
+    };
+    ctypes_all{}(fn);
+
+    // with operator logical OR
+    if (ctypes_all{} || false) {
+      std::cout << "Operation Logical OR returned true" << std::endl;
+    } else {
+      std::cout << "Operation Logical OR returned false" << std::endl;
+    }
+  }
 
   return 0;
 }
