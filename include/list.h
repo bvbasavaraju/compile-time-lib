@@ -4,14 +4,13 @@
 // #include "fold_ops.hpp"
 
 namespace ctl {
-namespace list {
 
-//Non instantiable types
+//list
 template <typename ...>
-struct types;
+struct list;
 
 // TODO: enable this as a new feature
-// // instantiabel types
+// // instantiable
 // template <typename ...>
 // struct instantiable_types{};
 
@@ -37,5 +36,4 @@ struct types;
 // };
 
 
-} //namespace list
 } // namespace ctl
