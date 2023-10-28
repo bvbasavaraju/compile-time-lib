@@ -2,8 +2,6 @@
 
 namespace ctl {
 
-namespace list {
-
 // push_front
 template <typename T1, typename T2>
 struct push_front{
@@ -119,7 +117,7 @@ template <typename T1, typename T2>
 using append_t = push_back<T1, T2>::type;
 
 // first
-template <typename List>
+template <typename types>
 struct first {
   private:
     template <typename L>
@@ -137,18 +135,18 @@ struct first {
 
     template <template <typename...> typename L, typename ...Ts>
     struct first_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "List can't be empty");
+      static_assert((sizeof...(Ts) > 0), "types can't be empty");
     };
 
   public:
-    using type = first_impl<List>::type;
+    using type = first_impl<types>::type;
 };
 
-template <typename List>
-using first_t = first<List>::type;
+template <typename types>
+using first_t = first<types>::type;
 
 // last
-template <typename List>
+template <typename types>
 struct last {
   private:
     template <typename L>
@@ -166,18 +164,18 @@ struct last {
 
     template <template <typename...> typename L, typename ...Ts>
     struct last_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "List can't be empty");
+      static_assert((sizeof...(Ts) > 0), "types can't be empty");
     };
 
   public:
-    using type = last_impl<List>::type;
+    using type = last_impl<types>::type;
 };
 
-template <typename List>
-using last_t = last<List>::type;
+template <typename types>
+using last_t = last<types>::type;
 
 // head or front
-template <typename List>
+template <typename types>
 struct head {
   private:
     template <typename L>
@@ -197,30 +195,30 @@ struct head {
 
     template <template <typename...> typename L, typename ...Ts>
     struct head_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "List can't be empty");
+      static_assert((sizeof...(Ts) > 0), "types can't be empty");
     };
 
   public:
-    using type = head_impl<List>::type;
+    using type = head_impl<types>::type;
 };
 
-template <typename List>
-using head_t = head<List>::type;
+template <typename types>
+using head_t = head<types>::type;
 
-template <typename List>
-using front = head<List>;
+template <typename types>
+using front = head<types>;
 
-template <typename List>
-using front_t = front<List>::type;
+template <typename types>
+using front_t = front<types>::type;
 
-template <typename List>
-using pop_back = head<List>;
+template <typename types>
+using pop_back = head<types>;
 
-template <typename List>
-using pop_back_t = pop_back<List>::type;
+template <typename types>
+using pop_back_t = pop_back<types>::type;
 
 // tail or back
-template <typename List>
+template <typename types>
 struct tail {
   private:
     template <typename L>
@@ -238,29 +236,29 @@ struct tail {
 
     template <template <typename...> typename L, typename ...Ts>
     struct tail_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "List can't be empty");
+      static_assert((sizeof...(Ts) > 0), "types can't be empty");
     };
 
   public:
-    using type = tail_impl<List>::type;
+    using type = tail_impl<types>::type;
 };
 
-template <typename List>
-using tail_t = tail<List>::type;
+template <typename types>
+using tail_t = tail<types>::type;
 
-template <typename List>
-using back = tail<List>;
+template <typename types>
+using back = tail<types>;
 
-template <typename List>
-using back_t = back<List>::type;
+template <typename types>
+using back_t = back<types>::type;
 
-template <typename List>
-using pop_front = tail<List>;
+template <typename types>
+using pop_front = tail<types>;
 
-template <typename List>
-using pop_front_t = pop_front<List>::type;
+template <typename types>
+using pop_front_t = pop_front<types>::type;
 
-template <typename List>
+template <typename types>
 struct size {
   private:
     template <typename L>
@@ -277,19 +275,19 @@ struct size {
     };
 
   public:
-    using type = size_impl<List>::type;
+    using type = size_impl<types>::type;
 };
 
-template <typename List>
-using size_t = size<List>::type;
+template <typename types>
+using size_t = size<types>::type;
 
-template <typename List>
-using count = size<List>;
+template <typename types>
+using count = size<types>;
 
-template <typename List>
-using count_t = count<List>::type;
+template <typename types>
+using count_t = count<types>::type;
 
-template <typename List>
+template <typename types>
 struct empty {
   private:
     template <typename L>
@@ -308,13 +306,13 @@ struct empty {
     };
 
   public:
-    using type = empty_impl<List>::type;
+    using type = empty_impl<types>::type;
 };
 
-template <typename List>
-using empty_t = empty<List>::type;
+template <typename types>
+using empty_t = empty<types>::type;
 
-template <typename List>
+template <typename types>
 struct clear {
   private:
     template <typename L>
@@ -331,11 +329,10 @@ struct clear {
     };
 
   public:
-    using type = clear_impl<List>::type;
+    using type = clear_impl<types>::type;
 };
 
-template <typename List>
-using clear_t = clear<List>::type;
+template <typename types>
+using clear_t = clear<types>::type;
 
-} // namespace list
 } // namespace ctl
