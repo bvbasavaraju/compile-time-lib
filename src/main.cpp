@@ -8,33 +8,27 @@ struct super_type {
   auto attendence() const {
     std::cout << "Present" << std::endl;
   }
+
+  virtual void name() const = 0;
 };
 
 struct type1 : public super_type {
+  void name() const {
+    std::cout << "type1: ";
+  }
+
   auto operator()() const {
-    std::cout << "inside type1\n";
-  }
-
-  auto operator||(auto val) {
-    return val || false;
-  }
-
-  auto operator&&(auto val) {
-    return val && false;
+    return false;
   }
 };
 
 struct type2 : public super_type {
+  void name() const {
+    std::cout << "type2: ";
+  }
+
   auto operator()() const {
-    std::cout << "inside type2\n";
-  }
-
-  auto operator||(auto val) {
-    return val || true;
-  }
-
-  auto operator&&(auto val) {
-    return val && true;
+    return true;
   }
 };
 
@@ -55,12 +49,12 @@ int main() {
   {
     //Callable list
     using ctypes_all = ctl::clist<type1, type2>;
-    ctypes_all{}();
+    ctypes_all{};
 
     // with predicate!
     constexpr auto fn = [](auto const& obj) {
+      obj.name();
       obj.attendence();
-      decltype(obj){}();
     };
     ctypes_all{}(fn);
 
@@ -76,13 +70,6 @@ int main() {
     } else {
       std::cout << "fold op :: logical and :: returned false" << std::endl;
     }
-
-    // // with operator logical OR
-    // if (ctypes_all{} || false) {
-    //   std::cout << "Operation Logical OR returned true" << std::endl;
-    // } else {
-    //   std::cout << "Operation Logical OR returned false" << std::endl;
-    // }
   }
 
   return 0;
