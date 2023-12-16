@@ -2,6 +2,7 @@
 #include <list.hpp>
 #include <utils.hpp>
 #include <show_type.hpp>
+#include <fold_ops.hpp>
 
 struct super_type {
   auto attendence() const {
@@ -10,22 +11,30 @@ struct super_type {
 };
 
 struct type1 : public super_type {
-  auto operator()() {
+  auto operator()() const {
     std::cout << "inside type1\n";
   }
 
   auto operator||(auto val) {
     return val || false;
   }
+
+  auto operator&&(auto val) {
+    return val && false;
+  }
 };
 
 struct type2 : public super_type {
-  auto operator()() {
+  auto operator()() const {
     std::cout << "inside type2\n";
   }
 
   auto operator||(auto val) {
-    return val || false;
+    return val || true;
+  }
+
+  auto operator&&(auto val) {
+    return val && true;
   }
 };
 
@@ -51,15 +60,29 @@ int main() {
     // with predicate!
     constexpr auto fn = [](auto const& obj) {
       obj.attendence();
+      decltype(obj){}();
     };
     ctypes_all{}(fn);
 
-    // with operator logical OR
-    if (ctypes_all{} || false) {
-      std::cout << "Operation Logical OR returned true" << std::endl;
+    // with fold operations
+    if ( ctypes_all{}(ctl::fold_ops::logical_or{}) ) {
+      std::cout << "fold op :: logical or :: returned true" << std::endl;
     } else {
-      std::cout << "Operation Logical OR returned false" << std::endl;
+      std::cout << "fold op :: logical or :: returned false" << std::endl;
     }
+
+    if ( ctypes_all{}(ctl::fold_ops::logical_and{}) ) {
+      std::cout << "fold op :: logical and :: returned true" << std::endl;
+    } else {
+      std::cout << "fold op :: logical and :: returned false" << std::endl;
+    }
+
+    // // with operator logical OR
+    // if (ctypes_all{} || false) {
+    //   std::cout << "Operation Logical OR returned true" << std::endl;
+    // } else {
+    //   std::cout << "Operation Logical OR returned false" << std::endl;
+    // }
   }
 
   return 0;
