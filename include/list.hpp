@@ -1,6 +1,6 @@
 #pragma once
 
-#include <fold_ops.hpp>
+// #include <fold_ops.hpp>
 
 namespace ctl {
 
@@ -21,15 +21,12 @@ struct clist : public ilist<types...> {
     return (predicate(types{}), ...);
   }
 
-  template <typename T>
-  constexpr auto operator()(T &&);
-
-  constexpr auto operator()(ctl::fold_ops::logical_or) {
-    return (types{}() || ... || false);
+  constexpr auto operator||(auto initialVal) {
+    return (types{}() || ... || initialVal);
   }
 
-  constexpr auto operator()(ctl::fold_ops::logical_and) {
-    return (types{}() && ... && true);
+  constexpr auto operator&&(auto initialVal) {
+    return (types{}() && ... && initialVal);
   }
 
   //TODO: other fold operators!!

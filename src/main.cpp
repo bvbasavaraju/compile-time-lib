@@ -2,7 +2,7 @@
 #include <list.hpp>
 #include <utils.hpp>
 #include <show_type.hpp>
-#include <fold_ops.hpp>
+// #include <fold_ops.hpp>
 
 struct super_type {
   auto attendence() const {
@@ -58,17 +58,17 @@ int main() {
     };
     ctypes_all{}(fn);
 
-    // with fold operations
-    if ( ctypes_all{}(ctl::fold_ops::logical_or{}) ) {
-      std::cout << "fold op :: logical or :: returned true" << std::endl;
+    // with logical operations with the help of fold
+    if ( ctypes_all{} || false ) {
+      std::cout << "logical or :: returned true" << std::endl;
     } else {
-      std::cout << "fold op :: logical or :: returned false" << std::endl;
+      std::cout << "logical or :: returned false" << std::endl;
     }
 
-    if ( ctypes_all{}(ctl::fold_ops::logical_and{}) ) {
-      std::cout << "fold op :: logical and :: returned true" << std::endl;
+    if ( ctypes_all{} && true) {
+      std::cout << "logical and :: returned true" << std::endl;
     } else {
-      std::cout << "fold op :: logical and :: returned false" << std::endl;
+      std::cout << "logical and :: returned false" << std::endl;
     }
   }
 
