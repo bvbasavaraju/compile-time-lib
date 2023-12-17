@@ -2,7 +2,6 @@
 #include <list.hpp>
 #include <utils.hpp>
 #include <show_type.hpp>
-// #include <fold_ops.hpp>
 
 struct super_type {
   auto attendence() const {
@@ -71,6 +70,10 @@ int main() {
       std::cout << "logical and :: returned false" << std::endl;
     }
   }
+
+  using numList = ctl::clist<std::integral_constant<uint32_t, 1>,std::integral_constant<uint32_t, 2>, std::integral_constant<uint32_t, 3>>;
+  // ctl::debug::show_type<numList>();
+  std::cout << "operator+: " << (numList{} + 10) << std::endl;
 
   return 0;
 }

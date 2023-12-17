@@ -1,7 +1,5 @@
 #pragma once
 
-// #include <fold_ops.hpp>
-
 namespace ctl {
 
 //list
@@ -27,6 +25,12 @@ struct clist : public ilist<types...> {
 
   constexpr auto operator&&(auto initialVal) {
     return (types{}() && ... && initialVal);
+  }
+
+  constexpr auto operator+(auto initialVal) {
+    // return (types{}() + ... + initialVal);
+    // return (types{} + ... + initialVal);
+    return (types::value + ... + initialVal);
   }
 
   //TODO: other fold operators!!
