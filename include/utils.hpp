@@ -335,4 +335,134 @@ struct clear {
 template <typename types>
 using clear_t = clear<types>::type;
 
+template <typename types, typename type_to_remove>
+struct remove_type {
+  private:
+    template <typename U, typename L>
+    struct remove_type_impl;
+
+    template <typename T, template <typename ...> typename L>
+    struct remove_type_impl<T, L<>> {
+      using type = L<>;
+    };
+
+    template <typename T, template <typename ...> typename L>
+    struct remove_type_impl<T, L<T>> {
+      using type = L<>;
+    };
+
+    template <typename U, template <typename ...> typename L, typename T>
+    struct remove_type_impl<U, L<T>> {
+      using type = L<T>;
+    };
+
+    template <typename U, template <typename ...> typename L, typename T, typename ...Ts>
+    struct remove_type_impl<U, L<T, Ts...>> {
+      using first = remove_type_impl<U, L<T>>::type;
+      using rest = remove_type<L<Ts...>, U>::type;
+
+      using type = push_back_t<first, rest>;
+    };
+
+  public:
+    using type = remove_type_impl<type_to_remove, types>::type;
+};
+
+template <typename types, typename type_to_remove>
+using remove_type_t = remove_type<types, type_to_remove>::type;
+
+template <typename types>
+struct remove_duplicates {
+  private:
+    template <typename L>
+    struct remove_duplicates_impl;
+
+    template <template <typename...> typename L>
+    struct remove_duplicates_impl<L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename T>
+    struct remove_duplicates_impl<L<T>> {
+      using type = L<T>;
+    };
+
+    template <template <typename ...> typename L, typename T, typename ...Ts>
+    struct remove_duplicates_impl<L<T, Ts...>>{
+      using first = remove_type_t<L<Ts...>, T>;
+      using rest = remove_duplicates<first>::type;
+
+      using type = push_back_t<L<T>, rest>;
+    };
+  
+  public:
+    using type = remove_duplicates_impl<types>::type;
+};
+
+template <typename types>
+using remove_duplicates_t = remove_duplicates<types>::type;
+
+template <typename types>
+struct reverse {
+  private:
+    template <typename L>
+    struct reverse_impl;
+
+    template <template <typename ...> typename L>
+    struct reverse_impl<L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename ...> typename L, typename T>
+    struct reverse_impl<L<T>> {
+      using type = L<T>;
+    };
+
+    template <template <typename ...> typename L, typename T, typename ...Ts>
+    struct reverse_impl<L<T, Ts...>> {
+      using rest = reverse<L<Ts...>>::type;
+
+      using type = push_back_t<rest, L<T>>;
+    };
+
+  public:
+    using type = reverse_impl<types>::type;
+};
+
+template <typename types>
+using reverse_t = reverse<types>::type;
+
+template <typename types, typename N>
+struct at{
+  private:
+    template <typename U, typename L>
+    struct at_impl;
+
+    template <template <typename ...>typename L, typename T, typename ...Ts>
+    struct at_impl<std::integral_constant<typename N::value_type, 0>, L<T, Ts...>> {
+      using type = T;
+    };
+
+    template <N::value_type index, template <typename ...>typename L, typename T, typename ...Ts>
+    struct at_impl<std::integral_constant<typename N::value_type, index>, L<T, Ts...>> {
+      using index_type = std::integral_constant<typename N::value_type, index-1>;
+      using type = at_impl<index_type, L<Ts...>>::type;
+    };
+
+    template <typename U, template <typename...> typename L, typename ...Ts>
+    struct at_impl<U, L<Ts...>> {
+      static_assert((U::value >= sizeof...(Ts)), "Index should be within size of the list of types");
+      static_assert((U::value < 0), "Index cannot be negative");
+    };
+
+  public:
+    using type = at_impl<N, types>::type;
+};
+
+template <typename types, typename N>
+using at_t = at<types, N>::type;
+
+template <typename types, std::size_t index>
+using at_c_t = at_t<types, std::integral_constant<std::size_t, index>>;
+
 } // namespace ctl
