@@ -258,6 +258,7 @@ using pop_front = tail<types>;
 template <typename types>
 using pop_front_t = pop_front<types>::type;
 
+// size or count
 template <typename types>
 struct size {
   private:
@@ -287,6 +288,7 @@ using count = size<types>;
 template <typename types>
 using count_t = count<types>::type;
 
+// empty
 template <typename types>
 struct empty {
   private:
@@ -312,6 +314,7 @@ struct empty {
 template <typename types>
 using empty_t = empty<types>::type;
 
+// clear
 template <typename types>
 struct clear {
   private:
@@ -335,6 +338,7 @@ struct clear {
 template <typename types>
 using clear_t = clear<types>::type;
 
+// remove type
 template <typename types, typename type_to_remove>
 struct remove_type {
   private:
@@ -371,6 +375,7 @@ struct remove_type {
 template <typename types, typename type_to_remove>
 using remove_type_t = remove_type<types, type_to_remove>::type;
 
+// remove duplicates
 template <typename types>
 struct remove_duplicates {
   private:
@@ -402,6 +407,7 @@ struct remove_duplicates {
 template <typename types>
 using remove_duplicates_t = remove_duplicates<types>::type;
 
+// reverse
 template <typename types>
 struct reverse {
   private:
@@ -432,6 +438,7 @@ struct reverse {
 template <typename types>
 using reverse_t = reverse<types>::type;
 
+// at
 template <typename types, typename N>
 struct at{
   private:
@@ -465,4 +472,62 @@ using at_t = at<types, N>::type;
 template <typename types, std::size_t index>
 using at_c_t = at_t<types, std::integral_constant<std::size_t, index>>;
 
+// if
+template <typename C, typename T, typename ...F>
+struct select {
+  private:
+    template <typename COND, typename TRUE_TYPE, typename ...FALSE_TYPE>
+    struct select_impl;
+
+    template <typename TRUE_TYPE, typename ...FALSE_TYPE>
+    struct select_impl<std::true_type, TRUE_TYPE, FALSE_TYPE...> {
+      using type = TRUE_TYPE;
+    };
+
+    template <typename TRUE_TYPE, typename FALSE_TYPE>
+    struct select_impl<std::false_type, TRUE_TYPE, FALSE_TYPE> {
+      using type = FALSE_TYPE;
+    };
+
+  public:
+    using type = select_impl<C, T, F...>::type;
+};
+
+template <typename C, typename T, typename ...F>
+using select_t = select<C, T, F...>::type;
+
+template <bool cond, typename T, typename ...F>
+using select_c_t = select_t<std::integral_constant<bool, cond>, T, F...>;
+
+// // filter
+// template <typename predicate, typename types>
+// struct filter {
+//   private:
+//     template <typename P, typename L>
+//     struct filter_impl;
+
+//     template <template <typename...> typename P, template <typename...> typename L>
+//     struct filter_impl<P<>, L<>>{
+//       using type = L<>;
+//     };
+
+//     template <template <typename...> typename P, template <typename...> typename L, typename T>
+//     struct filter_impl<P<T>, L<T>>{
+//       using type = select_t<P<T>, L<T>, L<>>;
+//     };
+
+//     template <template <typename...> typename P, template <typename...> typename L, typename T, typename ...Ts>
+//     struct filter_impl<P<T>, L<T, Ts...>>{
+//       using first = filter_impl<P<T>, L<T>>::type;
+//       using rest = filter_impl<P<T>, L<T>>::type;
+
+//       using type = push_back_t<first, rest>;
+//     };
+
+//   public:
+//     using type = filter_impl<predicate, types>::type;
+// };
+
+// template <typename predicate, typename types>
+// using filter_t = filter<predicate, types>::type;
 } // namespace ctl
