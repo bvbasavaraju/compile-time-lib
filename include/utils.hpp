@@ -439,95 +439,95 @@ template <typename types>
 using reverse_t = reverse<types>::type;
 
 // at
-template <typename types, typename N>
-struct at{
+template <typename types, std::size_t N>
+struct at_c{
   private:
-    template <typename U, typename L>
-    struct at_impl;
+    template <std::size_t U, typename L>
+    struct at_c_impl;
 
     template <template <typename ...>typename L, typename T, typename ...Ts>
-    struct at_impl<std::integral_constant<typename N::value_type, 0>, L<T, Ts...>> {
+    struct at_c_impl<0, L<T, Ts...>> {
       using type = T;
     };
 
-    template <N::value_type index, template <typename ...>typename L, typename T, typename ...Ts>
-    struct at_impl<std::integral_constant<typename N::value_type, index>, L<T, Ts...>> {
-      using index_type = std::integral_constant<typename N::value_type, index-1>;
-      using type = at_impl<index_type, L<Ts...>>::type;
+    template <std::size_t index, template <typename ...>typename L, typename T, typename ...Ts>
+    struct at_c_impl<index, L<T, Ts...>> {
+      using type = at_c_impl<index-1, L<Ts...>>::type;
     };
 
-    template <typename U, template <typename...> typename L, typename ...Ts>
-    struct at_impl<U, L<Ts...>> {
-      static_assert((U::value >= sizeof...(Ts)), "Index should be within size of the list of types");
-      static_assert((U::value < 0), "Index cannot be negative");
+    template <std::size_t U, template <typename...> typename L, typename ...Ts>
+    struct at_c_impl<U, L<Ts...>> {
+      static_assert((U >= sizeof...(Ts)), "Index should be within size of the list of types");
+      static_assert((U < 0), "Index cannot be negative");
     };
 
   public:
-    using type = at_impl<N, types>::type;
+    using type = at_c_impl<N, types>::type;
 };
 
+template <typename types, std::size_t N>
+using at_c_t = at_c<types, N>::type;
+
 template <typename types, typename N>
-using at_t = at<types, N>::type;
+using at_t = at_c_t<types, N::value>;
 
-template <typename types, std::size_t index>
-using at_c_t = at_t<types, std::integral_constant<std::size_t, index>>;
-
-// if
-template <typename C, typename T, typename ...F>
-struct select {
+// select
+template <bool C, typename T, typename ...F>
+struct select_c {
   private:
-    template <typename COND, typename TRUE_TYPE, typename ...FALSE_TYPE>
-    struct select_impl;
+    template <bool COND, typename TRUE_TYPE, typename ...FALSE_TYPE>
+    struct select_c_impl;
 
     template <typename TRUE_TYPE, typename ...FALSE_TYPE>
-    struct select_impl<std::true_type, TRUE_TYPE, FALSE_TYPE...> {
+    struct select_c_impl<true, TRUE_TYPE, FALSE_TYPE...> {
       using type = TRUE_TYPE;
     };
 
     template <typename TRUE_TYPE, typename FALSE_TYPE>
-    struct select_impl<std::false_type, TRUE_TYPE, FALSE_TYPE> {
+    struct select_c_impl<false, TRUE_TYPE, FALSE_TYPE> {
       using type = FALSE_TYPE;
     };
 
   public:
-    using type = select_impl<C, T, F...>::type;
+    using type = select_c_impl<C, T, F...>::type;
 };
 
+template <bool C, typename T, typename ...F>
+using select_c_t = select_c<C, T, F...>::type;
+
 template <typename C, typename T, typename ...F>
-using select_t = select<C, T, F...>::type;
+using select_t = select_c_t<C::value, T, F...>;
 
-template <bool cond, typename T, typename ...F>
-using select_c_t = select_t<std::integral_constant<bool, cond>, T, F...>;
+// filter
+template <template <typename ...> typename predicate, typename types>
+struct filter {
+  private:
+    template <typename L>
+    struct filter_impl;
 
-// // filter
-// template <typename predicate, typename types>
-// struct filter {
-//   private:
-//     template <typename P, typename L>
-//     struct filter_impl;
+    template <template <typename...> typename L>
+    struct filter_impl<L<>>{
+      using type = L<>;
+    };
 
-//     template <template <typename...> typename P, template <typename...> typename L>
-//     struct filter_impl<P<>, L<>>{
-//       using type = L<>;
-//     };
+    template <template <typename...> typename L, typename T>
+    struct filter_impl<L<T>>{
+      using type = select_t<predicate<T>, L<T>, L<>>;
+    };
 
-//     template <template <typename...> typename P, template <typename...> typename L, typename T>
-//     struct filter_impl<P<T>, L<T>>{
-//       using type = select_t<P<T>, L<T>, L<>>;
-//     };
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct filter_impl<L<T, Ts...>>{
+      using first = filter_impl<L<T>>::type;
+      using rest = filter_impl<L<Ts...>>::type;
 
-//     template <template <typename...> typename P, template <typename...> typename L, typename T, typename ...Ts>
-//     struct filter_impl<P<T>, L<T, Ts...>>{
-//       using first = filter_impl<P<T>, L<T>>::type;
-//       using rest = filter_impl<P<T>, L<T>>::type;
+      using type = push_back_t<first, rest>;
+    };
 
-//       using type = push_back_t<first, rest>;
-//     };
+  public:
+    using type = filter_impl<types>::type;
+};
 
-//   public:
-//     using type = filter_impl<predicate, types>::type;
-// };
+template <template <typename ...> typename predicate, typename types>
+using filter_t = filter<predicate, types>::type;
 
-// template <typename predicate, typename types>
-// using filter_t = filter<predicate, types>::type;
 } // namespace ctl
