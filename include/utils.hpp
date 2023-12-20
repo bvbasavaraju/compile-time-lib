@@ -258,7 +258,7 @@ using pop_front = tail<types>;
 template <typename types>
 using pop_front_t = pop_front<types>::type;
 
-// size or count
+// size
 template <typename types>
 struct size {
   private:
@@ -282,11 +282,52 @@ struct size {
 template <typename types>
 using size_t = size<types>::type;
 
+// count
 template <typename types>
 using count = size<types>;
 
 template <typename types>
 using count_t = count<types>::type;
+
+template <template <typename...> typename P, typename types>
+struct count_if{
+  private:
+    template <bool C, typename L>
+    struct count_if_true {
+      using type = std::integral_constant<uint32_t, 0>;
+    };
+
+    template <typename L>
+    struct count_if_true<true, L> {
+      using type = std::integral_constant<uint32_t, 1>;
+    };
+
+    // count_if_impl
+    template <typename L>
+    struct count_if_impl;
+
+    template <template <typename...> typename L>
+    struct count_if_impl<L<>>{
+      using type = std::integral_constant<uint32_t, 0>;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct count_if_impl<L<T, Ts...>>{
+      using first = count_if_true<P<T>::value, L<T, Ts...>>::type;
+      using rest = count_if_impl<L<Ts...>>::type;
+
+      using type = std::integral_constant<uint32_t, (first::value + rest::value)>;
+    };
+
+  public:
+    using type = count_if_impl<types>::type;
+};
+
+template <template <typename...> typename P, typename types>
+using count_if_t = count_if<P, types>::type;
+
+template <typename QMF, typename types>
+using count_if_qmf_t = count_if_t<QMF::template fn, types>;
 
 // empty
 template <typename types>
@@ -499,7 +540,7 @@ template <typename C, typename T, typename ...F>
 using select_t = select_c_t<C::value, T, F...>;
 
 // filter
-template <template <typename ...> typename predicate, typename types>
+template <template <typename ...> typename P, typename types>
 struct filter {
   private:
     template <typename L>
@@ -512,7 +553,7 @@ struct filter {
 
     template <template <typename...> typename L, typename T>
     struct filter_impl<L<T>>{
-      using type = select_t<predicate<T>, L<T>, L<>>;
+      using type = select_t<P<T>, L<T>, L<>>;
     };
 
     template <template <typename...> typename L, typename T, typename ...Ts>
@@ -527,7 +568,126 @@ struct filter {
     using type = filter_impl<types>::type;
 };
 
-template <template <typename ...> typename predicate, typename types>
-using filter_t = filter<predicate, types>::type;
+template <template <typename ...> typename P, typename types>
+using filter_t = filter<P, types>::type;
+
+template <typename QMF, typename types>
+using filter_qmf_t = filter_t<QMF::template fn, types>;
+
+// contains
+template <typename types, typename type_to_search>
+struct contains {
+  private:
+    template <typename U, typename L>
+    struct contains_impl;
+
+    template <typename U, template <typename...> typename L>
+    struct contains_impl<U, L<>> {
+      using type = std::false_type;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct contains_impl<T, L<T, Ts...>> {
+      using type = std::true_type;
+    };
+
+    template <typename U, template <typename...> typename L, typename T, typename ...Ts>
+    struct contains_impl<U, L<T, Ts...>> {
+      using type = contains_impl<U, L<Ts...>>::type;
+    };
+
+  public:
+    using type = contains_impl<type_to_search, types>::type;
+};
+
+template <typename types, typename type_to_search>
+using contains_t = contains<types, type_to_search>::type;
+
+// drop
+template <typename types, std::size_t N>
+struct drop_c {
+  private:
+    template <std::size_t count, typename L>
+    struct drop_c_impl;
+
+    template <std::size_t count, template <typename...> typename L>
+    struct drop_c_impl<count, L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L>
+    struct drop_c_impl<0, L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct drop_c_impl<0, L<Ts...>> {
+      using type = L<Ts...>;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct drop_c_impl<0, L<T, Ts...>> {
+      using type = L<T, Ts...>;
+    };
+
+    template <std::size_t count, template <typename...> typename L, typename T, typename ...Ts>
+    struct drop_c_impl<count, L<T, Ts...>> {
+      using type = drop_c_impl<count-1, L<Ts...>>::type;
+    };
+
+  public:
+    using type = drop_c_impl<N, types>::type;
+};
+
+template <typename types, std::size_t N>
+using drop_c_t = drop_c<types, N>::type;
+
+template <typename types, typename N>
+using drop_t = drop_c_t<types, N::value>;
+
+// take
+template <typename types, std::size_t N>
+struct take_c {
+  private:
+    template <std::size_t count, typename L>
+    struct take_c_impl;
+
+    template <template <typename...> typename L>
+    struct take_c_impl<0, L<>>{
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct take_c_impl<0, L<Ts...>>{
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct take_c_impl<0, L<T, Ts...>>{
+      using type = L<>;
+    };
+
+    template <std::size_t count, template <typename...> typename L>
+    struct take_c_impl<count, L<>>{
+      using type = L<>;
+    };
+
+    template <std::size_t count, template <typename...> typename L, typename T, typename ...Ts>
+    struct take_c_impl<count, L<T, Ts...>>{
+      using first = L<T>;
+      using rest = take_c_impl<count-1, L<Ts...>>::type;
+
+      using type = push_back_t<first, rest>;
+    };
+
+  public:
+    using type = take_c_impl<N, types>::type;
+};
+
+template <typename types, std::size_t N>
+using take_c_t = take_c<types, N>::type;
+
+template <typename types, typename N>
+using take_t = take_c_t<types, N::value>;
 
 } // namespace ctl
