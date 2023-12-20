@@ -916,18 +916,100 @@ TEST_F(list_test, select) {
   }
 }
 
-// template <typename T>
-// struct pred : public std::false_type {};
-// template <> struct pred<int> : public std::true_type {};
+template <typename ...T> struct pred1 : public std::false_type {};
+template <> struct pred1<int> : public std::true_type {};
 
-// TEST_F(list_test, filter) {
-//   using list = ctl::list<int, char, double, int>;
+TEST_F(list_test, filter_only_ints) {
+  {
+    using list = ctl::list<int, char, double, int>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred1, list>, ctl::list<int, int>>;
+    EXPECT_TRUE(expect_true);
 
-//   {
-//     using filtered = ctl::filter_t<pred<int>, list>;
-//     // ctl::debug::show_type<pred>();
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred1, list>, list>;
+    EXPECT_FALSE(expect_false);
+  }
 
-//     constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred<int>, list>, ctl::list<int, int>>;
-//     EXPECT_TRUE(expect_true);
-//   }
-// }
+  {
+    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred1, list>, ctl::list<int, int, int, int, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred1, list>, list>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using list = ctl::list<>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred1, list>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred1, list>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }
+}
+
+template <typename ...T> struct pred2 : public std::false_type {};
+template <> struct pred2<int> : public std::true_type {};
+template <> struct pred2<char> : public std::true_type {};
+
+TEST_F(list_test, filter_only_ints_chars) {
+  {
+    using list = ctl::list<int, char, double, int>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred2, list>, ctl::list<int, char, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred2, list>, list>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred2, list>, ctl::list<char, int, char, int, int, char, int, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred2, list>, list>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using list = ctl::list<>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred2, list>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred2, list>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }
+}
+
+template <typename ...T> struct pred3 : public std::false_type {};
+template <> struct pred3<> : public std::true_type {};
+
+TEST_F(list_test, filter_all) {
+  {
+    using list = ctl::list<int, char, double, int>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred3, list>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred3, list>, list>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred3, list>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred3, list>, list>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using list = ctl::list<>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_t<pred3, list>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_t<pred3, list>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }
+}
+
