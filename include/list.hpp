@@ -19,11 +19,21 @@ struct clist : public ilist<types...> {
     return (predicate(types{}), ...);
   }
 
-  constexpr auto operator||(auto inital_val) -> bool {
-    return (types{} || ... || inital_val);
+  constexpr auto operator||(auto initialVal) {
+    return (types{}() || ... || initialVal);
   }
 
-  //TODO: other operators!!
+  constexpr auto operator&&(auto initialVal) {
+    return (types{}() && ... && initialVal);
+  }
+
+  constexpr auto operator+(auto initialVal) {
+    // return (types{}() + ... + initialVal);
+    // return (types{} + ... + initialVal);
+    return (types::value + ... + initialVal);
+  }
+
+  //TODO: other fold operators!!
 };
 
 } // namespace ctl
