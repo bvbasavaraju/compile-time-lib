@@ -1,7 +1,7 @@
 #include <iostream>
-#include <list.hpp>
-#include <utils.hpp>
-#include <show_type.hpp>
+#include <container/list.hpp>
+#include <container/algorithms.hpp>
+#include <debug/show_type.hpp>
 
 struct super_type {
   auto attendence() const {
