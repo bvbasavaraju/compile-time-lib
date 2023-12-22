@@ -2,33 +2,115 @@
 
 namespace ctl {
 
+// quote
+template <template <typename...> typename F>
+struct quote {
+  template <typename ...Ts>
+  using fn = F<Ts...>;
+};
+
+// valid
+template <template <typename...> typename F, typename ...Ts>
+struct valid {
+  private:
+    template <typename, typename = void>
+    struct helper : public std::false_type {};
+
+    template <typename T>
+    struct helper<T, std::void_t<typename T::type>> : public std::true_type {};
+
+  public:
+    using type = std::integral_constant<bool, helper<F<Ts...>>::value>;
+};
+
+template <template <typename...> typename F, typename ...Ts>
+using valid_t = valid<F, Ts...>::type;
+
+template <typename QMF, typename ...Ts>
+using valid_qmf_t = valid_t<QMF::template fn, Ts...>;
+
 // select
-template <bool C, typename T, typename ...F>
+template <bool C, typename T, typename F>
 struct select_c {
   private:
-    template <bool COND, typename TRUE_TYPE, typename ...FALSE_TYPE>
-    struct select_c_impl;
-
-    template <typename TRUE_TYPE, typename ...FALSE_TYPE>
-    struct select_c_impl<true, TRUE_TYPE, FALSE_TYPE...> {
-      using type = TRUE_TYPE;
+    template <bool COND, typename TT>
+    struct select_c_impl {
+      using type = F;
     };
 
-    template <typename TRUE_TYPE, typename FALSE_TYPE>
-    struct select_c_impl<false, TRUE_TYPE, FALSE_TYPE> {
-      using type = FALSE_TYPE;
+    template <typename TT>
+    struct select_c_impl<true, TT> {
+      using type = TT;
     };
 
   public:
-    using type = select_c_impl<C, T, F...>::type;
+    using type = select_c_impl<C, T>::type;
 };
 
-template <bool C, typename T, typename ...F>
-using select_c_t = select_c<C, T, F...>::type;
+template <bool C, typename T, typename F>
+using select_c_t = select_c<C, T, F>::type;
 
-template <typename C, typename T, typename ...F>
-using select_t = select_c_t<C::value, T, F...>;
+template <typename C, typename T, typename F>
+using select_t = select_c_t<C::value, T, F>;
 
+template <bool C, typename T, template <typename ...> typename F, typename ...Ts>
+struct select_f_c {
+  private:
+    template <bool COND, typename TT>
+    struct select_c_impl {
+      using type = F<Ts...>;
+    };
+
+    template <typename TT> 
+    struct select_c_impl<true, TT> {
+      using type = TT;
+    };
+
+  public:
+    using type = select_c_impl<C, T>::type;
+};
+
+template <bool C, typename T, template <typename ...> typename F, typename ...Ts>
+using select_f_c_t = select_f_c<C, T, F, Ts...>::type;
+
+template <typename C, typename T, template <typename ...> typename F, typename ...Ts>
+using select_f_t = select_f_c_t<C::value, T, F, Ts...>;
+
+template <bool C, typename T, typename QMF, typename ...Ts>
+using select_qmf_c_t = select_f_c_t<C, T, QMF::template fn, Ts...>;
+
+template <typename C, typename T, typename QMF, typename ...Ts>
+using select_qmf_t = select_qmf_c_t<C::value, T, QMF, Ts...>;
+
+// rename
+template <typename types, template <typename...> typename new_types>
+struct rename {
+  private:
+    template <typename L>
+    struct rename_impl;
+
+    template <template <typename...> typename L>
+    struct rename_impl<L<>> {
+      using type = new_types<>;
+    };
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct rename_impl<L<Ts...>> {
+      using type = new_types<Ts...>;
+    };
+  public:
+    using type = rename_impl<types>::type;
+};
+
+template <typename types, template <typename...> typename new_types>
+using rename_t = rename<types, new_types>::type;
+
+// apply
+template <typename types, template <typename...> typename F>
+using apply = rename<types, F>;
+
+template <typename types, template <typename...> typename F>
+using apply_t = apply<types, F>::type;
 
 // push_front
 template <typename T1, typename T2>
@@ -1252,22 +1334,132 @@ using none_of_t = none_of<types, P>::type;
 template <typename types, typename QMF>
 using none_of_qmf_t = none_of_t<types, QMF::template fn>;
 
-// // valid
-// template <template <typename...> typename F, typename ...Ts>
-// struct valid {
+// transform
+template <typename types, template <typename ...> typename F>
+struct transform {
+  private:
+    template <typename L>
+    struct transform_impl;
+
+    template <template <typename ...> typename L>
+    struct transform_impl<L<>>{
+      using type = L<>;
+    };
+
+    template <template <typename ...> typename L, typename T>
+    struct transform_impl<L<T>>{
+      using type = L<F<T>>;
+    };
+
+    template <template <typename ...> typename L, typename T, typename ...Ts>
+    struct transform_impl<L<T, Ts...>>{
+      using first = L<F<T>>;
+      using rest = transform_impl<L<Ts...>>::type;
+
+      using type = push_back_t<first, rest>;
+    };
+
+  public:
+    using type = transform_impl<types>::type;
+};
+
+template <typename types, template <typename ...> typename F>
+using transform_t = transform<types, F>::type;
+
+template <typename types, typename QMF>
+using transform_qmf_t = transform_t<types, QMF::template fn>;
+
+// transform if
+template <typename types, template <typename ...> typename F, template <typename...> typename P>
+struct transform_if {
+  private:
+
+    template <typename L>
+    struct transform_if_impl;
+
+    template <template <typename...> typename L>
+    struct transform_if_impl<L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename ...> typename L, typename T>
+    struct transform_if_impl<L<T>> {
+      using type = select_t<P<T>, L<F<T>>, L<>>;
+    };
+
+    template <template <typename ...> typename L, typename T, typename ...Ts>
+    struct transform_if_impl<L<T, Ts...>> {
+      using first = select_t<P<T>, L<F<T>>, L<>>;
+      using rest = transform_if_impl<L<Ts...>>::type;
+
+      using type = push_back_t<first, rest>;
+    };
+  public:
+    using type = transform_if_impl<types>::type;
+};
+
+template <typename types, template <typename ...> typename F, template <typename...> typename P>
+using transform_if_t = transform_if<types, F, P>::type;
+
+template <typename types, typename QMFf, typename QMFp>
+using transform_if_qmf_t = transform_if<types, QMFf::template fn, QMFp::template fn>::type;
+
+// // transform
+// template <template <typename ...> typename F, typename ...types>
+// struct transform {
 //   private:
-//     template <typename T = void>
-//     struct helper{
-//       constexpr static auto value = false;
+//     // template <typename ...L>
+//     // struct transform_impl;
+
+//     // template <template <typename ...> typename ...L>
+//     // struct transform_impl<L<>...>{
+//     //   using type = L<>;
+//     // };
+
+//     // template <template <typename ...> typename ...L, typename T>
+//     // struct transform_impl<L<T>...>{
+//     //   using type = L<F<T>>;
+//     // };
+
+//     // template <template <typename ...> typename L, typename T, typename ...Ts>
+//     // struct transform_impl<L<T, Ts...>>{
+//     //   using first = L<F<T>>;
+//     //   using rest = transform_impl<L<Ts...>>::type;
+
+//     //   using type = push_back_t<first, rest>;
+//     // };
+
+//     template <std::size_t N, typename ...L>
+//     struct transform_impl;
+
+//     template <typename L>
+//     struct transform_impl<1, L> {
+//       using pos_type = <at_c_t<L, 0>;
+//       using type = F<pos_type>;
 //     };
 
-//     template <>
-//     struct helper<decltype(F<Ts...>)> {
-//       constexpr static auto value = true;
+//     template <std::size_t N, typename L>
+//     struct transform_impl<N, L> {
+//       using pos_type = at_c_t<L, N-1>;
+//     };
+
+//     template <std::size_t N, typename L, typename ...Ls>
+//     struct transform_impl<N, L, Ls...> {
+//       using pos_type = at_c_t<L, N-1>;
+//       using prev_pos_type =  transform_impl<N-1, Ls...>::pos_type;
+
+//       using types_at_pos_ = push_back_t<std::tuple<>, prev_pos_type>;
+//       using types_at_pos = push_back_t<types_at_pos_, pos_type>;
+
+//       using first = rename<types_at_pos, F>;
+//       using rest = transform_impl<N-1, L, Ls...>::type;
+
+//       using type = push_back_t<first, rest>;
 //     };
 
 //   public:
-//     using type = std::integral_constant<bool, helper<decltype(F<Ts...>)>::value>;
+//     using type = transform_impl<std::sizeof...(types), types...>::type;
 // };
+
 
 } // namespace ctl
