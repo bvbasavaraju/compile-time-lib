@@ -1,0 +1,9 @@
+= CTL (Compile Time Library)
+
+This is a C++ library, created to include algorithms that can be worked out at compile time.
+It uses Meta programming techniques to achive the same.
+
+Features to use:
+
+* container <<doc/container/container.adoc>>
+* utility <<utility.adoc>>
