@@ -64,6 +64,16 @@ struct quoted_pred_type {
   using fn = predicate_type<T>;
 };
 
+template <typename T1, typename T2>
+struct less_than_eq {
+  constexpr static bool value = T2::value <= T1::value;
+};
+
+template <typename T1, typename T2>
+struct greater_than {
+  constexpr static bool value = T2::value > T1::value;
+};
+
 //Tests
 TEST_F(list_test, basic_type_list_test) {
   using heterogeneous_types = ctl::list<int, char, double>;
@@ -3425,4 +3435,147 @@ TEST_F(list_test, apply) {
   EXPECT_TRUE((std::is_same_v<ctl::apply_t<list, std::tuple>, expected_list>));
 
   EXPECT_TRUE((std::is_same_v<ctl::apply_t<ctl::list<>, std::tuple>, std::tuple<>>));
+}
+
+TEST_F(list_test, sort) {
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 3, 1, 0, 2>>;
+
+    using sorted_nums = ctl::sort_t<nums>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, ctl::iota_c_t<4>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, nums>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 13, 41, 450, 4562, 121, 34, 553, 2, 1, 6, 5689>>;
+    using expected_nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 1, 2, 6, 13, 34, 41, 121, 450, 553, 4562, 5689>>;
+
+    using sorted_nums = ctl::sort_t<nums>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, expected_nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, nums>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 0, 1, 2, 3>>;
+
+    using sorted_nums = ctl::sort_t<nums>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, std::tuple<>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::list<>;
+
+    using sorted_nums = ctl::sort_t<nums>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, ctl::iota_c_t<1>>;
+    EXPECT_FALSE(expect_false);
+  }
+}
+
+TEST_F(list_test, sort_p) {
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 3, 1, 0, 2>>;
+
+    using sorted_nums = ctl::sort_p_t<nums, less_than_eq, greater_than>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, ctl::iota_c_t<4>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, nums>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 13, 41, 450, 4562, 121, 34, 553, 2, 1, 6, 5689>>;
+    using expected_nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 1, 2, 6, 13, 34, 41, 121, 450, 553, 4562, 5689>>;
+
+    using sorted_nums = ctl::sort_p_t<nums, less_than_eq, greater_than>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, expected_nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, nums>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 0, 1, 2, 3>>;
+
+    using sorted_nums = ctl::sort_p_t<nums, less_than_eq, greater_than>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, std::tuple<>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::list<>;
+
+    using sorted_nums = ctl::sort_p_t<nums, less_than_eq, greater_than>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, ctl::iota_c_t<1>>;
+    EXPECT_FALSE(expect_false);
+  }
+}
+
+TEST_F(list_test, sort_qmf_p) {
+  using less_than_eq_quote = ctl::quote<less_than_eq>;
+  using greater_than_quote = ctl::quote<greater_than>;
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 3, 1, 0, 2>>;
+
+    using sorted_nums = ctl::sort_qmf_p_t<nums, less_than_eq_quote, greater_than_quote>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, ctl::iota_c_t<4>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, nums>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 13, 41, 450, 4562, 121, 34, 553, 2, 1, 6, 5689>>;
+    using expected_nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 1, 2, 6, 13, 34, 41, 121, 450, 553, 4562, 5689>>;
+
+    using sorted_nums = ctl::sort_qmf_p_t<nums, less_than_eq_quote, greater_than_quote>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, expected_nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, nums>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::from_integer_sequence_t<std::integer_sequence<uint32_t, 0, 1, 2, 3>>;
+
+    using sorted_nums = ctl::sort_qmf_p_t<nums, less_than_eq_quote, greater_than_quote>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, std::tuple<>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using nums = ctl::list<>;
+
+    using sorted_nums = ctl::sort_qmf_p_t<nums, less_than_eq_quote, greater_than_quote>;
+    constexpr auto expect_true = std::is_same_v<sorted_nums, nums>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<sorted_nums, ctl::iota_c_t<1>>;
+    EXPECT_FALSE(expect_false);
+  }
 }
