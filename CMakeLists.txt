@@ -21,7 +21,3 @@ add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(include)
 add_library(${PROJECT_NAME} INTERFACE)
-# add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
-# add_executable(${PROJECT_NAME} ${SRC_FILES})
-
-# target_include_directories(${PROJECT_NAME} PRIVATE ${INC_DIRS})

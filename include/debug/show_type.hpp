@@ -2,7 +2,7 @@
 
 namespace ctl {
 
-struct debug{
+struct debug {
   private:
     template <typename T>
     constexpr static bool always_false = false;
@@ -19,4 +19,4 @@ struct debug{
     }
 };
 
-} // namespace ctl
+}  // namespace ctl
