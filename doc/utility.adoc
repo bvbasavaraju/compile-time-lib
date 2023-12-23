@@ -1,3 +1,73 @@
-= Utility
+== Utility
 
-TODO
+Following struct(s)/algorithm(s) can be applied on the types. To use algorithms make sure to add `#include <utils.hpp>` in source file.
+
+=== quote
+
+This helps to wrap template type inside a structure called `quote`. template type can be accessed with the help of nested type `fn`.
+
+[source,cpp]
+---
+template <template <typename...> typename F>
+struct quote {
+    template <typename... Ts>
+    using fn = F<Ts...>;
+};
+---
+
+=== valid
+
+This helps to validate if the provided template type is valid or not.
+
+[source,cpp]
+---
+template <template <typename...> typename F, typename... Ts>
+struct valid {
+  ...
+};
+---
+
+It results in `std::true_type` if `F<Ts...>::type` is valid. `std::false_type` otherwise.
+
+variants of `valid` are:
+
+* `valid` 
+* `valid_t` => to avoid using `::type` 
+* `valid_qmf_t` => to pass template function as a quoted meta function
+** `valid_qmf_t` => is same as `valid_t<QMF::template fn, Ts...>;`
+
+=== select
+
+This is equivalent of ternary operator but for types.
+
+[source, cpp]
+---
+template <bool C, typename T, typename F>
+struct select_c {
+  ...
+};
+---
+
+If condition `C` is `true`, select_c<>::type will be alias to `T`, to `F` otherwise.
+
+variants of `select` are:
+
+* `select_c` => when condition is `true/false` value. `::type` required to retrieve the type
+* `select_c_t` => used to avoid `::type`
+* `select_t`  => when condition is a type. boolean value is accessed with the help of `C::value`
+
+Following variants of select is used to get the false type as templated function. i.e. if condition results in `false` then selected type is `F<Ts...>`.
+
+[source, cpp]
+---
+template <bool C, typename T, template <typename...> typename F, typename... Ts>
+using select_f_c_t {
+  ...
+};
+---
+
+* `select_f_c`  => when condition is `true/false` value. `::type` required to retrieve the type
+* `select_f_c_t` => used to avoid `::type`
+* `select_f_t` => when condition is a type. boolean value is accessed with the help of `C::value`
+* `select_qmf_c_t` => when `false` type is captured with quoted meta function, and condition is `true/false` value
+* `select_qmf_t` => when `false` type is captured with quoted meta function, and condition is a type

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "utils.hpp"
+#include <utils.hpp>
 
 namespace ctl {
 
@@ -31,11 +31,11 @@ template <typename types, template <typename...> typename new_types>
 using rename_t = typename rename<types, new_types>::type;
 
 // apply
-template <typename types, template <typename...> typename F>
+template <template <typename...> typename F, typename types>
 using apply = rename<types, F>;
 
-template <typename types, template <typename...> typename F>
-using apply_t = typename apply<types, F>::type;
+template <template <typename...> typename F, typename types>
+using apply_t = typename apply<F, types>::type;
 
 // push_front
 template <typename T1, typename T2>
@@ -1056,18 +1056,18 @@ using rotate_left_t = rotate_left_c_t<types, N::value>;
 
 // rotate right
 template <typename types, std::size_t N>
-struct replace_right_c {
+struct rotate_right_c {
   private:
     template <typename L>
-    struct replace_right_c_impl;
+    struct rotate_right_c_impl;
 
     template <template <typename...> typename L>
-    struct replace_right_c_impl<L<>> {
+    struct rotate_right_c_impl<L<>> {
         using type = L<>;
     };
 
     template <template <typename...> typename L, typename... Ts>
-    struct replace_right_c_impl<L<Ts...>> {
+    struct rotate_right_c_impl<L<Ts...>> {
         constexpr static auto len = size_t<L<Ts...>>::value;
         constexpr static auto count = N % len;
 
@@ -1078,14 +1078,14 @@ struct replace_right_c {
     };
 
   public:
-    using type = typename replace_right_c_impl<types>::type;
+    using type = typename rotate_right_c_impl<types>::type;
 };
 
 template <typename types, std::size_t N>
-using replace_right_c_t = typename replace_right_c<types, N>::type;
+using rotate_right_c_t = typename rotate_right_c<types, N>::type;
 
 template <typename types, typename N>
-using replace_right_t = replace_right_c_t<types, N::value>;
+using rotate_right_t = rotate_right_c_t<types, N::value>;
 
 // copy if
 template <typename types, template <typename...> typename P>

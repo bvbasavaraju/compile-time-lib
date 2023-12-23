@@ -2266,60 +2266,60 @@ TEST_F(list_test, rotate_right) {
   {
     using list = ctl::list<int, char, double, int>;
     using pos = std::integral_constant<uint32_t, 0>;
-    constexpr auto expect_true = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<int, char, double, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<int, char, double, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<char, double, int, int>>;
+    constexpr auto expect_false = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<char, double, int, int>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
     using pos = std::integral_constant<uint32_t, 1>;
-    constexpr auto expect_true = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<int, int, char, double>>;
+    constexpr auto expect_true = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<int, int, char, double>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<char, double, int, int>>;
+    constexpr auto expect_false = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<char, double, int, int>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
     using pos = std::integral_constant<uint32_t, 2>;
-    constexpr auto expect_true = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<double, int, int, char>>;
+    constexpr auto expect_true = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<double, int, int, char>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<int, int, char, double>>;
+    constexpr auto expect_false = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<int, int, char, double>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
     using pos = std::integral_constant<uint32_t, 3>;
-    constexpr auto expect_true = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<char, double, int, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<char, double, int, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::replace_right_t<list, pos>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::rotate_right_t<list, pos>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
     using pos = std::integral_constant<uint32_t, 4>;
-    constexpr auto expect_true = std::is_same_v<ctl::replace_right_t<list, pos>, list>;
+    constexpr auto expect_true = std::is_same_v<ctl::rotate_right_t<list, pos>, list>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<char, double, int, int>>;
+    constexpr auto expect_false = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<char, double, int, int>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
     using pos = std::integral_constant<uint32_t, 5>;
-    constexpr auto expect_true = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<int, int, char, double>>;
+    constexpr auto expect_true = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<int, int, char, double>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::replace_right_t<list, pos>, ctl::list<char, double, int, int>>;
+    constexpr auto expect_false = std::is_same_v<ctl::rotate_right_t<list, pos>, ctl::list<char, double, int, int>>;
     EXPECT_FALSE(expect_false);
   }
 }
@@ -3432,9 +3432,9 @@ TEST_F(list_test, apply) {
   using list = ctl::list<int, char, float>;
   using expected_list = std::tuple<int, char, float>;
 
-  EXPECT_TRUE((std::is_same_v<ctl::apply_t<list, std::tuple>, expected_list>));
+  EXPECT_TRUE((std::is_same_v<ctl::apply_t<std::tuple, list>, expected_list>));
 
-  EXPECT_TRUE((std::is_same_v<ctl::apply_t<ctl::list<>, std::tuple>, std::tuple<>>));
+  EXPECT_TRUE((std::is_same_v<ctl::apply_t<std::tuple, ctl::list<>>, std::tuple<>>));
 }
 
 TEST_F(list_test, sort) {
