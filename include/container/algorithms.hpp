@@ -1326,4 +1326,89 @@ using transform_if_t = transform_if<types, F, P>::type;
 template <typename types, typename QMFf, typename QMFp>
 using transform_if_qmf_t = transform_if<types, QMFf::template fn, QMFp::template fn>::type;
 
+// sort
+template <typename types>
+struct sort {
+  private:
+    template <typename L>
+    struct sort_impl;
+
+    template <template <typename...> typename L>
+    struct sort_impl<L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct sort_impl<L<T, Ts...>> {
+      
+      template <typename U>
+      struct lesser_filter_pred {
+        constexpr static bool value = U::value <= T::value ? true : false;
+      };
+
+      template <typename U>
+      struct greater_filter_pred {
+        constexpr static bool value = U::value > T::value ? true : false;
+      };
+
+      using lesser = filter_t<L<Ts...>, lesser_filter_pred>;
+      using greater = filter_t<L<Ts...>, greater_filter_pred>;
+
+      using sorted_left = sort<lesser>::type;
+      using sorted_right = sort<greater>::type;
+
+      using type_ = push_back_t<sorted_left, L<T>>;
+      using type = push_back_t<type_, sorted_right>;
+    };
+  public:
+    using type = sort_impl<types>::type;
+};
+
+template <typename types>
+using sort_t = sort<types>::type;
+
+// sort
+template <typename types, template <typename...> typename left_predicate, template <typename ...> typename right_predicate>
+struct sort_p {
+  private:
+    template <typename L>
+    struct sort_p_impl;
+
+    template <template <typename...> typename L>
+    struct sort_p_impl<L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct sort_p_impl<L<T, Ts...>> {
+      
+      template <typename U>
+      struct lesser_filter_pred {
+        constexpr static bool value = left_predicate<T, U>::value;
+      };
+
+      template <typename U>
+      struct greater_filter_pred {
+        constexpr static bool value = right_predicate<T, U>::value;
+      };
+
+      using lesser = filter_t<L<Ts...>, lesser_filter_pred>;
+      using greater = filter_t<L<Ts...>, greater_filter_pred>;
+
+      using sorted_left = sort<lesser>::type;
+      using sorted_right = sort<greater>::type;
+
+      using type_ = push_back_t<sorted_left, L<T>>;
+      using type = push_back_t<type_, sorted_right>;
+    };
+  public:
+    using type = sort_p_impl<types>::type;
+};
+
+template <typename types, template <typename...> typename left_predicate, template <typename ...> typename right_predicate>
+using sort_p_t = sort_p<types, left_predicate, right_predicate>::type;
+
+template <typename types, typename QMF_left, typename QMF_right>
+using sort_qmf_p_t = sort_p_t<types, QMF_left::template fn, QMF_right::template fn>;
+
 } // namespace ctl
