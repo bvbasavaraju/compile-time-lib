@@ -1,3 +1,185 @@
-= Container
+== Container
 
-TODO
+There are 2 parts here.
+
+* `list` => the container which holds the type
+* `algorithms` => used with `list` type. Not necessarily with `ctl::list` but any other compile time list as well. ex: `std::tuple`
+
+=== list
+
+It is a container which holds the types. It is an heterogenous container. To use make sure to add `#include <container/list.hpp>` in source file. 
+
+There are 3 variants of list
+
+* `clt::list<>` => non-instantiable list
+* `ctl::ilist<>` => instantiable list
+* `ctl::clist<>` => instantiable and callable list. It has many operator over-loadings which can be called at runtime. Example for the same can be found in `src/main.cpp` file
+
+=== Algorithms
+
+Once the heterogenous list is created, algorithms are required to do some actions. like for example, to add new element to existing list, or to retrieve an element, or remove specific entry in the list like or even sorting the types in the list. Just like data structure `std::vector<>` (note that `std::vector<>` can be used to hold the values of homogenous type at runtime).
+
+All algorithms will result in `new type`. *original type is never modified*
+
+==== Algo Group: Modifiers
+
+Set of algorithms are used to get the `new list` from the `original list` by adding/removing one or more types. 
+
+General usage of the algorithm is:
+[source, cpp]
+using modified_type = _algo name_<L<Ts...>, U>::type
+
+where,
+
+* _ algo name _ => name of the modifiable algorithms listed below
+* L<Ts...> => list which has to be modified
+* U => type of the interest. It could be single type or another list!
+* `::type` => to access the type from the result of the modified list. If algorithm name is postfixed with `_t` then there is no need of using `::type`
+
+Following are some of `modifiable` algorithms (replaced with _ algo name _):
+
+* `push_front` => to push another `type/list` to front of given list
+* `push_front_t` => used to avoid `::type`
+* `push_back` => to push another `type/list` to back of given list
+* `push_back_t` => used to avoid `::type`
+* `append` => alias to `push_back`
+* `append_t` => alias to `push_back_t`
+* `pop_back`
+* `pop_back_t`
+* `pop_front`
+* `pop_front_t`
+* `clear`
+* `clear_t`
+* `remove_type`
+* `remove_type_t`
+* `remove_if`
+* `remove_if_t`
+* `remove_if_qmf_t`
+* `remove_duplicates`
+* `remove_duplicates_t`
+* `reverse`
+* `reverse_t`
+* `filter`
+* `filter_t`
+* `filter_qmf_t`
+* `drop_c`
+* `drop_c_t`
+* `drop_t`
+* `insert_c`
+* `insert_c_t`
+* `insert_t`
+* `erase_c`
+* `erase_c_t`
+* `erase_t`
+* `replace`
+* `replace_t`
+* `replace_at_c`
+* `replace_at_c_t`
+* `replace_at_t`
+* `replace_if`
+* `replace_if_t`
+* `replace_if_qmf_t`
+* `rotate_left_c`
+* `rotate_left_c_t`
+* `rotate_left_t`
+* `rotate_right_c`
+* `rotate_right_c_t`
+* `rotate_right_t`
+* `unique_t`
+* `unique_if_t`
+* `unique_if_qmf_t`
+* `transform`
+* `transform_t`
+* `transform_qmf_t`
+* `transform_if`
+* `transform_if_t`
+* `transform_if_qmf_t`
+* `sort`
+* `sort_t`
+* `sort_p`
+* `sort_p_t`
+* `sort_qmf_p_t`
+
+==== Algo Group: Accessors
+
+Set of algorithms are used to retrieve the one or more types from the `original list`. In some case `conditional retrieval` is possible. *These algorithms will result in compiler error if the provided `list` is empty*. 
+
+General usage of the algorithm is:
+[source, cpp]
+using result = _algo name_<L<Ts...>, P>::type
+
+where,
+
+* _ algo name _ => name of the accessor algorithms listed below
+* L<Ts...> => list from which one or more type is retrieved
+* P => `predicate/function` which is `applied on each type` to access/retrieve. It is `optional`, not every algorithm needs this parameter
+* `::type` => to access the type from the result. If algorithm name is postfixed with `_t` then there is no need of using `::type`
+
+Following are some of `accessor` algorithms (replaced with _ algo name _):
+
+* `first` => to get the first type from the list
+* `first_t` => used to avoid `::type`
+* `last` => to get the last type from the list
+* `last_t` => used to avoid `::type`
+* `head`
+* `head_t`
+* `front`
+* `front_t`
+* `tail`
+* `tail_t`
+* `back`
+* `back_t`
+* `at_c`
+* `at_c_t`
+* `at_t`
+* `take_c`
+* `take_c_t`
+* `take_t`
+
+
+==== Algo Group: Miscellaneous
+
+Set of algorithms used for miscellaneous stuffs which are not listed above! Name of the algorithm will give hint on misc stuff.
+
+* `rename` => to rename one list as another list. like converting `ctl::list` to `std::tuple`
+** usage: 
+*** `using result_type = rename<L<Ts...>, Y>::type`
+*** results in `Y<Ts...>`
+* `rename_t` => used to avoid `::type`
+* `apply` => same as `rename` but template parameters reversed
+* `apply_t` => used to avoid `::type`
+* `size`
+* `size_t`
+* `count`
+* `count_t`
+* `count_if`
+* `count_if_t`
+* `count_if_qmf_t`
+* `empty`
+* `empty_t`
+* `contains`
+* `contains_t`
+* `repeat_c`
+* `repeat_c_t`
+* `repeat_t`
+* `from_integer_sequence`
+* `from_integer_sequence_t`
+* `iota_c`
+* `iota_c_t`
+* `iota_t`
+* `copy_if_t`
+* `copy_if_qmf_t`
+* `find`
+* `find_t`
+* `find_if`
+* `find_if_t`
+* `find_if_qmf_t`
+* `all_of`
+* `all_of_t`
+* `all_of_qmf_t`
+* `any_of`
+* `any_of_t`
+* `any_of_qmf_t`
+* `none_of`
+* `none_of_t`
+* `none_of_qmf_t`
