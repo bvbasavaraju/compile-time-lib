@@ -1,3 +1,6 @@
+:toc: left
+:toclevels: 4
+
 == Utility
 
 Following struct(s)/algorithm(s) can be applied on the types. To use algorithms make sure to add `#include <utils.hpp>` in source file.

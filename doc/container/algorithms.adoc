@@ -1,3 +1,5 @@
+:toc: left
+:toclevels: 4
 
 == Algorithms
 
@@ -94,7 +96,7 @@ Variants:
 * `sort`
 * `sort_t` => to avoid `::type`
 * `sort_p` => to provide comparator as predicate to compare 2 types. `::type` is needed to access the result type
-** `comparator` should return true if the template parameter passed first should be considered before the second template parameter
+** `comparator` should return `true` if the first template parameter should be considered before the second template parameter
 * `sort_p_t` => to avoid `::type`
 * `sort_qmf_p` => to provide comparator predicate as quoted meta function. `::type` is needed to access the result type
 * `sort_qmf_p_t` => to avoid `::type`
