@@ -1,20 +1,20 @@
 = CTL (Compile Time Library)
 
 This is a C++ library, created to include algorithms that can be worked out at compile time.
-It uses C++ template meta programming and functional programming techniques to execute many alogirthms at compile time on one or more types. 
+It uses C++ template meta programming and functional programming techniques to execute many algorithms at compile time on one or more types. 
 
 _The more work done at compile time, less time to complete the job at run time!_
 
 All algorithms/features are wrapped in ```namespace *ctl*```
 
-Features availble to use:
+Features available to use:
 
 * container <<doc/container/container.adoc>>
 * utility <<doc/utility.adoc>>
 
 *Note:*
 
-* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. Many of the algorithms are having the same name as mentioned in library MP11.
+* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. This has been started as re-inventing wheel theory and used different techniques to implement the same MP11 library, many of the algorithms are having the same name as mentioned in library MP11.
 * `_t` next to algorithm name is implemented to avoid using with `::type` keyword every time algorithm is used
 * `_c` next to algorithm name is implemented to take constants which are known at compile time (ex: true/false or numbers)
 * `_f` next to algorithm name is implemented to take template types as template arguments

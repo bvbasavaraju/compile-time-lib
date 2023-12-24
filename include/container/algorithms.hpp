@@ -180,6 +180,12 @@ struct first {
 template <typename types>
 using first_t = typename first<types>::type;
 
+template <typename types>
+using front = first<types>;
+
+template <typename types>
+using front_t = typename front<types>::type;
+
 // last
 template <typename types>
 struct last {
@@ -208,6 +214,12 @@ struct last {
 
 template <typename types>
 using last_t = typename last<types>::type;
+
+template <typename types>
+using back = last<types>;
+
+template <typename types>
+using back_t = typename back<types>::type;
 
 // head or front
 template <typename types>
@@ -239,12 +251,6 @@ struct head {
 
 template <typename types>
 using head_t = typename head<types>::type;
-
-template <typename types>
-using front = head<types>;
-
-template <typename types>
-using front_t = typename front<types>::type;
 
 template <typename types>
 using pop_back = head<types>;
@@ -280,12 +286,6 @@ struct tail {
 
 template <typename types>
 using tail_t = typename tail<types>::type;
-
-template <typename types>
-using back = tail<types>;
-
-template <typename types>
-using back_t = typename back<types>::type;
 
 template <typename types>
 using pop_front = tail<types>;
@@ -362,7 +362,10 @@ template <typename types, template <typename...> typename P>
 using count_if_t = typename count_if<types, P>::type;
 
 template <typename types, typename QMF>
-using count_if_qmf_t = count_if_t<types, QMF::template fn>;
+using count_if_qmf = count_if<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using count_if_qmf_t = typename count_if_qmf<types, QMF>::type;
 
 // empty
 template <typename types>
@@ -484,7 +487,10 @@ template <typename types, template <typename...> typename P>
 using remove_if_t = typename remove_if<types, P>::type;
 
 template <typename types, typename QMF>
-using remove_if_qmf_t = remove_if_t<types, QMF::template fn>;
+using remove_if_qmf = remove_if<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using remove_if_qmf_t = typename remove_if_qmf<types, QMF>::type;
 
 // remove duplicates
 template <typename types>
@@ -581,42 +587,48 @@ template <typename types, std::size_t N>
 using at_c_t = typename at_c<types, N>::type;
 
 template <typename types, typename N>
-using at_t = at_c_t<types, N::value>;
+using at = at_c<types, N::value>;
+
+template <typename types, typename N>
+using at_t = typename at<types, N>::type;
 
 // filter
 template <typename types, template <typename...> typename P>
-struct filter {
+struct filter_if {
   private:
     template <typename L>
-    struct filter_impl;
+    struct filter_if_impl;
 
     template <template <typename...> typename L>
-    struct filter_impl<L<>> {
+    struct filter_if_impl<L<>> {
         using type = L<>;
     };
 
     template <template <typename...> typename L, typename T>
-    struct filter_impl<L<T>> {
+    struct filter_if_impl<L<T>> {
         using type = select_t<P<T>, L<T>, L<>>;
     };
 
     template <template <typename...> typename L, typename T, typename... Ts>
-    struct filter_impl<L<T, Ts...>> {
-        using first = typename filter_impl<L<T>>::type;
-        using rest = typename filter_impl<L<Ts...>>::type;
+    struct filter_if_impl<L<T, Ts...>> {
+        using first = typename filter_if_impl<L<T>>::type;
+        using rest = typename filter_if_impl<L<Ts...>>::type;
 
         using type = push_back_t<first, rest>;
     };
 
   public:
-    using type = typename filter_impl<types>::type;
+    using type = typename filter_if_impl<types>::type;
 };
 
 template <typename types, template <typename...> typename P>
-using filter_t = typename filter<types, P>::type;
+using filter_if_t = typename filter_if<types, P>::type;
 
 template <typename types, typename QMF>
-using filter_qmf_t = filter_t<types, QMF::template fn>;
+using filter_if_qmf = filter_if<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using filter_if_qmf_t = typename filter_if_qmf<types, QMF>::type;
 
 // contains
 template <typename types, typename type_to_search>
@@ -687,7 +699,10 @@ template <typename types, std::size_t N>
 using drop_c_t = typename drop_c<types, N>::type;
 
 template <typename types, typename N>
-using drop_t = drop_c_t<types, N::value>;
+using drop = drop_c<types, N::value>;
+
+template <typename types, typename N>
+using drop_t = typename drop<types, N>::type;
 
 // take
 template <typename types, std::size_t N>
@@ -732,7 +747,10 @@ template <typename types, std::size_t N>
 using take_c_t = typename take_c<types, N>::type;
 
 template <typename types, typename N>
-using take_t = take_c_t<types, N::value>;
+using take = take_c<types, N::value>;
+
+template <typename types, typename N>
+using take_t = typename take<types, N>::type;
 
 // repeat
 template <typename types, std::size_t N>
@@ -776,7 +794,10 @@ template <typename types, std::size_t N>
 using repeat_c_t = typename repeat_c<types, N>::type;
 
 template <typename types, typename N>
-using repeat_t = repeat_c_t<types, N::value>;
+using repeat = repeat_c<types, N::value>;
+
+template <typename types, typename N>
+using repeat_t = typename repeat<types, N>::type;
 
 // from integer sequence
 template <typename sequence, template <typename...> typename result_type = std::tuple>
@@ -852,7 +873,10 @@ template <std::size_t N, typename DT = uint32_t,
 using iota_c_t = typename iota_c<N, DT, result_type>::type;
 
 template <typename N, template <typename...> typename result_type = std::tuple>
-using iota_t = iota_c_t<N::value, typename N::value_type, result_type>;
+using iota = iota_c<N::value, typename N::value_type, result_type>;
+
+template <typename N, template <typename...> typename result_type = std::tuple>
+using iota_t = typename iota<N, result_type>::type;
 
 // insert
 template <typename types, std::size_t P, typename... types_to_insert>
@@ -881,7 +905,10 @@ template <typename types, std::size_t P, typename... types_to_insert>
 using insert_c_t = typename insert_c<types, P, types_to_insert...>::type;
 
 template <typename types, typename P, typename... types_to_insert>
-using insert_t = insert_c_t<types, P::value, types_to_insert...>;
+using insert = insert_c<types, P::value, types_to_insert...>;
+
+template <typename types, typename P, typename... types_to_insert>
+using insert_t = typename insert<types, P, types_to_insert...>::type;
 
 // erase
 template <typename types, std::size_t P1, std::size_t P2>
@@ -914,7 +941,10 @@ template <typename types, std::size_t P1, std::size_t P2>
 using erase_c_t = typename erase_c<types, P1, P2>::type;
 
 template <typename types, typename P1, typename P2>
-using erase_t = erase_c_t<types, P1::value, P2::value>;
+using erase = erase_c<types, P1::value, P2::value>;
+
+template <typename types, typename P1, typename P2>
+using erase_t = typename erase<types, P1, P2>::type;
 
 // replace
 template <typename types, typename type_to_replace, typename replace_with>
@@ -984,7 +1014,10 @@ template <typename types, std::size_t P, typename replace_with>
 using replace_at_c_t = typename replace_at_c<types, P, replace_with>::type;
 
 template <typename types, typename P, typename replace_with>
-using replace_at_t = replace_at_c_t<types, P::value, replace_with>;
+using replace_at = replace_at_c<types, P::value, replace_with>;
+
+template <typename types, typename P, typename replace_with>
+using replace_at_t = typename replace_at<types, P, replace_with>::type;
 
 // replace if
 template <typename types, template <typename...> typename P, typename replace_with>
@@ -1019,7 +1052,10 @@ template <typename types, template <typename...> typename P, typename replace_wi
 using replace_if_t = typename replace_if<types, P, replace_with>::type;
 
 template <typename types, typename QMF, typename replace_with>
-using replace_if_qmf_t = replace_if_t<types, QMF::template fn, replace_with>;
+using replace_if_qmf = replace_if<types, QMF::template fn, replace_with>;
+
+template <typename types, typename QMF, typename replace_with>
+using replace_if_qmf_t = typename replace_if_qmf<types, QMF, replace_with>::type;
 
 // rotate left
 template <typename types, std::size_t N>
@@ -1052,7 +1088,10 @@ template <typename types, std::size_t N>
 using rotate_left_c_t = typename rotate_left_c<types, N>::type;
 
 template <typename types, typename N>
-using rotate_left_t = rotate_left_c_t<types, N::value>;
+using rotate_left = rotate_left_c<types, N::value>;
+
+template <typename types, typename N>
+using rotate_left_t = typename rotate_left<types, N>::type;
 
 // rotate right
 template <typename types, std::size_t N>
@@ -1085,14 +1124,23 @@ template <typename types, std::size_t N>
 using rotate_right_c_t = typename rotate_right_c<types, N>::type;
 
 template <typename types, typename N>
-using rotate_right_t = rotate_right_c_t<types, N::value>;
+using rotate_right = rotate_right_c<types, N::value>;
+
+template <typename types, typename N>
+using rotate_right_t = typename rotate_right<types, N>::type;
 
 // copy if
 template <typename types, template <typename...> typename P>
-using copy_if_t = filter_t<types, P>;
+using copy_if = filter_if<types, P>;
+
+template <typename types, template <typename...> typename P>
+using copy_if_t = typename copy_if<types, P>::type;
 
 template <typename types, typename QMF>
-using copy_if_qmf_t = copy_if_t<types, QMF::template fn>;
+using copy_if_qmf = copy_if<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using copy_if_qmf_t = typename copy_if_qmf<types, QMF>::type;
 
 // find
 template <typename types, typename type_to_find>
@@ -1173,17 +1221,29 @@ template <typename types, template <typename...> typename P>
 using find_if_t = typename find_if<types, P>::type;
 
 template <typename types, typename QMF>
-using find_if_qmf_t = typename find_if<types, QMF::template fn>::type;
+using find_if_qmf = typename find_if<types, QMF::template fn>::type;
+
+template <typename types, typename QMF>
+using find_if_qmf_t = typename find_if_qmf<types, QMF>::type;
 
 // unique
 template <typename types>
-using unique_t = remove_duplicates_t<types>;
+using unique = remove_duplicates<types>;
+
+template <typename types>
+using unique_t = typename unique<types>::type;
 
 template <typename types, template <typename...> typename P>
-using unique_if_t = remove_if_t<types, P>;
+using unique_if = remove_if<types, P>;
+
+template <typename types, template <typename...> typename P>
+using unique_if_t = typename unique_if<types, P>::type;
 
 template <typename types, typename QMF>
-using unique_if_qmf_t = remove_if_qmf_t<types, QMF>;
+using unique_if_qmf = remove_if_qmf<types, QMF>;
+
+template <typename types, typename QMF>
+using unique_if_qmf_t = typename unique_if_qmf<types, QMF>::type;
 
 // all of
 template <typename types, template <typename...> typename P>
@@ -1210,7 +1270,10 @@ template <typename types, template <typename...> typename P>
 using all_of_t = typename all_of<types, P>::type;
 
 template <typename types, typename QMF>
-using all_of_qmf_t = all_of_t<types, QMF::template fn>;
+using all_of_qmf = all_of<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using all_of_qmf_t = typename all_of_qmf<types, QMF>::type;
 
 // any of
 template <typename types, template <typename...> typename P>
@@ -1237,7 +1300,10 @@ template <typename types, template <typename...> typename P>
 using any_of_t = typename any_of<types, P>::type;
 
 template <typename types, typename QMF>
-using any_of_qmf_t = any_of_t<types, QMF::template fn>;
+using any_of_qmf = any_of<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using any_of_qmf_t = typename any_of_qmf<types, QMF>::type;
 
 // none of
 template <typename types, template <typename...> typename P>
@@ -1264,7 +1330,10 @@ template <typename types, template <typename...> typename P>
 using none_of_t = typename none_of<types, P>::type;
 
 template <typename types, typename QMF>
-using none_of_qmf_t = none_of_t<types, QMF::template fn>;
+using none_of_qmf = none_of<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using none_of_qmf_t = typename none_of_qmf<types, QMF>::type;
 
 // transform
 template <typename types, template <typename...> typename F>
@@ -1299,7 +1368,10 @@ template <typename types, template <typename...> typename F>
 using transform_t = typename transform<types, F>::type;
 
 template <typename types, typename QMF>
-using transform_qmf_t = transform_t<types, QMF::template fn>;
+using transform_qmf = transform<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using transform_qmf_t = typename transform_qmf<types, QMF>::type;
 
 // transform if
 template <typename types, template <typename...> typename F, template <typename...> typename P>
@@ -1334,7 +1406,10 @@ template <typename types, template <typename...> typename F, template <typename.
 using transform_if_t = typename transform_if<types, F, P>::type;
 
 template <typename types, typename QMFf, typename QMFp>
-using transform_if_qmf_t = transform_if_t<types, QMFf::template fn, QMFp::template fn>;
+using transform_if_qmf = transform_if<types, QMFf::template fn, QMFp::template fn>;
+
+template <typename types, typename QMFf, typename QMFp>
+using transform_if_qmf_t = typename transform_if_qmf<types, QMFf, QMFp>::type;
 
 // sort
 template <typename types>
@@ -1360,8 +1435,8 @@ struct sort {
             constexpr static bool value = U::value > T::value ? true : false;
         };
 
-        using lesser = filter_t<L<Ts...>, lesser_filter_pred>;
-        using greater = filter_t<L<Ts...>, greater_filter_pred>;
+        using lesser = filter_if_t<L<Ts...>, lesser_filter_pred>;
+        using greater = filter_if_t<L<Ts...>, greater_filter_pred>;
 
         using sorted_left = typename sort<lesser>::type;
         using sorted_right = typename sort<greater>::type;
@@ -1378,8 +1453,7 @@ template <typename types>
 using sort_t = typename sort<types>::type;
 
 // sort
-template <typename types, template <typename...> typename left_predicate,
-          template <typename...> typename right_predicate>
+template <typename types, template <typename...> typename comparator>
 struct sort_p {
   private:
     template <typename L>
@@ -1394,16 +1468,16 @@ struct sort_p {
     struct sort_p_impl<L<T, Ts...>> {
         template <typename U>
         struct lesser_filter_pred {
-            constexpr static bool value = left_predicate<T, U>::value;
+            constexpr static bool value = comparator<U, T>::value;
         };
 
         template <typename U>
         struct greater_filter_pred {
-            constexpr static bool value = right_predicate<T, U>::value;
+            constexpr static bool value = invert_t<comparator<U, T>>::value;
         };
 
-        using lesser = filter_t<L<Ts...>, lesser_filter_pred>;
-        using greater = filter_t<L<Ts...>, greater_filter_pred>;
+        using lesser = filter_if_t<L<Ts...>, lesser_filter_pred>;
+        using greater = filter_if_t<L<Ts...>, greater_filter_pred>;
 
         using sorted_left = typename sort<lesser>::type;
         using sorted_right = typename sort<greater>::type;
@@ -1416,11 +1490,13 @@ struct sort_p {
     using type = typename sort_p_impl<types>::type;
 };
 
-template <typename types, template <typename...> typename left_predicate,
-          template <typename...> typename right_predicate>
-using sort_p_t = typename sort_p<types, left_predicate, right_predicate>::type;
+template <typename types, template <typename...> typename predicate>
+using sort_p_t = typename sort_p<types, predicate>::type;
 
-template <typename types, typename QMF_left, typename QMF_right>
-using sort_qmf_p_t = sort_p_t<types, QMF_left::template fn, QMF_right::template fn>;
+template <typename types, typename QMF>
+using sort_qmf_p = sort_p<types, QMF::template fn>;
+
+template <typename types, typename QMF>
+using sort_qmf_p_t = typename sort_qmf_p<types, QMF>::type;
 
 }  // namespace ctl
