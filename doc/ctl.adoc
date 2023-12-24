@@ -1,3 +1,6 @@
+:toc: left
+:toclevels: 4
+
 = CTL (Compile Time Library)
 
 This is a C++ library, created to include algorithms that can be worked out at compile time.
@@ -9,8 +12,8 @@ All algorithms/features are wrapped in ```namespace *ctl*```
 
 Features available to use:
 
-* container <<doc/container/container.adoc>>
-* utility <<doc/utility.adoc>>
+* link:/container/container.adoc[container]
+* link:/utility.adoc[utility]
 
 *Note:*
 
