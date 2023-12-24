@@ -14,7 +14,7 @@ Features available to use:
 
 *Note:*
 
-* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. This has been started as re-inventing wheel theory and used different techniques to implement the same MP11 library, many of the algorithms are having the same name as mentioned in library MP11.
+* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. This has been started as re-inventing wheel theory and used personal approach to implement the same MP11 library, many of the algorithms are having the same name as mentioned in library MP11.
 * `_t` next to algorithm name is implemented to avoid using with `::type` keyword every time algorithm is used
 * `_c` next to algorithm name is implemented to take constants which are known at compile time (ex: true/false or numbers)
 * `_f` next to algorithm name is implemented to take template types as template arguments
