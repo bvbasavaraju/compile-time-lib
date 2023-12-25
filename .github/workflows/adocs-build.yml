@@ -33,8 +33,19 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./generated-html
-    - name: Deploy to github pages
-      permissions:
-        id-token: write
-      id: deployment
-      uses: actions/deploy-pages@v4
+
+  deploy:
+    needs: [build]
+    name: Deploy Documentation
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ${{ github.repository_owner == 'bvbasavaraju' }}
+    steps:
+      - name: Deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4
