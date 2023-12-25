@@ -3,8 +3,6 @@ name: Publish Ascii Doc
 on:
   push:
     branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
 
 jobs:
   build:
@@ -25,6 +23,8 @@ jobs:
       run: |
         mkdir -p ./generated-html
         asciidoctor docs/index.adoc -D ./generated-html
+        if [ -e docs/static ]; then cp -rf docs/static ./generated-html; fi
+        touch ./generated-html/.nojekyll
         ls -la ./generated-html
     - name: Setup github pages
       if: needs.configure.outputs.enable_publish == 'true'
