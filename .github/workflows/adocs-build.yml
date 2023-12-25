@@ -35,8 +35,6 @@ jobs:
         path: ./generated-html
     - name: Deploy to github pages
       permissions:
-        contents: read
-        pages: write
         id-token: write
       id: deployment
       uses: actions/deploy-pages@v4
