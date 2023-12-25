@@ -1,4 +1,4 @@
-name: build adocs
+name: Publish Ascii Doc
 
 on:
   push:
@@ -33,18 +33,10 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./generated-html
-
-  deploy:
-    needs: [build]
-    name: Deploy Documentation
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to github pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    - name: Deploy to github pages
+      permissions:
+        contents: read
+        pages: write
+        id-token: write
+      id: deployment
+      uses: actions/deploy-pages@v4
