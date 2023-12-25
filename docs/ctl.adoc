@@ -1,6 +1,3 @@
-:toc: left
-:toclevels: 4
-
 = CTL (Compile Time Library)
 
 This is a C++ library, created to include algorithms that can be worked out at compile time.
