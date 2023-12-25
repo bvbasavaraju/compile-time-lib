@@ -10,42 +10,6 @@ namespace details {
 
 template <typename ...> struct temp_list;
 
-// template <typename... Ts>
-// struct list_type {
-//   private:
-//     template <typename L>
-//     struct helper;
-
-//     template <template <typename...> typename L>
-//     struct helper<L<>> {
-//       using type = L<>;
-//     };
-
-//     template <template <typename...> typename L, typename... Us>
-//     struct helper<L<Us...>> {
-//       using type = typename helper<L<>>::type;
-//     };
-
-//     template <typename... L>
-//     struct list_type_impl;
-
-//     template <typename L>
-//     struct list_type_impl<L> {
-//       using type = typename helper<L>::type;
-//     };
-
-//     template <typename L, typename... Ls>
-//     struct list_type_impl<L, Ls...> {
-//       using type = typename helper<L>::type;
-//     };
-
-//   public:
-//     using type = typename list_type_impl<Ts...>::type;
-// };
-
-// template <typename... Ts>
-// using list_type_t = typename list_type<Ts...>::type;
-
 template <typename T,  typename U>
 struct first_is_lesser_or_eq {
   constexpr static bool value = T::value <= U::value;
