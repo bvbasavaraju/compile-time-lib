@@ -7,8 +7,8 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  adoc_build:
-    name: Build and deploy Documentation
+  build:
+    name: Build Documentation
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -33,15 +33,18 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./generated-html
-    - name: Deploy Documentation
-      permissions:
-        contents: read
-        pages: write
-        id-token: write
-      environment:
-        name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
-      steps:
-        - name: Deploy to github pages
-          id: deployment
-          uses: actions/deploy-pages@v4
+
+  deploy:
+    needs: [build]
+    name: Deploy Documentation
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4
