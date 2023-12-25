@@ -44,7 +44,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ${{ github.repository_owner == 'bvbasavaraju' || '' }}ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Deploy to github pages
         id: deployment
