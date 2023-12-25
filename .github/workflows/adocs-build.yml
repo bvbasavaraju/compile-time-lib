@@ -34,7 +34,7 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-pages-artifact@v3
       with:
-        path: index.html
+        path: ./generated-html
     - name: Deploy to github pages
       id: deployment
       uses: actions/deploy-pages@v4
