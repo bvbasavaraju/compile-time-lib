@@ -283,9 +283,9 @@ Variants:
 
 Usage:
 [source, cpp]
-using result = ctl::filter_if<L<Ts...>, P>::type
+using result = ctl::filter_if<P, L1, L2, ..., Ln>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `P<T2> = true` then `result = L<T2>`.
+if `L1<T1, T2, T3>, L2<T4, T5, T6> ... Ln<Tn, Tn+1, Tn+2>` and `P<T2, T5, ..., Tn+1> = true` then `result = L<T2>`.
 
 Variants:
 
@@ -370,9 +370,9 @@ Variants:
 
 Usage:
 [source, cpp]
-using result = ctl::remove_duplicates<L<Ts...>, F>::type
+using result = ctl::transform<F, L1, L2, ..., Ln>::type
 
-if `L<Ts...> = L<T1, T2>` then `result = L<F<T1>, F<T2>>`. F is templated type
+if `L1<T1, T2, T3>, L2<T4, T5, T6> ... Ln<Tn, Tn+1, Tn+2>` then `result = L<F<T1, T4, ..., Tn>, F<T2, T5, ..., Tn+1>, F<T3, T6, ..., Tn+2>>`. F is templated type.
 
 Variants:
 
