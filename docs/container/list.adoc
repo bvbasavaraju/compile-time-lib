@@ -1,7 +1,5 @@
-:toc: left
-:toclevels: 4
 
-== list
+== List
 
 It is a container which holds the types. It is an heterogenous container. To use make sure to add `#include <container/list.hpp>` in source file. 
 

@@ -1,5 +1,3 @@
-:toc: left
-:toclevels: 4
 
 == Algorithms
 
@@ -10,7 +8,7 @@ To use any algorithms make sure to add `#include <container/algorithms.hpp>` in 
 
 All algorithms will result in `new type`. *original type is never modified*
 
-=== Algo Group: Modifiers
+=== Modifiers
 
 Set of algorithms are used to get the `new list` from the `original list` by adding/removing one or more types. 
 
@@ -385,7 +383,7 @@ Variants:
 * `transform_if_qmf` => when `F` and predicate provided as quoted meta function
 * `transform_if_qmf_t` => to avoid `::type`
 
-=== Algo Group: Accessors
+=== Accessors
 
 Set of algorithms are used to retrieve the one or more types from the `original list`. In some case `conditional retrieval` is possible. *These algorithms will result in compiler error if the provided `list` is empty*. 
 
@@ -511,7 +509,7 @@ Variants:
 * `take_t` => to avoid `::type`
 
 
-=== Algo Group: Miscellaneous
+=== Miscellaneous
 
 Set of algorithms used for miscellaneous stuffs which are not listed above! Name of the algorithm will give hint on misc stuff.
 

@@ -1,0 +1,7 @@
+
+== Container
+
+There are 2 parts here.
+
+* <<_list>> => the container which holds the type
+* <<_algorithms>> => used with `list` type. Not necessarily with `ctl::list` but any other compile time list as well. ex: `std::tuple`

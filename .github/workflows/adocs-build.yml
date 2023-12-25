@@ -1,26 +1,49 @@
-name: build adocs
+name: Publish Ascii Doc
 
 on:
   push:
-    branches:
-    - main
+    branches: [ main, develop ]
+
 jobs:
-  adoc_build:
+  build:
+    name: Build Documentation
     runs-on: ubuntu-latest
-    name: asciidoctor -D docs --backend=html5 -o index.html -a toc2 docs/index.adoc 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Get build container
-      id: adocbuild
-      uses: tonynv/asciidoctor-action@master
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-          program: "asciidoctor -D docs --backend=html5 -o index.html docs/index.adoc"
-    - name: Print execution time
-      run: echo "Time ${{ steps.adocbuild.outputs.time }}"
-    - name: Deploy docs to ghpages
-      uses: peaceiris/actions-gh-pages@v3
+        node-version: 18
+    - name: Install asciidoctor
+      run: |
+        sudo apt update
+        sudo apt install -y asciidoctor
+    - name: Build documentation
+      run: |
+        mkdir -p ./generated-html
+        asciidoctor docs/index.adoc -D ./generated-html
+        ls -la ./generated-html
+    - name: Setup github pages
+      if: needs.configure.outputs.enable_publish == 'true'
+      uses: actions/configure-pages@v4
+    - name: Upload artifacts
+      uses: actions/upload-pages-artifact@v3
       with:
-        deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
-        publish_branch: gh-pages
-        publish_dir: ./
+        path: ./generated-html
+
+  deploy:
+    needs: [build]
+    name: Deploy Documentation
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4
