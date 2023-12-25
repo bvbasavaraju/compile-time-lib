@@ -13,11 +13,21 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Get build container
-      id: adocbuild
-      uses: tonynv/asciidoctor-action@master
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-          program: "asciidoctor -D docs --backend=html5 -o index.html docs/index.adoc"
+        node-version: 18
+    - name: Install asciidoctor
+      run: |
+        sudo apt update
+        sudo apt install -y asciidoctor
+    - name: Build documentation
+      run: |
+        mkdir -p ./generated-html
+        asciidoctor docs/index.adoc -D ./generated-html
+        if [ -e docs/static ]; then cp -rf docs/static ./generated-html; fi
+        touch ./generated-html/.nojekyll
+        ls -la ./generated-html
     - name: Setup github pages
       if: needs.configure.outputs.enable_publish == 'true'
       uses: actions/configure-pages@v4
