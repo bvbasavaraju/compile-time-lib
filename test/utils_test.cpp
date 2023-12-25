@@ -448,28 +448,28 @@ TEST_F(utils_test, quote) {
   { // filter check using ctl::quote
     {
       using list = ctl::list<int, char, double, int>;
-      constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<int, char, int>>;
+      constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<int, char, int>>;
       EXPECT_TRUE(expect_true);
 
-      constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+      constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, list>;
       EXPECT_FALSE(expect_false);
     }
 
     {
       using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-      constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char, int, char, int, int, char, int, int>>;
+      constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<char, int, char, int, int, char, int, int>>;
       EXPECT_TRUE(expect_true);
 
-      constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+      constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, list>;
       EXPECT_FALSE(expect_false);
     }
 
     {
       using list = ctl::list<>;
-      constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<>>;
+      constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<>>;
       EXPECT_TRUE(expect_true);
 
-      constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char>>;
+      constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<char>>;
       EXPECT_FALSE(expect_false);
     }
   }

@@ -6,6 +6,53 @@
 
 namespace ctl {
 
+namespace details {
+
+template <typename ...> struct temp_list;
+
+// template <typename... Ts>
+// struct list_type {
+//   private:
+//     template <typename L>
+//     struct helper;
+
+//     template <template <typename...> typename L>
+//     struct helper<L<>> {
+//       using type = L<>;
+//     };
+
+//     template <template <typename...> typename L, typename... Us>
+//     struct helper<L<Us...>> {
+//       using type = typename helper<L<>>::type;
+//     };
+
+//     template <typename... L>
+//     struct list_type_impl;
+
+//     template <typename L>
+//     struct list_type_impl<L> {
+//       using type = typename helper<L>::type;
+//     };
+
+//     template <typename L, typename... Ls>
+//     struct list_type_impl<L, Ls...> {
+//       using type = typename helper<L>::type;
+//     };
+
+//   public:
+//     using type = typename list_type_impl<Ts...>::type;
+// };
+
+// template <typename... Ts>
+// using list_type_t = typename list_type<Ts...>::type;
+
+template <typename T,  typename U>
+struct first_is_lesser_or_eq {
+  constexpr static bool value = T::value <= U::value;
+};
+
+} // details
+
 // rename
 template <typename types, template <typename...> typename new_types>
 struct rename {
@@ -592,44 +639,6 @@ using at = at_c<types, N::value>;
 template <typename types, typename N>
 using at_t = typename at<types, N>::type;
 
-// filter
-template <typename types, template <typename...> typename P>
-struct filter_if {
-  private:
-    template <typename L>
-    struct filter_if_impl;
-
-    template <template <typename...> typename L>
-    struct filter_if_impl<L<>> {
-        using type = L<>;
-    };
-
-    template <template <typename...> typename L, typename T>
-    struct filter_if_impl<L<T>> {
-        using type = select_t<P<T>, L<T>, L<>>;
-    };
-
-    template <template <typename...> typename L, typename T, typename... Ts>
-    struct filter_if_impl<L<T, Ts...>> {
-        using first = typename filter_if_impl<L<T>>::type;
-        using rest = typename filter_if_impl<L<Ts...>>::type;
-
-        using type = push_back_t<first, rest>;
-    };
-
-  public:
-    using type = typename filter_if_impl<types>::type;
-};
-
-template <typename types, template <typename...> typename P>
-using filter_if_t = typename filter_if<types, P>::type;
-
-template <typename types, typename QMF>
-using filter_if_qmf = filter_if<types, QMF::template fn>;
-
-template <typename types, typename QMF>
-using filter_if_qmf_t = typename filter_if_qmf<types, QMF>::type;
-
 // contains
 template <typename types, typename type_to_search>
 struct contains {
@@ -1129,19 +1138,6 @@ using rotate_right = rotate_right_c<types, N::value>;
 template <typename types, typename N>
 using rotate_right_t = typename rotate_right<types, N>::type;
 
-// copy if
-template <typename types, template <typename...> typename P>
-using copy_if = filter_if<types, P>;
-
-template <typename types, template <typename...> typename P>
-using copy_if_t = typename copy_if<types, P>::type;
-
-template <typename types, typename QMF>
-using copy_if_qmf = copy_if<types, QMF::template fn>;
-
-template <typename types, typename QMF>
-using copy_if_qmf_t = typename copy_if_qmf<types, QMF>::type;
-
 // find
 template <typename types, typename type_to_find>
 struct find {
@@ -1336,45 +1332,113 @@ template <typename types, typename QMF>
 using none_of_qmf_t = typename none_of_qmf<types, QMF>::type;
 
 // transform
-template <typename types, template <typename...> typename F>
+template <template <typename...> typename F, typename... types>
 struct transform {
   private:
-    template <typename L>
-    struct transform_impl;
+    // wrap with function
+    template <typename T, typename W>
+    struct wrap;
 
-    template <template <typename...> typename L>
-    struct transform_impl<L<>> {
+    template <typename T, template <typename...> typename W, typename ...U>
+    struct wrap<T, W<U...>> {
+      using type = push_back_t<W<U...>, T>;
+    };
+
+    // helper: this will convert L<T, T2, T3> => L<L<T1>, L<T2>, L<T3>>
+    template <typename L, typename R>
+    struct helper;
+
+    template <template <typename...> typename L, typename R>
+    struct helper<L<>, R> {
         using type = L<>;
     };
 
-    template <template <typename...> typename L, typename T>
-    struct transform_impl<L<T>> {
-        using type = L<F<T>>;
+    template <template <typename...> typename L, typename T, template <typename...> typename R>
+    struct helper<L<T>, R<>> {
+        using type = L<L<T>>;
     };
 
-    template <template <typename...> typename L, typename T, typename... Ts>
-    struct transform_impl<L<T, Ts...>> {
-        using first = L<F<T>>;
-        using rest = typename transform_impl<L<Ts...>>::type;
+    template <template <typename...> typename L, typename T, typename... Ts, template <typename...> typename R>
+    struct helper<L<T, Ts...>, R<>> {
+        using first = L<L<T>>;
+        using rest = typename helper<L<Ts...>, R<>>::type;
 
         using type = push_back_t<first, rest>;
     };
 
+    template <template <typename...> typename L, template <typename...> typename R, typename T, typename U>
+    struct helper<L<T>, R<U>> {
+        using wrapped = typename wrap<T, U>::type;
+        using type = L<wrapped>;
+    };
+
+    template <template <typename...> typename L, template <typename...> typename R, typename T, typename U, typename... Ts, typename... Us>
+    struct helper<L<T, Ts...>, R<U, Us...>> {
+        using wrapped = typename wrap<T, U>::type;
+
+        using first = L<wrapped>;
+        using rest = typename helper<L<Ts...>, R<Us...>>::type;
+
+        using type = push_back_t<first, rest>;
+    };
+
+    // transform multiple lists to list of lists ex: L<T1, T2, T3> => L<L<T1>, L<T2>, L<T3>>
+    template <typename R, typename ...L>
+    struct transform_LL_impl;
+
+    template <typename R, typename L>
+    struct transform_LL_impl<R, L> {
+      using type = helper<L, R>::type;
+    };
+
+    template <typename R, typename L, typename ...Ls>
+    struct transform_LL_impl<R, L, Ls...> {
+      using transformed = helper<L, R>::type;
+
+      using type = transform_LL_impl<transformed, Ls...>::type;
+    };
+
+    using list_of_list = typename transform_LL_impl<details::temp_list<>, types...>::type;
+
+    // convert the list of list => list of functions ex: L<L<T1>, L<T2>, L<T3>> => L<F<T1>, F<T2>, F<T3>>
+    template <typename L>
+    struct transform_impl;
+
+    template <template <typename...>typename L>
+    struct transform_impl<L<>> {
+      using type = L<>;
+    };
+
+    template <template <typename...>typename L, typename T>
+    struct transform_impl<L<T>> {
+      // here T is a list of some type!
+      using type = L<rename_t<T, F>>;
+    };
+
+    template <template <typename...>typename L, typename T, typename... Ts>
+    struct transform_impl<L<T, Ts...>> {
+      // here T is a list of some type!
+      using first = L<rename_t<T, F>>;
+      using rest = typename transform_impl<L<Ts...>>::type;
+
+      using type = push_back_t<first, rest>;
+    };
+
   public:
-    using type = typename transform_impl<types>::type;
+    using type = typename transform_impl<list_of_list>::type;
 };
 
-template <typename types, template <typename...> typename F>
-using transform_t = typename transform<types, F>::type;
+template <template <typename...> typename F, typename... types>
+using transform_t = typename transform<F, types...>::type;
 
-template <typename types, typename QMF>
-using transform_qmf = transform<types, QMF::template fn>;
+template <typename QMF, typename... types>
+using transform_qmf = transform<QMF::template fn, types...>;
 
-template <typename types, typename QMF>
-using transform_qmf_t = typename transform_qmf<types, QMF>::type;
+template <typename QMF, typename... types>
+using transform_qmf_t = typename transform_qmf<QMF, types...>::type;
 
 // transform if
-template <typename types, template <typename...> typename F, template <typename...> typename P>
+template <template <typename...> typename P, template <typename...> typename F, typename ...types>
 struct transform_if {
   private:
     template <typename L>
@@ -1382,75 +1446,95 @@ struct transform_if {
 
     template <template <typename...> typename L>
     struct transform_if_impl<L<>> {
-        using type = L<>;
+      using type = L<>;
     };
 
     template <template <typename...> typename L, typename T>
     struct transform_if_impl<L<T>> {
-        using type = select_t<P<T>, L<F<T>>, L<>>;
+      using condition = rename_t<T, P>;
+      using true_case = rename_t<T, F>;
+      using false_case = first_t<T>;
+
+      using type = L<select_t<condition, true_case, false_case>>;
     };
 
     template <template <typename...> typename L, typename T, typename... Ts>
     struct transform_if_impl<L<T, Ts...>> {
-        using first = select_t<P<T>, L<F<T>>, L<>>;
-        using rest = typename transform_if_impl<L<Ts...>>::type;
+      using condition = rename_t<T, P>;
+      using true_case = rename_t<T, F>;
+      using false_case = first_t<T>;
+
+      using first = L<select_t<condition, true_case, false_case>>;
+      using rest = typename transform_if_impl<L<Ts...>>::type;
+
+      using type = push_back_t<first, rest>;
+    };
+
+  public:
+    using type = typename transform_if_impl<transform_t<details::temp_list, types...>>::type;
+};
+
+template <template <typename...> typename P, template <typename...> typename F, typename ...types>
+using transform_if_t = typename transform_if<P, F, types...>::type;
+
+template <typename QMFp, typename QMFf, typename ...types>
+using transform_if_qmf = transform_if<QMFp::template fn, QMFf::template fn, types...>;
+
+template <typename QMFp, typename QMFf, typename ...types>
+using transform_if_qmf_t = typename transform_if_qmf<QMFp, QMFf, types...>::type;
+
+// filter
+template <template <typename...> typename P, typename... types>
+struct filter_if {
+  private:
+    template <typename L>
+    struct filter_if_impl;
+
+    template <template <typename...> typename L>
+    struct filter_if_impl<L<>> {
+        using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename T>
+    struct filter_if_impl<L<T>> {
+        using condition = rename_t<T, P>;
+        using type = select_t<condition, L<first_t<T>>, L<>>;
+    };
+
+    template <template <typename...> typename L, typename T, typename... Ts>
+    struct filter_if_impl<L<T, Ts...>> {
+        using first = typename filter_if_impl<L<T>>::type;
+        using rest = typename filter_if_impl<L<Ts...>>::type;
 
         using type = push_back_t<first, rest>;
     };
 
+    using transformed = transform_t<details::temp_list, types...>;
   public:
-    using type = typename transform_if_impl<types>::type;
+    using type = typename filter_if_impl<transformed>::type;
 };
 
-template <typename types, template <typename...> typename F, template <typename...> typename P>
-using transform_if_t = typename transform_if<types, F, P>::type;
+template <template <typename...> typename P, typename... types>
+using filter_if_t = typename filter_if<P, types...>::type;
 
-template <typename types, typename QMFf, typename QMFp>
-using transform_if_qmf = transform_if<types, QMFf::template fn, QMFp::template fn>;
+template <typename QMF, typename... types>
+using filter_if_qmf = filter_if<QMF::template fn, types...>;
 
-template <typename types, typename QMFf, typename QMFp>
-using transform_if_qmf_t = typename transform_if_qmf<types, QMFf, QMFp>::type;
+template <typename QMF, typename... types>
+using filter_if_qmf_t = typename filter_if_qmf<QMF, types...>::type;
 
-// sort
-template <typename types>
-struct sort {
-  private:
-    template <typename L>
-    struct sort_impl;
+// copy if
+template <typename types, template <typename...> typename P>
+using copy_if = filter_if<P, types>;
 
-    template <template <typename...> typename L>
-    struct sort_impl<L<>> {
-        using type = L<>;
-    };
+template <typename types, template <typename...> typename P>
+using copy_if_t = typename copy_if<types, P>::type;
 
-    template <template <typename...> typename L, typename T, typename... Ts>
-    struct sort_impl<L<T, Ts...>> {
-        template <typename U>
-        struct lesser_filter_pred {
-            constexpr static bool value = U::value <= T::value ? true : false;
-        };
+template <typename types, typename QMF>
+using copy_if_qmf = copy_if<types, QMF::template fn>;
 
-        template <typename U>
-        struct greater_filter_pred {
-            constexpr static bool value = U::value > T::value ? true : false;
-        };
-
-        using lesser = filter_if_t<L<Ts...>, lesser_filter_pred>;
-        using greater = filter_if_t<L<Ts...>, greater_filter_pred>;
-
-        using sorted_left = typename sort<lesser>::type;
-        using sorted_right = typename sort<greater>::type;
-
-        using type_ = push_back_t<sorted_left, L<T>>;
-        using type = push_back_t<type_, sorted_right>;
-    };
-
-  public:
-    using type = typename sort_impl<types>::type;
-};
-
-template <typename types>
-using sort_t = typename sort<types>::type;
+template <typename types, typename QMF>
+using copy_if_qmf_t = typename copy_if_qmf<types, QMF>::type;
 
 // sort
 template <typename types, template <typename...> typename comparator>
@@ -1476,11 +1560,11 @@ struct sort_p {
             constexpr static bool value = invert_t<comparator<U, T>>::value;
         };
 
-        using lesser = filter_if_t<L<Ts...>, lesser_filter_pred>;
-        using greater = filter_if_t<L<Ts...>, greater_filter_pred>;
+        using lesser = filter_if_t<lesser_filter_pred, L<Ts...>>;
+        using greater = filter_if_t<greater_filter_pred, L<Ts...>>;
 
-        using sorted_left = typename sort<lesser>::type;
-        using sorted_right = typename sort<greater>::type;
+        using sorted_left = typename sort_p_impl<lesser>::type;
+        using sorted_right = typename sort_p_impl<greater>::type;
 
         using type_ = push_back_t<sorted_left, L<T>>;
         using type = push_back_t<type_, sorted_right>;
@@ -1492,6 +1576,12 @@ struct sort_p {
 
 template <typename types, template <typename...> typename predicate>
 using sort_p_t = typename sort_p<types, predicate>::type;
+
+template <typename types>
+using sort = sort_p<types, details::first_is_lesser_or_eq>;
+
+template <typename types>
+using sort_t = typename sort<types>::type;
 
 template <typename types, typename QMF>
 using sort_qmf_p = sort_p<types, QMF::template fn>;

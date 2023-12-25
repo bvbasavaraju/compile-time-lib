@@ -18,11 +18,11 @@ class list_test : public ::testing::Test {
 };
 
 template <typename ...T> struct pred_int : public std::false_type {};
-template <> struct pred_int<int> : public std::true_type {};
+template <typename ...Ts> struct pred_int<int, Ts...> : public std::true_type {};
 
 template <typename ...T> struct pred_int_char : public std::false_type {};
-template <> struct pred_int_char<int> : public std::true_type {};
-template <> struct pred_int_char<char> : public std::true_type {};
+template <typename ...Ts> struct pred_int_char<int, Ts...> : public std::true_type {};
+template <typename ...Ts> struct pred_int_char<char, Ts...> : public std::true_type {};
 
 template <typename ...T> struct pred_empty : public std::false_type {};
 template <> struct pred_empty<> : public std::true_type {};
@@ -67,6 +67,24 @@ struct quoted_pred_type {
 template <typename T1, typename T2>
 struct comparator {
   constexpr static bool value = T1::value <= T2::value;
+};
+
+template <typename T>
+struct is_same_indirection {
+  constexpr static auto value = T::value;
+};
+
+template<class T1, class T2> using first_is_void = std::is_same<T1, void>;
+template<class T1, class T2> using second = T2;
+
+struct quoted_first_is_void {
+  template <typename T1, typename T2>
+  using fn = std::is_same<T1, void>;
+};
+
+struct quoted_second {
+  template <typename T1, typename T2>
+  using fn = T2;
 };
 
 //Tests
@@ -1074,57 +1092,124 @@ TEST_F(list_test, at) {
 TEST_F(list_test, filter_only_ints) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_int>, ctl::list<int, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int, list>, ctl::list<int, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_int>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_int>, ctl::list<int, int, int, int, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int, list>, ctl::list<int, int, int, int, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_int>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_int>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int, list>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_int>, ctl::list<char>>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int, list>, ctl::list<char>>;
     EXPECT_FALSE(expect_false);
   }
+  
+  {
+    using L1 = ctl::list<int, char, double, int>;
+    using L2 = ctl::list<float, double, void, char>;
+    using L3 = ctl::list<void, int, char, char>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int, L1, L2, L3>, ctl::list<int, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    using L2 = ctl::list<void, int, void, int, int, int, void, int, char[2], int, double>;
+    using L3 = ctl::list<double, int, char, int, float, int, char, int, double, char[3], double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int, L1, L2, L3>, ctl::list<int, int, int, int, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<>;
+    using L2 = ctl::list<>;
+    using L3 = ctl::list<>;
+
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int, L1, L2, L3>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int, L1, L2, L3>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }  
 }
 
 TEST_F(list_test, filter_only_ints_chars) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_int_char>, ctl::list<int, char, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int_char, list>, ctl::list<int, char, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_int_char>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int_char, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_int_char>, ctl::list<char, int, char, int, int, char, int, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int_char, list>, ctl::list<char, int, char, int, int, char, int, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_int_char>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int_char, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_int_char>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int_char, list>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_int_char>, ctl::list<char>>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int_char, list>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<int, char, double, int>;
+    using L2 = ctl::list<float, double, void, char>;
+    using L3 = ctl::list<void, int, char, char>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int_char, L1, L2, L3>, ctl::list<int, char, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int_char, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    using L2 = ctl::list<void, int, void, int, int, int, void, int, char[2], int, double>;
+    using L3 = ctl::list<double, int, char, int, float, int, char, int, double, char[3], double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int_char, L1, L2, L3>, ctl::list<char, int, char, int, int, char, int, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int_char, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<>;
+    using L2 = ctl::list<>;
+    using L3 = ctl::list<>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_int_char, L1, L2, L3>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_int_char, L1, L2, L3>, ctl::list<char>>;
     EXPECT_FALSE(expect_false);
   }
 }
@@ -1132,28 +1217,61 @@ TEST_F(list_test, filter_only_ints_chars) {
 TEST_F(list_test, filter_none) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_empty>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_empty, list>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_empty>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_empty, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_empty>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_empty, list>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_empty>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_empty, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_empty>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_empty, list>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_empty>, ctl::list<char>>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_empty, list>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<int, char, double, int>;
+    using L2 = ctl::list<float, double, void, char>;
+    using L3 = ctl::list<void, int, char, char>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_empty, L1, L2, L3>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_empty, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    using L2 = ctl::list<void, int, void, int, int, int, void, int, char[2], int, double>;
+    using L3 = ctl::list<double, int, char, int, float, int, char, int, double, char[3], double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_empty, L1, L2, L3>, ctl::list<>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_empty, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<>;
+    using L2 = ctl::list<>;
+    using L3 = ctl::list<>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_empty, L1, L2, L3>, L1>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_empty, L1, L2, L3>, ctl::list<char>>;
     EXPECT_FALSE(expect_false);
   }
 }
@@ -1161,28 +1279,61 @@ TEST_F(list_test, filter_none) {
 TEST_F(list_test, filter_all) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_all>, list>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_all, list>, list>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_all>, ctl::list<>>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_all, list>, ctl::list<>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_all>, list>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_all, list>, list>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_all>, ctl::list<>>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_all, list>, ctl::list<>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<list, pred_all>, list>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_all, list>, list>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<list, pred_all>, ctl::list<char>>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_all, list>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<int, char, double, int>;
+    using L2 = ctl::list<float, double, void, char>;
+    using L3 = ctl::list<void, int, char, char>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_all, L1, L2, L3>, L1>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_all, L1, L2, L3>, ctl::list<>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    using L2 = ctl::list<void, int, void, int, int, int, void, int, char[2], int, double>;
+    using L3 = ctl::list<double, int, char, int, float, int, char, int, double, char[3], double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_all, L1, L2, L3>, L1>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_all, L1, L2, L3>, ctl::list<>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<>;
+    using L2 = ctl::list<>;
+    using L3 = ctl::list<>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_t<pred_all, L1, L2, L3>, L1>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_t<pred_all, L1, L2, L3>, ctl::list<char>>;
     EXPECT_FALSE(expect_false);
   }
 }
@@ -1190,28 +1341,61 @@ TEST_F(list_test, filter_all) {
 TEST_F(list_test, filter_using_quoted_meta_function) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<list, quoted_int_char>, ctl::list<int, char, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, list>, ctl::list<int, char, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<list, quoted_int_char>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<list, quoted_int_char>, ctl::list<char, int, char, int, int, char, int, int>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, list>, ctl::list<char, int, char, int, int, char, int, int>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<list, quoted_int_char>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<list, quoted_int_char>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, list>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<list, quoted_int_char>, ctl::list<char>>;
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, list>, ctl::list<char>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<int, char, double, int>;
+    using L2 = ctl::list<float, double, void, char>;
+    using L3 = ctl::list<void, int, char, char>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, L1, L2, L3>, ctl::list<int, char, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+    using L2 = ctl::list<void, int, void, int, int, int, void, int, char[2], int, double>;
+    using L3 = ctl::list<double, int, char, int, float, int, char, int, double, char[3], double>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, L1, L2, L3>, ctl::list<char, int, char, int, int, char, int, int>>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, L1, L2, L3>, L1>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = ctl::list<>;
+    using L2 = ctl::list<>;
+    using L3 = ctl::list<>;
+    constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, L1, L2, L3>, L1>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::filter_if_qmf_t<quoted_int_char, L1, L2, L3>, ctl::list<char>>;
     EXPECT_FALSE(expect_false);
   }
 }
@@ -3286,35 +3470,139 @@ TEST_F(list_test, transform) {
   using list = ctl::list<int, char, double, int>;
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_t<list, add_pointer_t>, ctl::list<int*, char*, double*, int*>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_t<add_pointer_t, list>, ctl::list<int*, char*, double*, int*>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_t<list, add_pointer_t>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_t<add_pointer_t, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_t<ctl::list<>, add_pointer_t>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_t<add_pointer_t, ctl::list<>>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_t<ctl::list<>, add_pointer_t>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_t<add_pointer_t, ctl::list<>>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    // constexpr auto expect_true = std::is_same_v<ctl::transform_t<list, predicate_type>, ctl::list<std::integral_constant<bool, true>, std::integral_constant<bool, false>, std::integral_constant<bool, false>, std::integral_constant<bool, true> >>;
-    constexpr auto expect_true = std::is_same_v<ctl::transform_t<list, predicate_type>, ctl::list<std::true_type, std::false_type, std::false_type, std::true_type>>;
+    // constexpr auto expect_true = std::is_same_v<ctl::transform_t<predicate_type, list>, ctl::list<std::integral_constant<bool, true>, std::integral_constant<bool, false>, std::integral_constant<bool, false>, std::integral_constant<bool, true> >>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_t<predicate_type, list>, ctl::list<std::true_type, std::false_type, std::false_type, std::true_type>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_t<list, predicate_type>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_t<predicate_type, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_t<ctl::list<>, predicate_type>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_t<predicate_type, ctl::list<>>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_t<ctl::list<>, predicate_type>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_t<predicate_type, ctl::list<>>, list>;
+    EXPECT_FALSE(expect_false);
+  }
+}
+
+TEST_F(list_test, transform_multi_list) {
+  {
+    using list1 = ctl::list<int, char, double, int>;
+    using list2 = ctl::list<int, char, double, int>;
+    
+    auto lists_compare = ctl::all_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+
+    lists_compare = ctl::any_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+
+    lists_compare = ctl::none_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+  }
+
+  {
+    using list1 = ctl::list<int, char, double, int>;
+    using list2 = ctl::list<int, char, double, float>;
+    
+    auto lists_compare = ctl::any_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+
+    lists_compare = ctl::all_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+
+    lists_compare = true;
+    lists_compare = ctl::none_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+  }
+
+  {
+    using list1 = ctl::list<int, char, double, int>;
+    using list2 = ctl::list<char, double, int, float>;
+    
+    auto lists_compare = ctl::none_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+
+    lists_compare = ctl::all_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+
+    lists_compare = true;
+    lists_compare = ctl::any_of_t<ctl::transform_t<std::is_same, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+  }
+
+  {
+    using list1 = ctl::list<int, char, double, int>;
+    using list2 = ctl::list<int, char, double, int>;
+    
+    auto lists_compare = ctl::all_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+
+    lists_compare = ctl::any_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+
+    lists_compare = ctl::none_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+  }
+
+  {
+    using list1 = ctl::list<int, char, double, int>;
+    using list2 = ctl::list<int, char, double, float>;
+    
+    auto lists_compare = ctl::all_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+
+    lists_compare = ctl::any_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+
+    lists_compare = ctl::none_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+  }
+
+  {
+    using list1 = ctl::list<int, char, double, int>;
+    using list2 = ctl::list<char, double, int, float>;
+    
+    auto lists_compare = ctl::all_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+
+    lists_compare = true;
+    lists_compare = ctl::any_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_FALSE(lists_compare);
+
+    lists_compare = ctl::none_of_t<ctl::transform_qmf_t<ctl::quote<std::is_same>, list1, list2>, is_same_indirection>::value;
+    EXPECT_TRUE(lists_compare);
+  }
+
+  {
+    using type1 = ctl::list<int, char>;
+    using type2 = ctl::list<char, double>;
+    using type3 = ctl::list<double, float>;
+
+    auto expect_true = std::is_same_v<ctl::transform_t<std::tuple, type1, type2, type3>, ctl::list<std::tuple<int, char, double>, std::tuple<char, double, float>>>;
+    EXPECT_TRUE(expect_true);
+
+    auto expect_false = std::is_same_v<ctl::transform_t<std::tuple, type1, type2, type3>, ctl::list<ctl::list<int, char, double>, ctl::list<char, double, float>>>;
+    EXPECT_FALSE(expect_false);
+
+    expect_false = std::is_same_v<ctl::transform_t<std::tuple, type1, type2, type3>, std::tuple<ctl::list<int, char, double>, ctl::list<char, double, float>>>;
     EXPECT_FALSE(expect_false);
   }
 }
@@ -3323,34 +3611,34 @@ TEST_F(list_test, transform_quoted_meta_function) {
   using list = ctl::list<int, char, double, int>;
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<list, quoted_add_ptr>, ctl::list<int*, char*, double*, int*>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<quoted_add_ptr, list>, ctl::list<int*, char*, double*, int*>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<list, quoted_add_ptr>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<quoted_add_ptr, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<ctl::list<>, quoted_add_ptr>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<quoted_add_ptr, ctl::list<>>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<ctl::list<>, quoted_add_ptr>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<quoted_add_ptr, ctl::list<>>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<list, quoted_pred_type>, ctl::list<std::true_type, std::false_type, std::false_type, std::true_type>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<quoted_pred_type, list>, ctl::list<std::true_type, std::false_type, std::false_type, std::true_type>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<list, quoted_pred_type>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<quoted_pred_type, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<ctl::list<>, quoted_pred_type>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_qmf_t<quoted_pred_type, ctl::list<>>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<ctl::list<>, quoted_pred_type>, list>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_qmf_t<quoted_pred_type, ctl::list<>>, list>;
     EXPECT_FALSE(expect_false);
   }
 }
@@ -3358,58 +3646,82 @@ TEST_F(list_test, transform_quoted_meta_function) {
 TEST_F(list_test, transform_if) {
   using list = ctl::list<int, char, double, int>;
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_int>, ctl::list<int*, int*>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<pred_int, add_pointer_t, list>, ctl::list<int*, char, double, int*>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_int>, ctl::list<int*, char*, double*, int*>>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<pred_int, add_pointer_t, list>, ctl::list<int*, char*, double*, int*>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_int_char>, ctl::list<int*, char*, int*>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<pred_int_char, add_pointer_t, list>, ctl::list<int*, char*, double, int*>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_int_char>, ctl::list<int*, int*>>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<pred_int_char, add_pointer_t, list>, ctl::list<int*, char*, double*, int*>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_empty>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<pred_empty, add_pointer_t, list>, list>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_int_char>, ctl::list<int*, char*, double*, int*>>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<pred_int_char, add_pointer_t, list>, ctl::list<int*, char*, double*, int*>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_all>, ctl::list<int*, char*, double*, int*>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<pred_all, add_pointer_t, list>, ctl::list<int*, char*, double*, int*>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<list, add_pointer_t, pred_int_char>, ctl::list<>>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<pred_int_char, add_pointer_t, list>, list>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_if_qmf_t<list, quoted_add_ptr, quoted_int_char>, ctl::list<int*, char*, int*>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_qmf_t<quoted_int_char, quoted_add_ptr, list>, ctl::list<int*, char*, double, int*>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_if_qmf_t<list, quoted_add_ptr, quoted_int_char>, ctl::list<int*, int*>>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_qmf_t<quoted_int_char, quoted_add_ptr, list>, ctl::list<int*, char*, double*, int*>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<ctl::list<>, add_pointer_t, pred_int>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<pred_int, add_pointer_t, ctl::list<>>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<ctl::list<>, add_pointer_t, pred_int>, ctl::list<int*, char*, double*, int*>>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<pred_int, add_pointer_t, ctl::list<>>, ctl::list<int*>>;
     EXPECT_FALSE(expect_false);
   }
 
   {
-    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<ctl::list<>, predicate_type, pred_int>, ctl::list<>>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<pred_int, predicate_type, ctl::list<>>, ctl::list<>>;
     EXPECT_TRUE(expect_true);
 
-    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<ctl::list<>, predicate_type, pred_int>, ctl::list<int, int>>;
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<pred_int, predicate_type, ctl::list<>>, ctl::list<int>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = std::tuple<void, int, float, void, int>;
+    using L2 = std::tuple<char[1], char[2], char[3], char[4], char[5]>;
+
+    using expected = std::tuple<char[1], int, float, char[4], int>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_t<first_is_void, second, L1, L2>, expected>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_t<first_is_void, second, L1, L2>, std::tuple<void, int, float, void, int>>;
+    EXPECT_FALSE(expect_false);
+  }
+
+  {
+    using L1 = std::tuple<void, int, float, void, int>;
+    using L2 = std::tuple<char[1], char[2], char[3], char[4], char[5]>;
+
+    using expected = std::tuple<char[1], int, float, char[4], int>;
+    constexpr auto expect_true = std::is_same_v<ctl::transform_if_qmf_t<quoted_first_is_void, quoted_second, L1, L2>, expected>;
+    EXPECT_TRUE(expect_true);
+
+    constexpr auto expect_false = std::is_same_v<ctl::transform_if_qmf_t<quoted_first_is_void, quoted_second, L1, L2>, std::tuple<void, int, float, void, int>>;
     EXPECT_FALSE(expect_false);
   }
 }
