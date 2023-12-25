@@ -2,9 +2,9 @@ name: build adocs
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ master, main ]
+    branches: [ main, develop ]
 
 jobs:
   adoc_build:
