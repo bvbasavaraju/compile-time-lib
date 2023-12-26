@@ -24,9 +24,6 @@ jobs:
         mkdir -p ./generated-html
         asciidoctor docs/index.adoc -D ./generated-html
         ls -la ./generated-html
-    - name: Setup github pages
-      if: needs.configure.outputs.enable_publish == 'true'
-      uses: actions/configure-pages@v4
     - name: Upload artifacts
       uses: actions/upload-pages-artifact@v3
       with:

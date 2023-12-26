@@ -542,175 +542,167 @@ TEST_F(list_test, list_size) {
   using empty_list = ctl::list<>;
   EXPECT_EQ(0, ctl::size_t<empty_list>::value);
   EXPECT_EQ(0, ctl::size_t<empty_list>());
+  EXPECT_EQ(0, ctl::size_v<empty_list>);
 
   using single_element_list = ctl::list<int>;
   EXPECT_EQ(1, ctl::size_t<single_element_list>::value);
   EXPECT_EQ(1, ctl::size_t<single_element_list>());
+  EXPECT_EQ(1, ctl::size_v<single_element_list>);
 
   using two_elements_list = ctl::list<int, char>;
   EXPECT_EQ(2, ctl::size_t<two_elements_list>::value);
   EXPECT_EQ(2, ctl::size_t<two_elements_list>());
+  EXPECT_EQ(2, ctl::size_v<two_elements_list>);
 
   using three_elements_list = ctl::list<int, char, float>;
   EXPECT_EQ(3, ctl::size_t<three_elements_list>::value);
   EXPECT_EQ(3, ctl::size_t<three_elements_list>());
+  EXPECT_EQ(3, ctl::size_v<three_elements_list>);
 
   using merged_list = ctl::push_front_t<three_elements_list, two_elements_list>;
   EXPECT_EQ(5, ctl::size_t<merged_list>::value);
   EXPECT_EQ(5, ctl::size_t<merged_list>());
+  EXPECT_EQ(5, ctl::size_v<merged_list>);
 
   using merged_list2 = ctl::push_front_t<merged_list, single_element_list>;
   EXPECT_EQ(6, ctl::size_t<merged_list2>::value);
   EXPECT_EQ(6, ctl::size_t<merged_list2>());
+  EXPECT_EQ(6, ctl::size_v<merged_list2>);
 }
 
 TEST_F(list_test, list_count) {
   using empty_list = ctl::list<>;
   EXPECT_EQ(0, ctl::count_t<empty_list>::value);
   EXPECT_EQ(0, ctl::count_t<empty_list>());
+  EXPECT_EQ(0, ctl::count_v<empty_list>);
 
   using single_element_list = ctl::list<int>;
   EXPECT_EQ(1, ctl::count_t<single_element_list>::value);
   EXPECT_EQ(1, ctl::count_t<single_element_list>());
+  EXPECT_EQ(1, ctl::count_v<single_element_list>);
 
   using two_elements_list = ctl::list<int, char>;
   EXPECT_EQ(2, ctl::count_t<two_elements_list>::value);
   EXPECT_EQ(2, ctl::count_t<two_elements_list>());
+  EXPECT_EQ(2, ctl::count_v<two_elements_list>);
 
   using three_elements_list = ctl::list<int, char, float>;
   EXPECT_EQ(3, ctl::count_t<three_elements_list>::value);
   EXPECT_EQ(3, ctl::count_t<three_elements_list>());
+    EXPECT_EQ(3, ctl::count_v<three_elements_list>);
 
   using merged_list = ctl::push_front_t<three_elements_list, two_elements_list>;
   EXPECT_EQ(5, ctl::count_t<merged_list>::value);
   EXPECT_EQ(5, ctl::count_t<merged_list>());
+  EXPECT_EQ(5, ctl::count_v<merged_list>);
 
   using merged_list2 = ctl::push_front_t<merged_list, single_element_list>;
   EXPECT_EQ(6, ctl::count_t<merged_list2>::value);
   EXPECT_EQ(6, ctl::count_t<merged_list2>());
+  EXPECT_EQ(6, ctl::count_v<merged_list2>);
 }
 
 TEST_F(list_test, list_count_predicate) {
   {
     using empty_list = ctl::list<>;
-    auto val = ctl::count_if_t<empty_list, pred_int>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<empty_list, pred_int>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<empty_list, pred_int>));
 
-    val = 1;
-    val = ctl::count_if_t<empty_list, pred_int_char>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<empty_list, pred_int_char>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<empty_list, pred_int_char>));
 
-    val = 1;
-    val = ctl::count_if_t<empty_list, pred_empty>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<empty_list, pred_empty>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<empty_list, pred_empty>));
 
-    val = 1;
-    val = ctl::count_if_t<empty_list, pred_all>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<empty_list, pred_all>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<empty_list, pred_all>));
   }
 
   {
     using list = ctl::list<int>;
-    auto val = ctl::count_if_t<list, pred_int>::value;
-    EXPECT_EQ(1, val);
+    EXPECT_EQ(1, (ctl::count_if_t<list, pred_int>::value));
+    EXPECT_EQ(1, (ctl::count_if_v<list, pred_int>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_int_char>::value;
-    EXPECT_EQ(1, val);
+    EXPECT_EQ(1, (ctl::count_if_t<list, pred_int_char>::value));
+    EXPECT_EQ(1, (ctl::count_if_v<list, pred_int_char>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_empty>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<list, pred_empty>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<list, pred_empty>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_all>::value;
-    EXPECT_EQ(1, val);
+    EXPECT_EQ(1, (ctl::count_if_t<list, pred_all>::value));
+    EXPECT_EQ(1, (ctl::count_if_v<list, pred_all>));
   }
 
   {
     using list = ctl::list<int, char>;
-    auto val = ctl::count_if_t<list, pred_int>::value;
-    EXPECT_EQ(1, val);
+    EXPECT_EQ(1, (ctl::count_if_t<list, pred_int>::value));
+    EXPECT_EQ(1, (ctl::count_if_v<list, pred_int>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_int_char>::value;
-    EXPECT_EQ(2, val);
+    EXPECT_EQ(2, (ctl::count_if_t<list, pred_int_char>::value));
+    EXPECT_EQ(2, (ctl::count_if_v<list, pred_int_char>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_empty>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<list, pred_empty>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<list, pred_empty>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_all>::value;
-    EXPECT_EQ(2, val);
+    EXPECT_EQ(2, (ctl::count_if_t<list, pred_all>::value));
+    EXPECT_EQ(2, (ctl::count_if_v<list, pred_all>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    auto val = ctl::count_if_t<list, pred_int>::value;
-    EXPECT_EQ(2, val);
+    EXPECT_EQ(2, (ctl::count_if_t<list, pred_int>::value));
+    EXPECT_EQ(2, (ctl::count_if_v<list, pred_int>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_int_char>::value;
-    EXPECT_EQ(3, val);
+    EXPECT_EQ(3, (ctl::count_if_t<list, pred_int_char>::value));
+    EXPECT_EQ(3, (ctl::count_if_v<list, pred_int_char>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_empty>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<list, pred_empty>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<list, pred_empty>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_all>::value;
-    EXPECT_EQ(4, val);
+    EXPECT_EQ(4, (ctl::count_if_t<list, pred_all>::value));
+    EXPECT_EQ(4, (ctl::count_if_v<list, pred_all>));
   }
 
   {
     using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    auto val = ctl::count_if_t<list, pred_int>::value;
-    EXPECT_EQ(5, val);
+    EXPECT_EQ(5, (ctl::count_if_t<list, pred_int>::value));
+    EXPECT_EQ(5, (ctl::count_if_v<list, pred_int>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_int_char>::value;
-    EXPECT_EQ(8, val);
+    EXPECT_EQ(8, (ctl::count_if_t<list, pred_int_char>::value));
+    EXPECT_EQ(8, (ctl::count_if_v<list, pred_int_char>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_empty>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_t<list, pred_empty>::value));
+    EXPECT_EQ(0, (ctl::count_if_v<list, pred_empty>));
 
-    val = 100;
-    val = ctl::count_if_t<list, pred_all>::value;
-    EXPECT_EQ(11, val);
+    EXPECT_EQ(11, (ctl::count_if_t<list, pred_all>::value));
+    EXPECT_EQ(11, (ctl::count_if_v<list, pred_all>));
   }
 }
 
 TEST_F(list_test, list_count_qmf) {
   {
     using empty_list = ctl::list<>;
-    auto val = ctl::count_if_qmf_t<empty_list, quoted_int_char>::value;
-    EXPECT_EQ(0, val);
+    EXPECT_EQ(0, (ctl::count_if_qmf_v<empty_list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<int>;
-    auto val = ctl::count_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(1, val);
+    EXPECT_EQ(1, (ctl::count_if_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<int, char>;
-    auto val = ctl::count_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(2, val);
+    EXPECT_EQ(2, (ctl::count_if_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    auto val = ctl::count_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(3, val);
+    EXPECT_EQ(3, (ctl::count_if_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    auto val = ctl::count_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(8, val);
+    EXPECT_EQ(8, (ctl::count_if_qmf_v<list, quoted_int_char>));
   }
 }
 
@@ -718,26 +710,32 @@ TEST_F(list_test, empty_check) {
   using empty_list = ctl::list<>;
   EXPECT_TRUE(ctl::empty_t<empty_list>::value);
   EXPECT_TRUE(ctl::empty_t<empty_list>());
+  EXPECT_TRUE(ctl::empty_v<empty_list>);
 
   using single_element_list = ctl::list<int>;
   EXPECT_FALSE(ctl::empty_t<single_element_list>::value);
   EXPECT_FALSE(ctl::empty_t<single_element_list>());
+  EXPECT_FALSE(ctl::empty_v<single_element_list>);
 
   using two_elements_list = ctl::list<int, char>;
   EXPECT_FALSE(ctl::empty_t<two_elements_list>::value);
   EXPECT_FALSE(ctl::empty_t<two_elements_list>());
+  EXPECT_FALSE(ctl::empty_v<two_elements_list>);
 
   using three_elements_list = ctl::list<int, char, float>;
   EXPECT_FALSE(ctl::empty_t<three_elements_list>::value);
   EXPECT_FALSE(ctl::empty_t<three_elements_list>());
+  EXPECT_FALSE(ctl::empty_v<three_elements_list>);
 
   using merged_list = ctl::push_front_t<three_elements_list, two_elements_list>;
   EXPECT_FALSE(ctl::empty_t<merged_list>::value);
   EXPECT_FALSE(ctl::empty_t<merged_list>());
+  EXPECT_FALSE(ctl::empty_v<merged_list>);
 
   using merged_list2 = ctl::push_front_t<merged_list, single_element_list>;
   EXPECT_FALSE(ctl::empty_t<merged_list2>::value);
   EXPECT_FALSE(ctl::empty_t<merged_list2>());
+  EXPECT_FALSE(ctl::empty_v<merged_list2>);
 }
 
 TEST_F(list_test, list_clear) {
@@ -1403,47 +1401,26 @@ TEST_F(list_test, filter_using_quoted_meta_function) {
 TEST_F(list_test, contains) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto expect_true1 = ctl::contains_t<list, int>::value;
-    EXPECT_TRUE(expect_true1);
-
-    constexpr auto expect_true2 = ctl::contains_t<list, double>::value;
-    EXPECT_TRUE(expect_true2);
-
-    constexpr auto expect_true3 = ctl::contains_t<list, char>::value;
-    EXPECT_TRUE(expect_true3);
-
-    constexpr auto expect_false = ctl::contains_t<list, float>::value;
-    EXPECT_FALSE(expect_false);
+    EXPECT_TRUE((ctl::contains_v<list, int>));
+    EXPECT_TRUE((ctl::contains_v<list, double>));
+    EXPECT_TRUE((ctl::contains_v<list, char>));
+    EXPECT_FALSE((ctl::contains_v<list, float>));
   }
 
   {
     using list = ctl::list<char, int, float, int, float, int, char, int, int>;
-    constexpr auto expect_true1 = ctl::contains_t<list, int>::value;
-    EXPECT_TRUE(expect_true1);
-
-    constexpr auto expect_true2 = ctl::contains_t<list, float>::value;
-    EXPECT_TRUE(expect_true2);
-
-    constexpr auto expect_true3 = ctl::contains_t<list, char>::value;
-    EXPECT_TRUE(expect_true3);
-
-    constexpr auto expect_false = ctl::contains_t<list, double>::value;
-    EXPECT_FALSE(expect_false);
+    EXPECT_TRUE((ctl::contains_v<list, int>));
+    EXPECT_TRUE((ctl::contains_v<list, float>));
+    EXPECT_TRUE((ctl::contains_v<list, char>));
+    EXPECT_FALSE((ctl::contains_v<list, double>));
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto expect_false1 = ctl::contains_t<list, int>::value;
-    EXPECT_FALSE(expect_false1);
-
-    constexpr auto expect_false2 = ctl::contains_t<list, float>::value;
-    EXPECT_FALSE(expect_false2);
-
-    constexpr auto expect_false3 = ctl::contains_t<list, char>::value;
-    EXPECT_FALSE(expect_false3);
-
-    constexpr auto expect_false4 = ctl::contains_t<list, double>::value;
-    EXPECT_FALSE(expect_false4);
+    EXPECT_FALSE((ctl::contains_v<list, int>));
+    EXPECT_FALSE((ctl::contains_v<list, float>));
+    EXPECT_FALSE((ctl::contains_v<list, char>));
+    EXPECT_FALSE((ctl::contains_v<list, double>));
   }
 }
 
@@ -2796,124 +2773,104 @@ TEST_F(list_test, remove_if_using_quoted_meta_function) {
 TEST_F(list_test, find) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_t<list, int>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_v<list, int>), 0);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_t<list, char>::value;
-    EXPECT_EQ(pos, 1);
+    EXPECT_EQ((ctl::find_v<list, char>), 1);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_t<list, double>::value;
-    EXPECT_EQ(pos, 2);
+    EXPECT_EQ((ctl::find_v<list, double>), 2);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_t<list, float>::value;
-    EXPECT_EQ(pos, 4);
+    EXPECT_EQ((ctl::find_v<list, float>), 4);
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto pos = ctl::find_t<list, float>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_v<list, float>), 0);
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto pos = ctl::find_t<list, float>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_v<list, float>), 0);
   }
 
   {
     using list = ctl::list<int>;
-    constexpr auto pos = ctl::find_t<list, float>::value;
-    EXPECT_EQ(pos, 1);
+    EXPECT_EQ((ctl::find_v<list, float>), 1);
   }
 }
 
 TEST_F(list_test, find_if) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_if_t<list, pred_int>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_if_v<list, pred_int>), 0);
   }
 
   {
     using list = ctl::list<double, int, char, double, int>;
-    constexpr auto pos = ctl::find_if_t<list, pred_int_char>::value;
-    EXPECT_EQ(pos, 1);
+    EXPECT_EQ((ctl::find_if_v<list, pred_int_char>), 1);
   }
 
   {
     using list = ctl::list<double, char, int, int>;
-    constexpr auto pos = ctl::find_if_t<list, pred_int_char>::value;
-    EXPECT_EQ(pos, 1);
+    EXPECT_EQ((ctl::find_if_v<list, pred_int_char>), 1);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_if_t<list, pred_empty>::value;
-    EXPECT_EQ(pos, 4);
+    EXPECT_EQ((ctl::find_if_v<list, pred_empty>), 4);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_if_t<list, pred_all>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_if_v<list, pred_all>), 0);
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 0);
   }
 
   {
     using list = ctl::list<double, char, int, int>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 1);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 1);
   }
 
   {
     using list = ctl::list<double, float, float, char>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 3);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 3);
   }
 
   {
     using list = ctl::list<double, float, char, int, char>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 2);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 2);
   }
 
   {
     using list = ctl::list<int>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 0);
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 1);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 1);
   }
 
   {
     using list = ctl::list<float, double, float, float>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 4);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 4);
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, quoted_int_char>::value;
-    EXPECT_EQ(pos, 0);
+    EXPECT_EQ((ctl::find_if_qmf_v<list, quoted_int_char>), 0);
   }
 }
 
@@ -3157,312 +3114,261 @@ TEST_F(list_test, unique_if_using_quoted_meta_function) {
 TEST_F(list_test, all_of) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_int>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::all_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto result = ctl::all_of_t<list, pred_int>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto result = ctl::all_of_t<list, pred_int>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::all_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<int, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_int>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<double, int, char, double, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::all_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<double, char, int, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::all_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<char, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_empty>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::all_of_v<list, pred_empty>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::all_of_t<list, pred_all>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_v<list, pred_all>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::all_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::all_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::all_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char, int>;
-    constexpr auto result = ctl::all_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char>;
-    constexpr auto result = ctl::all_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<int>;
-    constexpr auto result = ctl::all_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto result = ctl::all_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::all_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto result = ctl::all_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::all_of_qmf_v<list, quoted_int_char>));
   }
 }
 
 TEST_F(list_test, any_of) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_int>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto result = ctl::any_of_t<list, pred_int>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::any_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto result = ctl::any_of_t<list, pred_int>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::any_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<int, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_int>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<double, int, char, double, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<double, char, int, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<char, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_empty>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::any_of_v<list, pred_empty>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::any_of_t<list, pred_all>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_v<list, pred_all>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::any_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::any_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char, int>;
-    constexpr auto result = ctl::any_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char>;
-    constexpr auto result = ctl::any_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<int>;
-    constexpr auto result = ctl::any_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::any_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto result = ctl::any_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::any_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto result = ctl::any_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::any_of_qmf_v<list, quoted_int_char>));
   }
 }
 
 TEST_F(list_test, none_of) {
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_int>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto result = ctl::none_of_t<list, pred_int>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::none_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto result = ctl::none_of_t<list, pred_int>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::none_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<int, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_int>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_v<list, pred_int>));
   }
 
   {
     using list = ctl::list<double, int, char, double, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<double, char, int, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<char, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_v<list, pred_int_char>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_empty>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::none_of_v<list, pred_empty>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::none_of_t<list, pred_all>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_v<list, pred_all>));
   }
 
   {
     using list = ctl::list<int, char, double, int>;
-    constexpr auto result = ctl::none_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::none_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char, int>;
-    constexpr auto result = ctl::none_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<char>;
-    constexpr auto result = ctl::none_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<int>;
-    constexpr auto result = ctl::none_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_FALSE(result);
+    EXPECT_FALSE((ctl::none_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<float>;
-    constexpr auto result = ctl::none_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::none_of_qmf_v<list, quoted_int_char>));
   }
 
   {
     using list = ctl::list<>;
-    constexpr auto result = ctl::none_of_qmf_t<list, quoted_int_char>::value;
-    EXPECT_TRUE(result);
+    EXPECT_TRUE((ctl::none_of_qmf_v<list, quoted_int_char>));
   }
 }
 

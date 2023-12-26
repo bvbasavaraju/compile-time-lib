@@ -1,9 +1,10 @@
 
 == Algorithms
 
-Once the heterogenous list is created, algorithms are required to do some actions. like for example, to add new element to existing list, or to retrieve an element, or remove specific entry in the list like or even sorting the types in the list. Just like data structure `std::vector<>` (note that `std::vector<>` can be used to hold the values of homogenous type at runtime).
+Once the heterogenous list is created, algorithms are required to do some work with that list. like for example, to add new element to existing list, or to retrieve an element, or remove specific entry in the list like or even sorting the types in the list. Just like data structure `std::vector<>` (note that `std::vector<>` can be used to hold the values of homogenous type at runtime).
 
 These algorithms can be used with any list of types like std::tuple<>. It is *not* restricted to `ctl::list` alone.
+
 To use any algorithms make sure to add `#include <container/algorithms.hpp>` in source file.
 
 All algorithms will result in `new type`. *original type is never modified*
@@ -511,7 +512,7 @@ Variants:
 
 === Miscellaneous
 
-Set of algorithms used for miscellaneous stuffs which are not listed above! Name of the algorithm will give hint on misc stuff.
+Set of algorithms used for miscellaneous stuffs which are not listed above! like ex, creating the integer sequence, getting the position of the type in a list, getting the size of the list, etc.
 
 Following are some of algorithms:
 
@@ -527,6 +528,7 @@ Variants:
 
 * `size`
 * `size_t` => to avoid `::type`
+* `size_v` => to avoid `::value`
 
 ==== count
 
@@ -540,10 +542,13 @@ Variants:
 
 * `count` => alias to `size`
 * `count_t` => to avoid `::type`
+* `count_v` => to avoid `::value`
 * `count_if` => when `predicate P` is passed as second template argument. type will be counted only if `P<T> is true`. `::type` is needed to access the result type
 * `count_if_t` => to avoid `::type`
+* `count_if_v` => to avoid `::value`
 * `count_if_qmf` => when `predicate` is passed as quoted meta function
 * `count_if_qmf_t` => to avoid `::type`
+* `count_if_qmf_v` => to avoid `::value`
 
 ==== empty
 
@@ -557,6 +562,7 @@ Variants:
 
 * `empty`
 * `empty_t` => to avoid `::type`
+* `empty_v` => to avoid `::value`
 
 ==== contains
 
@@ -570,6 +576,7 @@ Variants:
 
 * `contains`
 * `contains_t` => to avoid `::type`
+* `contains_v` => to avoid `::value`
 
 ==== find
 
@@ -583,10 +590,13 @@ Variants:
 
 * `find`
 * `find_t` => to avoid `::type`
+* `find_v` => to avoid `::value`
 * `find_if` => when `U` is a predicate. `result` will have the first position for which `P<T>` will result in `true`. `::type` is needed to access the result type
 * `find_if_t` => to avoid `::type`
+* `find_if_v` => to avoid `::value`
 * `find_if_qmf` => when predicate is passed as quoted meta function. `::type` is needed to access the result type
 * `find_if_qmf_t` => to avoid `::type`
+* `find_if_qmf_v` => to avoid `::value`
 
 ==== all_of
 
@@ -600,8 +610,10 @@ Variants:
 
 * `all_of`
 * `all_of_t` => to avoid `::type`
+* `all_of_v` => to avoid `::value`
 * `all_of_qmf` => when predicate is passed as quoted meta function. `::type` is needed to access the result type
 * `all_of_qmf_t` => to avoid `::type`
+* `all_of_qmf_v` => to avoid `::value`
 
 ==== any_of
 
@@ -615,8 +627,10 @@ Variants:
 
 * `any_of`
 * `any_of_t` => to avoid `::type`
+* `any_of_v` => to avoid `::value`
 * `any_of_qmf` => when predicate is passed as quoted meta function. `::type` is needed to access the result type
 * `any_of_qmf_t` => to avoid `::type`
+* `any_of_qmf_v` => to avoid `::value`
 
 ==== none_of
 
@@ -630,8 +644,10 @@ Variants:
 
 * `none_of`
 * `none_of_t` => to avoid `::type`
+* `none_of_v` => to avoid `::value`
 * `none_of_qmf` => when predicate is passed as quoted meta function. `::type` is needed to access the result type
 * `none_of_qmf_t` => to avoid `::type`
+* `none_of_qmf_v` => to avoid `::value`
 
 ==== from integer sequence
 
