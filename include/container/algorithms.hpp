@@ -328,12 +328,18 @@ struct size {
 template <typename types>
 using size_t = typename size<types>::type;
 
+template <typename types>
+constexpr static auto size_v = size_t<types>::value;
+
 // count
 template <typename types>
 using count = size<types>;
 
 template <typename types>
 using count_t = typename count<types>::type;
+
+template <typename types>
+constexpr static auto count_v = count_t<types>::value;
 
 template <typename types, template <typename...> typename P>
 struct count_if {
@@ -372,11 +378,17 @@ struct count_if {
 template <typename types, template <typename...> typename P>
 using count_if_t = typename count_if<types, P>::type;
 
+template <typename types, template <typename...> typename P>
+constexpr static auto count_if_v = count_if_t<types, P>::value;
+
 template <typename types, typename QMF>
 using count_if_qmf = count_if<types, QMF::template fn>;
 
 template <typename types, typename QMF>
 using count_if_qmf_t = typename count_if_qmf<types, QMF>::type;
+
+template <typename types, typename QMF>
+constexpr static auto count_if_qmf_v = count_if_qmf_t<types, QMF>::value;
 
 // empty
 template <typename types>
@@ -403,6 +415,9 @@ struct empty {
 
 template <typename types>
 using empty_t = typename empty<types>::type;
+
+template <typename types>
+constexpr static auto empty_v = empty_t<types>::value;
 
 // clear
 template <typename types>
@@ -631,6 +646,9 @@ struct contains {
 
 template <typename types, typename type_to_search>
 using contains_t = typename contains<types, type_to_search>::type;
+
+template <typename types, typename type_to_search>
+constexpr static auto contains_v = contains_t<types, type_to_search>::value;
 
 // drop
 template <typename types, std::size_t N>
@@ -1131,6 +1149,9 @@ struct find {
 template <typename types, typename type_to_find>
 using find_t = typename find<types, type_to_find>::type;
 
+template <typename types, typename type_to_find>
+constexpr static auto  find_v = find_t<types, type_to_find>::value;
+
 // find if
 template <typename types, template <typename...> typename P>
 struct find_if {
@@ -1180,11 +1201,17 @@ struct find_if {
 template <typename types, template <typename...> typename P>
 using find_if_t = typename find_if<types, P>::type;
 
+template <typename types, template <typename...> typename P>
+constexpr static auto find_if_v = find_if_t<types, P>::value;
+
 template <typename types, typename QMF>
 using find_if_qmf = typename find_if<types, QMF::template fn>::type;
 
 template <typename types, typename QMF>
 using find_if_qmf_t = typename find_if_qmf<types, QMF>::type;
+
+template <typename types, typename QMF>
+constexpr static auto find_if_qmf_v = find_if_qmf_t<types, QMF>::value;
 
 // unique
 template <typename types>
@@ -1229,11 +1256,17 @@ struct all_of {
 template <typename types, template <typename...> typename P>
 using all_of_t = typename all_of<types, P>::type;
 
+template <typename types, template <typename...> typename P>
+constexpr static auto all_of_v = all_of_t<types, P>::value;
+
 template <typename types, typename QMF>
 using all_of_qmf = all_of<types, QMF::template fn>;
 
 template <typename types, typename QMF>
 using all_of_qmf_t = typename all_of_qmf<types, QMF>::type;
+
+template <typename types, typename QMF>
+constexpr static auto all_of_qmf_v = all_of_qmf_t<types, QMF>::value;
 
 // any of
 template <typename types, template <typename...> typename P>
@@ -1259,11 +1292,17 @@ struct any_of {
 template <typename types, template <typename...> typename P>
 using any_of_t = typename any_of<types, P>::type;
 
+template <typename types, template <typename...> typename P>
+constexpr static auto any_of_v = any_of_t<types, P>::value;
+
 template <typename types, typename QMF>
 using any_of_qmf = any_of<types, QMF::template fn>;
 
 template <typename types, typename QMF>
 using any_of_qmf_t = typename any_of_qmf<types, QMF>::type;
+
+template <typename types, typename QMF>
+constexpr static auto any_of_qmf_v = any_of_qmf_t<types, QMF>::value;
 
 // none of
 template <typename types, template <typename...> typename P>
@@ -1289,11 +1328,17 @@ struct none_of {
 template <typename types, template <typename...> typename P>
 using none_of_t = typename none_of<types, P>::type;
 
+template <typename types, template <typename...> typename P>
+constexpr static auto none_of_v = none_of_t<types, P>::value;
+
 template <typename types, typename QMF>
 using none_of_qmf = none_of<types, QMF::template fn>;
 
 template <typename types, typename QMF>
 using none_of_qmf_t = typename none_of_qmf<types, QMF>::type;
+
+template <typename types, typename QMF>
+constexpr static auto none_of_qmf_v = none_of_qmf_t<types, QMF>::value;
 
 // transform
 template <template <typename...> typename F, typename... types>

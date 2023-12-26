@@ -1,7 +1,9 @@
 
 == List
 
-It is a container which holds the types. It is an heterogenous container. To use make sure to add `#include <container/list.hpp>` in source file. 
+It is a container which holds the types. It is an heterogenous container. 
+
+To use make sure to add `#include <container/list.hpp>` in source file. 
 
 There are 3 variants of list
 
@@ -9,4 +11,4 @@ There are 3 variants of list
 * `ctl::ilist<>` => instantiable list
 * `ctl::clist<>` => instantiable and callable list. It has many operator over-loadings which can be called at runtime. Example for the same can be found in `src/main.cpp` file
 
-This list can be used as is and any algorithms can be applied on these list. Including the algorithms from MP11 can be used.
+Many algorithms can be applied on the created list type. Algorithms from MP11 can also be used with the list type.

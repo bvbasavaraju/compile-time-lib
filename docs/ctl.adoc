@@ -16,10 +16,11 @@ Features available to use:
 
 *Note:*
 
-* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. This has been started as re-inventing wheel theory and used personal approach to implement the same MP11 library, many of the algorithms are having the same name as mentioned in library MP11.
-* `_t` next to algorithm name is implemented to avoid using with `::type` keyword every time algorithm is used
+* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. This has been started as re-inventing wheel theory and used personal approach to implement the APIs/Functions that MP11 library supports, many of the algorithms are having the same name as mentioned in library MP11.
+* `_t` next to algorithm name is implemented to avoid using `::type` keyword with algorithm
 * `_c` next to algorithm name is implemented to take constants which are known at compile time (ex: true/false or numbers)
-* `_f` next to algorithm name is implemented to take template types as template arguments
-* `_p` next to algorithm name is implemented to take predicate as template parameter (predicate is a template type). It is same as `_f`, but `_p` is used to make it more precise
-* `_qmf` next to algorithm name is implemented to take Quoted meta functions as template arguments
-**  `_qmf` implementations are usually using its counter parts from *non `_qmf`* counterparts
+* `_f` next to algorithm name is implemented to take template types as template parameter
+* `_p` next to algorithm name is implemented to take predicate as template parameter (predicate is a template type). It is same as `_f`, but `_p` is used to make it more clear to read
+* `_qmf` next to algorithm name is implemented to take Quoted meta functions as template parameter
+**  `_qmf` implementations are using its *non `_qmf`* counterparts
+* `_v` next to algorithm name is implemented to get the constant value (boolean or number). it is like using `::value` on the integral_constant type
