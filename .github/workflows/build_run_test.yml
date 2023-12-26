@@ -22,6 +22,7 @@ jobs:
         compiler: [clang, gcc]
         version: [12, 13, 14, 15, 16, 17]
         cxx_standard: [20]
+        stdlib: [libstdc++, libc++]
         build_type: [Debug]
         include:
           - compiler: clang
@@ -76,14 +77,13 @@ jobs:
           - compiler: gcc
             version: 14
           - compiler: clang
-            version: 14
-            stdlib: libstdc++
-          - compiler: clang
             version: 13
           - compiler: clang
             version: 12
           - compiler: gcc
             stdlib: libc++
+          - compiler: clang
+            stdlib: libstdc++
 
     steps:
       - uses: actions/checkout@v4
