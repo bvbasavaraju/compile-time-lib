@@ -31,7 +31,7 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -DCMAKE_C_COMPILER="/usr/bin/gcc-12" -DCMAKE_CXX_COMPILER="/usr/bin/g++-12" -DCMAKE_CXX_STANDARD=${{env.DEFAULT_CXX_STANDARD}} -DCMAKE_CXX_FLAGS_INIT=${{env.DEFAULT_CXX_FLAGS}} -DCMAKE_BUILD_TYPE=${{env.DEFAULT_BUILD_TYPE}}
 
       - name: Build Unit Tests
-        run: cmake DCMAKE_CXX_FLAGS_INIT=${{env.DEFAULT_CXX_FLAGS}} --build ${{github.workspace}}/build --config ${{env.DEFAULT_BUILD_TYPE}} -v -t ctl_test
+        run: cmake --build ${{github.workspace}}/build --config ${{env.DEFAULT_BUILD_TYPE}} -v -t ctl_test
 
       - name: Test
         working-directory: ${{github.workspace}}/build/test
