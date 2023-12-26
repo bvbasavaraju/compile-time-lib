@@ -14,7 +14,7 @@ struct quote {
 // not
 template <bool C>
 struct invert_c {
-  using type = std::integral_constant<bool, !C>;
+    using type = std::integral_constant<bool, !C>;
 };
 
 template <bool C>
