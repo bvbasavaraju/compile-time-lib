@@ -1397,14 +1397,14 @@ struct transform {
 
     template <typename R, typename L>
     struct transform_LL_impl<R, L> {
-      using type = helper<L, R>::type;
+      using type = typename helper<L, R>::type;
     };
 
     template <typename R, typename L, typename ...Ls>
     struct transform_LL_impl<R, L, Ls...> {
-      using transformed = helper<L, R>::type;
+      using transformed = typename helper<L, R>::type;
 
-      using type = transform_LL_impl<transformed, Ls...>::type;
+      using type = typename transform_LL_impl<transformed, Ls...>::type;
     };
 
     using list_of_list = typename transform_LL_impl<details::temp_list<>, types...>::type;
