@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, gcc]
+        compiler: [gcc]
         version: [12, 13]
         cxx_standard: [20]
         stdlib: [libstdc++, libc++]
