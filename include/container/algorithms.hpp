@@ -1,21 +1,19 @@
 #pragma once
 
+#include <container/list.hpp>
 #include <cstdint>
-
 #include <utils.hpp>
 
 namespace ctl {
 
 namespace details {
 
-template <typename ...> struct temp_list;
-
-template <typename T,  typename U>
+template <typename T, typename U>
 struct first_is_lesser_or_eq {
-  constexpr static bool value = T::value <= U::value;
+    constexpr static bool value = T::value <= U::value;
 };
 
-} // details
+}  // namespace details
 
 // rename
 template <typename types, template <typename...> typename new_types>
@@ -791,7 +789,7 @@ template <typename types, typename N>
 using repeat_t = typename repeat<types, N>::type;
 
 // from integer sequence
-template <typename sequence, template <typename...> typename result_type = std::tuple>
+template <typename sequence, template <typename...> typename result_type = ctl::list>
 struct from_integer_sequence {
   private:
     /*
@@ -829,12 +827,12 @@ struct from_integer_sequence {
     using type = typename from_integer_sequence_impl<sequence::size(), sequence>::type;
 };
 
-template <typename sequence, template <typename...> typename result_type = std::tuple>
+template <typename sequence, template <typename...> typename result_type = ctl::list>
 using from_integer_sequence_t = typename from_integer_sequence<sequence, result_type>::type;
 
 // iota
 template <std::size_t N, typename DT = uint32_t,
-          template <typename...> typename result_type = std::tuple>
+          template <typename...> typename result_type = ctl::list>
 struct iota_c {
   private:
     template <std::size_t count, typename T>
@@ -860,13 +858,13 @@ struct iota_c {
 };
 
 template <std::size_t N, typename DT = uint32_t,
-          template <typename...> typename result_type = std::tuple>
+          template <typename...> typename result_type = ctl::list>
 using iota_c_t = typename iota_c<N, DT, result_type>::type;
 
-template <typename N, template <typename...> typename result_type = std::tuple>
+template <typename N, template <typename...> typename result_type = ctl::list>
 using iota = iota_c<N::value, typename N::value_type, result_type>;
 
-template <typename N, template <typename...> typename result_type = std::tuple>
+template <typename N, template <typename...> typename result_type = ctl::list>
 using iota_t = typename iota<N, result_type>::type;
 
 // insert
@@ -1150,7 +1148,7 @@ template <typename types, typename type_to_find>
 using find_t = typename find<types, type_to_find>::type;
 
 template <typename types, typename type_to_find>
-constexpr static auto  find_v = find_t<types, type_to_find>::value;
+constexpr static auto find_v = find_t<types, type_to_find>::value;
 
 // find if
 template <typename types, template <typename...> typename P>
@@ -1348,9 +1346,9 @@ struct transform {
     template <typename T, typename W>
     struct wrap;
 
-    template <typename T, template <typename...> typename W, typename ...U>
+    template <typename T, template <typename...> typename W, typename... U>
     struct wrap<T, W<U...>> {
-      using type = push_back_t<W<U...>, T>;
+        using type = push_back_t<W<U...>, T>;
     };
 
     // helper: this will convert L<T, T2, T3> => L<L<T1>, L<T2>, L<T3>>
@@ -1367,7 +1365,8 @@ struct transform {
         using type = L<L<T>>;
     };
 
-    template <template <typename...> typename L, typename T, typename... Ts, template <typename...> typename R>
+    template <template <typename...> typename L, typename T, typename... Ts,
+              template <typename...> typename R>
     struct helper<L<T, Ts...>, R<>> {
         using first = L<L<T>>;
         using rest = typename helper<L<Ts...>, R<>>::type;
@@ -1375,13 +1374,15 @@ struct transform {
         using type = push_back_t<first, rest>;
     };
 
-    template <template <typename...> typename L, template <typename...> typename R, typename T, typename U>
+    template <template <typename...> typename L, template <typename...> typename R, typename T,
+              typename U>
     struct helper<L<T>, R<U>> {
         using wrapped = typename wrap<T, U>::type;
         using type = L<wrapped>;
     };
 
-    template <template <typename...> typename L, template <typename...> typename R, typename T, typename U, typename... Ts, typename... Us>
+    template <template <typename...> typename L, template <typename...> typename R, typename T,
+              typename U, typename... Ts, typename... Us>
     struct helper<L<T, Ts...>, R<U, Us...>> {
         using wrapped = typename wrap<T, U>::type;
 
@@ -1392,45 +1393,46 @@ struct transform {
     };
 
     // transform multiple lists to list of lists ex: L<T1, T2, T3> => L<L<T1>, L<T2>, L<T3>>
-    template <typename R, typename ...L>
+    template <typename R, typename... L>
     struct transform_LL_impl;
 
     template <typename R, typename L>
     struct transform_LL_impl<R, L> {
-      using type = typename helper<L, R>::type;
+        using type = typename helper<L, R>::type;
     };
 
-    template <typename R, typename L, typename ...Ls>
+    template <typename R, typename L, typename... Ls>
     struct transform_LL_impl<R, L, Ls...> {
-      using transformed = typename helper<L, R>::type;
+        using transformed = typename helper<L, R>::type;
 
-      using type = typename transform_LL_impl<transformed, Ls...>::type;
+        using type = typename transform_LL_impl<transformed, Ls...>::type;
     };
 
-    using list_of_list = typename transform_LL_impl<details::temp_list<>, types...>::type;
+    using list_of_list = typename transform_LL_impl<ctl::list<>, types...>::type;
 
-    // convert the list of list => list of functions ex: L<L<T1>, L<T2>, L<T3>> => L<F<T1>, F<T2>, F<T3>>
+    // convert the list of list => list of functions ex: L<L<T1>, L<T2>, L<T3>> => L<F<T1>, F<T2>,
+    // F<T3>>
     template <typename L>
     struct transform_impl;
 
-    template <template <typename...>typename L>
+    template <template <typename...> typename L>
     struct transform_impl<L<>> {
-      using type = L<>;
+        using type = L<>;
     };
 
-    template <template <typename...>typename L, typename T>
+    template <template <typename...> typename L, typename T>
     struct transform_impl<L<T>> {
-      // here T is a list of some type!
-      using type = L<rename_t<T, F>>;
+        // here T is a list of some type!
+        using type = L<rename_t<T, F>>;
     };
 
-    template <template <typename...>typename L, typename T, typename... Ts>
+    template <template <typename...> typename L, typename T, typename... Ts>
     struct transform_impl<L<T, Ts...>> {
-      // here T is a list of some type!
-      using first = L<rename_t<T, F>>;
-      using rest = typename transform_impl<L<Ts...>>::type;
+        // here T is a list of some type!
+        using first = L<rename_t<T, F>>;
+        using rest = typename transform_impl<L<Ts...>>::type;
 
-      using type = push_back_t<first, rest>;
+        using type = push_back_t<first, rest>;
     };
 
   public:
@@ -1447,7 +1449,7 @@ template <typename QMF, typename... types>
 using transform_qmf_t = typename transform_qmf<QMF, types...>::type;
 
 // transform if
-template <template <typename...> typename P, template <typename...> typename F, typename ...types>
+template <template <typename...> typename P, template <typename...> typename F, typename... types>
 struct transform_if {
   private:
     template <typename L>
@@ -1455,41 +1457,41 @@ struct transform_if {
 
     template <template <typename...> typename L>
     struct transform_if_impl<L<>> {
-      using type = L<>;
+        using type = L<>;
     };
 
     template <template <typename...> typename L, typename T>
     struct transform_if_impl<L<T>> {
-      using condition = rename_t<T, P>;
-      using true_case = rename_t<T, F>;
-      using false_case = first_t<T>;
+        using condition = rename_t<T, P>;
+        using true_case = rename_t<T, F>;
+        using false_case = first_t<T>;
 
-      using type = L<select_t<condition, true_case, false_case>>;
+        using type = L<select_t<condition, true_case, false_case>>;
     };
 
     template <template <typename...> typename L, typename T, typename... Ts>
     struct transform_if_impl<L<T, Ts...>> {
-      using condition = rename_t<T, P>;
-      using true_case = rename_t<T, F>;
-      using false_case = first_t<T>;
+        using condition = rename_t<T, P>;
+        using true_case = rename_t<T, F>;
+        using false_case = first_t<T>;
 
-      using first = L<select_t<condition, true_case, false_case>>;
-      using rest = typename transform_if_impl<L<Ts...>>::type;
+        using first = L<select_t<condition, true_case, false_case>>;
+        using rest = typename transform_if_impl<L<Ts...>>::type;
 
-      using type = push_back_t<first, rest>;
+        using type = push_back_t<first, rest>;
     };
 
   public:
-    using type = typename transform_if_impl<transform_t<details::temp_list, types...>>::type;
+    using type = typename transform_if_impl<transform_t<ctl::list, types...>>::type;
 };
 
-template <template <typename...> typename P, template <typename...> typename F, typename ...types>
+template <template <typename...> typename P, template <typename...> typename F, typename... types>
 using transform_if_t = typename transform_if<P, F, types...>::type;
 
-template <typename QMFp, typename QMFf, typename ...types>
+template <typename QMFp, typename QMFf, typename... types>
 using transform_if_qmf = transform_if<QMFp::template fn, QMFf::template fn, types...>;
 
-template <typename QMFp, typename QMFf, typename ...types>
+template <typename QMFp, typename QMFf, typename... types>
 using transform_if_qmf_t = typename transform_if_qmf<QMFp, QMFf, types...>::type;
 
 // filter
@@ -1518,7 +1520,8 @@ struct filter_if {
         using type = push_back_t<first, rest>;
     };
 
-    using transformed = transform_t<details::temp_list, types...>;
+    using transformed = transform_t<ctl::list, types...>;
+
   public:
     using type = typename filter_if_impl<transformed>::type;
 };

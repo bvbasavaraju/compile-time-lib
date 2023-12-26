@@ -1,4 +1,3 @@
 set(INC_DIRS
-include
-PARENT_SCOPE
-)
+    include
+    PARENT_SCOPE)
