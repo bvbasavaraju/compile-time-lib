@@ -29,8 +29,8 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -DCMAKE_C_COMPILER="/usr/bin/gcc-12" -DCMAKE_CXX_COMPILER="/usr/bin/g++-12" -DCMAKE_CXX_STANDARD=${{env.DEFAULT_CXX_STANDARD}} -DCMAKE_CXX_FLAGS_INIT=${{env.DEFAULT_CXX_FLAGS}} -DCMAKE_BUILD_TYPE=${{env.DEFAULT_BUILD_TYPE}}
 
       - name: Build Unit Tests
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} -v -t all
+        run: cmake --build ${{github.workspace}}/build --config ${{env.DEFAULT_BUILD_TYPE}} -v -t all
 
       - name: Test
         working-directory: ${{github.workspace}}/build/test
-        run: ctest -j $(nproc) -C ${{matrix.build_type}}
+        run: ctest -j $(nproc) -C ${{env.DEFAULT_BUILD_TYPE}}
