@@ -11,4 +11,4 @@ There are 3 variants of list
 * `ctl::ilist<>` => instantiable list
 * `ctl::clist<>` => instantiable and callable list. It has many operator over-loadings which can be called at runtime. Example for the same can be found in `src/main.cpp` file
 
-Many algorithms can be applied on the list type created. Algorithms from MP11 can also be used with the list type.
+Many algorithms can be applied on the created list type. Algorithms from MP11 can also be used with the list type.
