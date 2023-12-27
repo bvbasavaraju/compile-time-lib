@@ -311,16 +311,16 @@ struct size {
 
     template <template <typename...> typename L>
     struct size_impl<L<>> {
-        using type = std::integral_constant<uint32_t, 0>;
+        constexpr static auto val = 0;
     };
 
     template <template <typename...> typename L, typename T, typename... Ts>
     struct size_impl<L<T, Ts...>> {
-        using type = std::integral_constant<uint32_t, 1 + size_impl<L<Ts...>>::type::value>;
+        constexpr static auto val = 1 + size_impl<L<Ts...>>::val;
     };
 
   public:
-    using type = typename size_impl<types>::type;
+    using type = std::integral_constant<uint32_t, size_impl<types>::val>;
 };
 
 template <typename types>
@@ -344,12 +344,12 @@ struct count_if {
   private:
     template <bool C, typename L>
     struct count_if_true {
-        using type = std::integral_constant<uint32_t, 0>;
+        constexpr static auto val = 0;
     };
 
     template <typename L>
     struct count_if_true<true, L> {
-        using type = std::integral_constant<uint32_t, 1>;
+        constexpr static auto val = 1;
     };
 
     // count_if_impl
@@ -358,19 +358,19 @@ struct count_if {
 
     template <template <typename...> typename L>
     struct count_if_impl<L<>> {
-        using type = std::integral_constant<uint32_t, 0>;
+        constexpr static auto val = 0;
     };
 
     template <template <typename...> typename L, typename T, typename... Ts>
     struct count_if_impl<L<T, Ts...>> {
-        using first = typename count_if_true<P<T>::value, L<T, Ts...>>::type;
-        using rest = typename count_if_impl<L<Ts...>>::type;
+        constexpr static auto first = count_if_true<P<T>::value, L<T, Ts...>>::val;
+        constexpr static auto rest = count_if_impl<L<Ts...>>::val;
 
-        using type = std::integral_constant<uint32_t, (first::value + rest::value)>;
+        constexpr static auto val = first + rest;
     };
 
   public:
-    using type = typename count_if_impl<types>::type;
+    using type = std::integral_constant<uint32_t, count_if_impl<types>::val>;
 };
 
 template <typename types, template <typename...> typename P>
@@ -397,13 +397,11 @@ struct empty {
 
     template <template <typename...> typename L>
     struct empty_impl<L<>> {
-        // using type = std::integral_constant<bool, true>;
         using type = std::true_type;
     };
 
     template <template <typename...> typename L, typename... Ts>
     struct empty_impl<L<Ts...>> {
-        // using type = std::integral_constant<bool, false>;
         using type = std::false_type;
     };
 
@@ -809,8 +807,8 @@ struct from_integer_sequence {
     template <std::size_t N, typename S>
     struct from_integer_sequence_impl;
 
-    template <template <typename T, T... vs> typename S, typename DT, DT... vals>
-    struct from_integer_sequence_impl<0, S<DT, vals...>> {
+    template <typename S>
+    struct from_integer_sequence_impl<0, S> {
         using type = result_type<>;
     };
 
@@ -846,11 +844,6 @@ struct iota_c {
     template <typename T>
     struct iota_c_impl<0, T> {
         using type = result_type<>;
-    };
-
-    template <typename T>
-    struct iota_c_impl<1, T> {
-        using type = result_type<std::integral_constant<T, 0>>;
     };
 
   public:

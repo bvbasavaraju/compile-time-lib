@@ -1,11 +1,13 @@
 
 == Utility
+:hardbreaks-option:
 
 Following struct(s)/algorithm(s) can be applied on the types. To use algorithms make sure to add `#include <utils.hpp>` in source file.
 
 === quote
 
-This helps to wrap template type inside a structure called `quote`. template type can be accessed with the help of nested type `fn`.
+This helps to wrap template type inside a structure called `quote`. 
+Template type can be accessed with the help of nested type `fn`.
 
 [source, cpp]
 template <template <typename...> typename F>
@@ -24,11 +26,12 @@ struct invert_c {
   ...
 };
 
-variants of `valid` are:
+variants of `invert` are:
 
 * `invert_c` 
 * `invert_c_t` => to avoid `::type` 
-* `invert` => to pass typename as template parameter. boolean value is accessed with the help of `C::value`
+* `invert` => to pass typename as template parameter. 
+boolean value is accessed with the help of `C::value`
 * `invert_t` => to avoid `::type` 
 
 === valid
@@ -66,10 +69,12 @@ variants of `select` are:
 
 * `select_c` => when condition is `true/false` value. `::type` required to retrieve the type
 * `select_c_t` => to avoid `::type`
-* `select`  => when condition is a type. boolean value is accessed with the help of `C::value`
+* `select`  => when condition is a type. 
+boolean value is accessed with the help of `C::value`
 * `select_t`  => to avoid `::type`
 
-Following variants of select is used to get the false type as templated function. i.e. if condition results in `false` then selected type is `F<Ts...>`.
+Following variants of select is used to get the false type as templated function. 
+i.e. if condition results in `false` then selected type is `F<Ts...>`.
 
 [source, cpp]
 template <bool C, typename T, template <typename...> typename F, typename... Ts>
