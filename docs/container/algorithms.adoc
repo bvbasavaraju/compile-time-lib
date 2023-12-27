@@ -1,5 +1,6 @@
 
 == Algorithms
+:hardbreaks-option:
 
 Once the heterogenous list is created, algorithms are required to do some work with that list. like for example, to add new element to existing list, or to retrieve an element, or remove specific entry in the list like or even sorting the types in the list. Just like data structure `std::vector<>` (note that `std::vector<>` can be used to hold the values of homogenous type at runtime).
 
@@ -21,8 +22,10 @@ where,
 
 * _ algo name _ => name of the modifiable algorithms listed below
 * L<Ts...> => list which has to be modified
-* U => type of the interest. It could be single type or another list type! This is optional parameter depending on algorithm.
-* `::type` => to access the type from the result of the modified list. If algorithm name is postfixed with `_t` then there is no need of using `::type`
+* U => type of the interest. It could be single type or another list type! 
+This is optional parameter depending on algorithm.
+* `::type` => to access the type from the result of the modified list. 
+If algorithm name is postfixed with `_t` then there is no need of using `::type`
 
 Following are some of `modifiable` algorithms (replaced with _ algo name _):
 
@@ -32,7 +35,13 @@ Usage:
 [source, cpp]
 using result = ctl::rename<L<Ts...>, Y>::type
 
-if `L<Ts...> = ctl::list<T1, T2, T3>` and `Y == std::tuple` then `result = std::tuple<T2, T3, T1>`
+----
+if 
+  `L<Ts...> = ctl::list<T1, T2, T3>` 
+  `Y == std::tuple` 
+then 
+  `result = std::tuple<T2, T3, T1>`
+----
 
 Variants:
 
@@ -45,7 +54,13 @@ Usage:
 [source, cpp]
 using result = ctl::apply<Y, L<Ts...>>::type
 
-if `Y == std::tuple` and `L<Ts...> = ctl::list<T1, T2, T3>` then `result = std::tuple<T2, T3, T1>`
+----
+if 
+    `Y == std::tuple`
+    `L<Ts...> = ctl::list<T1, T2, T3>`
+then 
+    `result = std::tuple<T2, T3, T1>`
+----
 
 Variants:
 
@@ -58,7 +73,13 @@ Usage:
 [source, cpp]
 using result = rotate_left_c<L<Ts...>, _num_>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `_num_ = 1` then `result = L<T2, T3, T1>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+    `_num_ = 1`
+then 
+    `result = L<T2, T3, T1>`
+----
 
 Variants:
 
@@ -73,7 +94,13 @@ Usage:
 [source, cpp]
 using result = rotate_right_c<L<Ts...>, _num_>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `_num_ = 1` then `result = L<T3, T1, T2>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `_num_ = 1`
+then 
+    `result = L<T3, T1, T2>`
+----
 
 Variants:
 
@@ -88,7 +115,16 @@ Usage:
 [source, cpp]
 using result = sort<L<Ts...>>::type
 
-if `L<Ts...> = L<T3, T2, T1>` then `result = L<T1, T2, T3>` when `T1::value <= T2::value <= T3::value`. Logic used here is `Quick sort`.
+----
+if 
+    `L<Ts...> = L<T3, T2, T1>` 
+then 
+    `result = L<T1, T2, T3>` 
+    
+where `T1::value <= T2::value <= T3::value`.
+----
+
+Logic used here is `Quick sort`.
 
 Variants:
 
@@ -106,7 +142,12 @@ Usage:
 [source, cpp]
 using result = ctl::reverse<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = L<T3, T2, T1>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = L<T3, T2, T1>`
+----
 
 Variants:
 
@@ -119,7 +160,14 @@ Usage:
 [source, cpp]
 using result = ctl::replace<L<Ts...>, TR, RW>::type
 
-if `L<Ts...> = L<T1, T2, T3>`, `TR = T2` and `RW = T4` then `result = L<T1, T4, T3>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `TR = T2`
+    `RW = T4`
+then
+    `result = L<T1, T4, T3>`
+----
 
 Variants:
 
@@ -140,7 +188,13 @@ Usage:
 [source, cpp]
 using result = ctl::push_front<L<Ts...>, T>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `L<T4, T5, T6>` then `result = L<T4, T5, T6, T1, T2, T3>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `L<T4, T5, T6>`
+then 
+    `result = L<T4, T5, T6, T1, T2, T3>`
+----
 
 Variants:
 
@@ -153,7 +207,13 @@ Usage:
 [source, cpp]
 using result = ctl::push_back<L<Ts...>, T>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `L<T4, T5, T6>` then `result = L<T1, T2, T3, T4, T5, T6>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `L<T4, T5, T6>`
+then 
+    `result = L<T1, T2, T3, T4, T5, T6>`
+----
 
 Variants:
 
@@ -166,7 +226,13 @@ Usage:
 [source, cpp]
 using result = ctl::append<L<Ts...>, T>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `L<T4, T5, T6>` then `result = L<T1, T2, T3, T4, T5, T6>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `T = `L<T4, T5, T6>`
+then 
+    `result = L<T1, T2, T3, T4, T5, T6>`
+----
 
 Variants:
 
@@ -179,7 +245,13 @@ Usage:
 [source, cpp]
 using result = ctl::pop_front<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = L<T2, T3>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = L<T2, T3>`
+----
+
 if list provided is empty, then it will result in error
 
 Variants:
@@ -193,7 +265,12 @@ Usage:
 [source, cpp]
 using result = ctl::pop_back<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = L<T1, T2>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = L<T1, T2>`
+----
 
 Variants:
 
@@ -206,7 +283,15 @@ Usage:
 [source, cpp]
 using result = ctl::insert_c<L<Ts...>, _index_, Us...>::type
 
-if `L<Ts...> = L<T1, T2, T3>`, `_index_ = 1` and `Us... = U1, U2, U3`  then `result = L<T1, U1, U2, U3, T2, T3>`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `_index_ = 1`
+    `Us... = U1, U2, U3` 
+then 
+    `result = L<T1, U1, U2, U3, T2, T3>`
+----
+
 if _index_ should be less than size of the `L<Ts...>`. otherwise it will result in compiler error
 
 Variants:
@@ -222,7 +307,14 @@ Usage:
 [source, cpp]
 using result = ctl::repeat_c<L<Ts...>, _count_>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and _count_ = 2 then `result = L<T1, T2, T3, T1, T2, T3>`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    _count_ = 2 
+then
+    `result = L<T1, T2, T3, T1, T2, T3>`
+----
+
 if _count_ == 0, then `result = L<>`
 
 Variants:
@@ -238,7 +330,12 @@ Usage:
 [source, cpp]
 using result = ctl::repeat_c<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = L<>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+then 
+    `result = L<>`
+----
 
 Variants:
 
@@ -251,7 +348,15 @@ Usage:
 [source, cpp]
 using result = ctl::erase_c<L<Ts...>, _pos1_, _pos2_>::type
 
-if `L<Ts...> = L<T1, T2, T3>`, _pos1_ == 0 and _pos2_ == 1 then `result = L<T2, T3>`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    _pos1_ == 0
+    _pos2_ == 1 
+then 
+    `result = L<T2, T3>`
+----
+
 if condition _pos1_ < `L<Ts...>` <= _pos2_ fails, then results in compiler error.
 
 Variants:
@@ -267,7 +372,13 @@ Usage:
 [source, cpp]
 using result = ctl::remove_type<L<Ts...>, U>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `U = T2` then `result = L<T1, T2>`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `U = T2`
+then 
+    `result = L<T1, T2>`
+----
 
 Variants:
 
@@ -284,7 +395,17 @@ Usage:
 [source, cpp]
 using result = ctl::filter_if<P, L1, L2, ..., Ln>::type
 
-if `L1<T1, T2, T3>, L2<T4, T5, T6> ... Ln<Tn, Tn+1, Tn+2>` and `P<T2, T5, ..., Tn+1> = true` then `result = L<T2>`.
+----
+if 
+    `L1 = L1<T1, T2, T3>, 
+    `L2 = L2<T4, T5, T6>`
+    ... 
+    `Ln<Tn, Tn+1, Tn+2>`
+
+    `P = P<T2, T5, ..., Tn+1> = true` 
+then 
+    `result = L<T2>`
+----
 
 Variants:
 
@@ -299,7 +420,14 @@ Usage:
 [source, cpp]
 using result = ctl::copy_if<L<Ts...>, P>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `P<T2> = true` then `result = L<T2>`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+
+    `P<T2> = true` 
+then 
+    `result = L<T2>`
+----
 
 Variants:
 
@@ -314,7 +442,14 @@ Usage:
 [source, cpp]
 using result = ctl::drop_c<L<Ts...>, _count_>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and _count_ = 2 then `result = L<T3>`. 
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+    _count_ = 2 
+then 
+    `result = L<T3>`
+----
+
 if _count_ >= `L<Ts...>` size, then `result = L<>`
 
 Variants:
@@ -330,7 +465,13 @@ Usage:
 [source, cpp]
 using result = ctl::remove_duplicates<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T1, T2>` and _count_ = 2 then `result = L<T1, T2>`. 
+----
+if 
+    `L<Ts...> = L<T1, T1, T2>`
+    _count_ = 2
+then 
+    `result = L<T1, T2>`
+----
 
 Variants:
 
@@ -343,7 +484,13 @@ Usage:
 [source, cpp]
 using result = ctl::unique<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T1, T2>` and _count_ = 2 then `result = L<T1, T2>`. 
+----
+if 
+    `L<Ts...> = L<T1, T1, T2>`
+    _count_ = 2 
+then 
+    `result = L<T1, T2>`
+----
 
 Variants:
 
@@ -356,7 +503,13 @@ Usage:
 [source, cpp]
 using result = ctl::unique_if<L<Ts...>, P>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `P<T> = T2` then `result = L<T1, T2>`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `P<T> = T2`
+then 
+    `result = L<T1, T2>`
+----
 
 Variants:
 
@@ -371,7 +524,16 @@ Usage:
 [source, cpp]
 using result = ctl::transform<F, L1, L2, ..., Ln>::type
 
-if `L1<T1, T2, T3>, L2<T4, T5, T6> ... Ln<Tn, Tn+1, Tn+2>` then `result = L<F<T1, T4, ..., Tn>, F<T2, T5, ..., Tn+1>, F<T3, T6, ..., Tn+2>>`. F is templated type.
+----
+if 
+    `L1 = L1<T1, T2, T3>
+    `L2 = L2<T4, T5, T6> `
+    ... 
+    `Ln<Tn, Tn+1, Tn+2>`
+then 
+    `result = L<F<T1, T4, ..., Tn>, F<T2, T5, ..., Tn+1>, F<T3, T6, ..., Tn+2>>`. 
+    where, F is templated type.
+----
 
 Variants:
 
@@ -396,8 +558,10 @@ where,
 
 * _ algo name _ => name of the accessor algorithms listed below
 * L<Ts...> => list from which one or more type is retrieved
-* P => `predicate/function` which is `applied on each type` to access/retrieve. It is `optional`, not every algorithm needs this parameter
-* `::type` => to access the type from the result. If algorithm name is postfixed with `_t` then there is no need of using `::type`
+* P => `predicate/function` which is `applied on each type` to access/retrieve. 
+It is `optional`, not every algorithm needs this parameter
+* `::type` => to access the type from the result. 
+If algorithm name is postfixed with `_t` then there is no need of using `::type`
 
 Following are some of `accessor` algorithms (replaced with _ algo name _):
 
@@ -407,7 +571,15 @@ Usage:
 [source, cpp]
 using result = ctl::at_c<L<Ts...>, _pos_>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and _pos_ == 2 then `result = T3`. if condition _pos_ < size of `L<Ts...>` then it will result in compiler error
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    _pos_ == 2 
+then 
+    `result = T3`
+----
+
+If condition _pos_ < size of `L<Ts...>` then it will result in compiler error
 
 Variants:
 
@@ -422,7 +594,14 @@ Usage:
 [source, cpp]
 using result = ctl::first<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = T1`. if list provided is empty, then it will result in compiler error
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = T1`
+----
+
+If list provided is empty, then it will result in compiler error
 
 Variants:
 
@@ -435,7 +614,14 @@ Usage:
 [source, cpp]
 using result = ctl::front<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = T1`. if list provided is empty, then it will result in compiler error
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = T1`
+----
+
+If list provided is empty, then it will result in compiler error
 
 Variants:
 
@@ -448,7 +634,15 @@ Usage:
 [source, cpp]
 using result = ctl::last<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = T3`. if list provided is empty, then it will result in compiler error
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = T3`
+----
+
+If list provided is empty, then it will result in compiler error
+
 
 Variants:
 
@@ -461,7 +655,14 @@ Usage:
 [source, cpp]
 using result = ctl::back<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = T3`. if list provided is empty, then it will result in compiler error
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = T3`
+----
+
+If list provided is empty, then it will result in compiler error
 
 Variants:
 
@@ -474,7 +675,15 @@ Usage:
 [source, cpp]
 using result = ctl::head<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = L<T1, T2>`. if list provided is empty, then it will result in compiler error. If there is only one entry in the list, then `result = L<>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = L<T1, T2>`
+----
+
+If list provided is empty, then it will result in compiler error. 
+If there is only one entry in the list, then `result = L<>`
 
 Variants:
 
@@ -487,7 +696,15 @@ Usage:
 [source, cpp]
 using result = ctl::tail<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = L<T2, T3>`. if list provided is empty, then it will result in compiler error. If there is only one entry in the list, then `result = L<>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = L<T2, T3>`
+----
+
+If list provided is empty, then it will result in compiler error.
+If there is only one entry in the list, then `result = L<>`
 
 Variants:
 
@@ -500,7 +717,15 @@ Usage:
 [source, cpp]
 using result = ctl::take<L<Ts...>, _count_>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and _count_ = 2, then `result = L<T1, T2>`. if _count_ >= size of `L<Ts...>` then `result = L<Ts...>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    _count_ = 2, 
+then 
+    `result = L<T1, T2>`
+----
+
+If _count_ >= size of `L<Ts...>` then `result = L<Ts...>`
 
 Variants:
 
@@ -512,7 +737,7 @@ Variants:
 
 === Miscellaneous
 
-Set of algorithms used for miscellaneous stuffs which are not listed above! like ex, creating the integer sequence, getting the position of the type in a list, getting the size of the list, etc.
+Set of algorithms used for miscellaneous stuffs which are not listed above! like for ex, creating the integer sequence, getting the position of the type in a list, getting the size of the list, etc.
 
 Following are some of algorithms:
 
@@ -522,7 +747,12 @@ Usage:
 [source, cpp]
 using result = ctl::size<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = std::integral_constant<uint32_t, 3>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = std::integral_constant<uint32_t, 3>`
+----
 
 Variants:
 
@@ -536,7 +766,12 @@ Usage:
 [source, cpp]
 using result = ctl::count<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = std::integral_constant<uint32_t, 3>`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = std::integral_constant<uint32_t, 3>`
+----
 
 Variants:
 
@@ -556,7 +791,14 @@ Usage:
 [source, cpp]
 using result = ctl::empty<L<Ts...>>::type
 
-if `L<Ts...> = L<T1, T2, T3>` then `result = std::false_type`. if `L<Ts...> = L<>` then `result = std::true_type`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+then 
+    `result = std::false_type`
+----
+
+If `L<Ts...> = L<>` then `result = std::true_type`
 
 Variants:
 
@@ -570,7 +812,15 @@ Usage:
 [source, cpp]
 using result = ctl::contains<L<Ts...>, U>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `U == T2` then `result = std::true_type`. if `U == T4` then `result = std::false_type`
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `U == T2` 
+then 
+    `result = std::true_type`
+----
+
+If `U == T4` then `result = std::false_type`
 
 Variants:
 
@@ -584,7 +834,15 @@ Usage:
 [source, cpp]
 using result = ctl::find<L<Ts...>, U>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `U == T2` then `result = std::integral_constant<uint32_t, 1>`. if `U` is not found in list, then `result` is size of the list
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>` 
+    `U == T2` 
+then 
+    `result = std::integral_constant<uint32_t, 1>`.
+----
+
+If `U` is not found in list, then `result` is size of the list
 
 Variants:
 
@@ -604,7 +862,14 @@ Usage:
 [source, cpp]
 using result = ctl::all_of<L<Ts...>, P>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `P<T> == true` for all T1, T2, T3 types then `result = std::true_type`, otherwise `result = std::false_type`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `P<T> == true` for all T1, T2, T3 types 
+then 
+    `result = std::true_type`, 
+    `result = std::false_type`, if P<T> == false for any one of the types
+----
 
 Variants:
 
@@ -621,7 +886,14 @@ Usage:
 [source, cpp]
 using result = ctl::any_of<L<Ts...>, P>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `P<T> == true` for any T1, T2, T3 types then `result = std::true_type`, otherwise `result = std::false_type`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `P<T> == true` for any T1, T2, T3 types 
+then 
+    `result = std::true_type`, 
+    `result = std::false_type`, if P<T> == false for all types
+----
 
 Variants:
 
@@ -638,7 +910,14 @@ Usage:
 [source, cpp]
 using result = ctl::none_of<L<Ts...>, P>::type
 
-if `L<Ts...> = L<T1, T2, T3>` and `P<T> == false` for all T1, T2, T3 types then `result = std::true_type`, otherwise `result = std::false_type`.
+----
+if 
+    `L<Ts...> = L<T1, T2, T3>`
+    `P<T> == false` for all T1, T2, T3 types 
+then 
+    `result = std::true_type`, 
+    `result = std::false_type`, if P<T> for any one of the types 
+----
 
 Variants:
 
@@ -655,7 +934,13 @@ Usage:
 [source, cpp]
 using result = ctl::from_integer_sequence<sequence, RT>::type
 
-if `sequence = std::integer_sequence<unsigned int, 9, 2, 5>` and `RT == ctl::list` then `result = ctl::list<std::integral_constant<unsigned int, 9>, std::integral_constant<unsigned int, 2>, std::integral_constant<unsigned int, 5> >`
+----
+if 
+    `sequence = std::integer_sequence<unsigned int, 9, 2, 5>`
+    `RT == ctl::list` 
+then 
+    `result = ctl::list<std::integral_constant<unsigned int, 9>, std::integral_constant<unsigned int, 2>, std::integral_constant<unsigned int, 5> >`
+----
 
 `RT` default type is `std::tuple`.
 
@@ -670,7 +955,14 @@ Usage:
 [source, cpp]
 using result = ctl::iota_c<_count_, DT, RT>::type
 
-if _count_ = 3, `DT = uint32_t` and `RT == ctl::list` then `result = ctl::list<std::integral_constant<uint32_t, 0>, std::integral_constant<uint32_t, 1>, std::integral_constant<uint32_t, 2> >`
+----
+if 
+    _count_ = 3, 
+    `DT = uint32_t`
+    `RT == ctl::list` 
+then 
+    `result = ctl::list<std::integral_constant<uint32_t, 0>, std::integral_constant<uint32_t, 1>, std::integral_constant<uint32_t, 2> >`
+----
 
 `DT` default type is `uint32_t`.
 `RT` default type is `std::tuple`.

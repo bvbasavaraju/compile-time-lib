@@ -1,6 +1,7 @@
 = CTL (Compile Time Library)
 
 == Overview
+:hardbreaks-option:
 
 This is a C++ library, created to include algorithms that can be worked out at compile time.
 It uses C++ template meta programming and functional programming techniques to execute many algorithms at compile time on one or more types. 
@@ -16,11 +17,19 @@ Features available to use:
 
 *Note:*
 
-* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. This has been started as re-inventing wheel theory and used personal approach to implement the APIs/Functions that MP11 library supports, many of the algorithms are having the same name as mentioned in library MP11.
+* Container algorithms and utility are influenced by https://www.boost.org/doc/libs/1_80_0/libs/mp11/doc/html/mp11.html#list[Boost::MP11]. 
+This has been started as re-inventing wheel theory and taken personal approach to implement the APIs/Functions that MP11 library supports.
+Many of the algorithms are having the same name as mentioned in library MP11.
+
 * `_t` next to algorithm name is implemented to avoid using `::type` keyword with algorithm
+
 * `_c` next to algorithm name is implemented to take constants which are known at compile time (ex: true/false or numbers)
+
 * `_f` next to algorithm name is implemented to take template types as template parameter
+
 * `_p` next to algorithm name is implemented to take predicate as template parameter (predicate is a template type). It is same as `_f`, but `_p` is used to make it more clear to read
+
 * `_qmf` next to algorithm name is implemented to take Quoted meta functions as template parameter
 **  `_qmf` implementations are using its *non `_qmf`* counterparts
+
 * `_v` next to algorithm name is implemented to get the constant value (boolean or number). it is like using `::value` on the integral_constant type
