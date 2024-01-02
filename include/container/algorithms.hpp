@@ -1675,7 +1675,7 @@ struct flatten {
     };
 
   public:
-    using type = flatten_impl<types>::type;
+    using type = typename flatten_impl<types>::type;
 };
 
 template <typename types, typename flatten_with = clear_t<types>>
