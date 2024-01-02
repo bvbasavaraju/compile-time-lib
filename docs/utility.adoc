@@ -30,9 +30,11 @@ variants of `invert` are:
 
 * `invert_c` 
 * `invert_c_t` => to avoid `::type` 
+* `invert_c_v` => to avoid `::value` 
 * `invert` => to pass typename as template parameter. 
 boolean value is accessed with the help of `C::value`
 * `invert_t` => to avoid `::type` 
+* `invert_v` => to avoid `::value` 
 
 === valid
 
@@ -50,8 +52,10 @@ variants of `valid` are:
 
 * `valid` 
 * `valid_t` => to avoid using `::type` 
+* `valid_v` => to avoid using `::value` 
 * `valid_qmf` => to pass template function as a quoted meta function
 * `valid_qmf_t` => to avoid using `::type`
+* `valid_qmf_v` => to avoid using `::value`
 
 === select
 

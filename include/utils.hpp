@@ -20,11 +20,17 @@ struct invert_c {
 template <bool C>
 using invert_c_t = typename invert_c<C>::type;
 
+template <bool C>
+constexpr static bool invert_c_v = invert_c_t<C>::value;
+
 template <typename C>
 using invert = invert_c<C::value>;
 
 template <typename C>
 using invert_t = typename invert<C>::type;
+
+template <typename C>
+constexpr static bool invert_v = invert_t<C>::value;
 
 // valid
 template <template <typename...> typename F, typename... Ts>
@@ -43,11 +49,17 @@ struct valid {
 template <template <typename...> typename F, typename... Ts>
 using valid_t = typename valid<F, Ts...>::type;
 
+template <template <typename...> typename F, typename... Ts>
+constexpr static bool valid_v = valid_t<F, Ts...>::value;
+
 template <typename QMF, typename... Ts>
 using valid_qmf = valid<QMF::template fn, Ts...>;
 
 template <typename QMF, typename... Ts>
 using valid_qmf_t = typename valid_qmf<QMF, Ts...>::type;
+
+template <typename QMF, typename... Ts>
+constexpr static bool valid_qmf_v = valid_qmf_t<QMF, Ts...>::value;
 
 // select
 template <bool C, typename T, typename F>

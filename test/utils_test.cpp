@@ -222,10 +222,20 @@ TEST_F(utils_test, valid) {
     EXPECT_FALSE((ctl::valid_t<member_type, void, int>::value));
     EXPECT_TRUE((ctl::valid_t<member_type, int>::value));
 
+    EXPECT_FALSE((ctl::valid_v<member_type>));
+    EXPECT_FALSE((ctl::valid_v<member_type, void>));
+    EXPECT_FALSE((ctl::valid_v<member_type, void, int>));
+    EXPECT_TRUE((ctl::valid_v<member_type, int>));
+
     EXPECT_FALSE((ctl::valid_qmf_t<quoted_member_type>::value));
     EXPECT_FALSE((ctl::valid_qmf_t<quoted_member_type, void>::value));
     EXPECT_FALSE((ctl::valid_qmf_t<quoted_member_type, void, int>::value));
     EXPECT_TRUE((ctl::valid_qmf_t<quoted_member_type, int>::value));
+
+    EXPECT_FALSE((ctl::valid_qmf_v<quoted_member_type, void>));
+    EXPECT_FALSE((ctl::valid_qmf_v<quoted_member_type>));
+    EXPECT_FALSE((ctl::valid_qmf_v<quoted_member_type, void, int>));
+    EXPECT_TRUE((ctl::valid_qmf_v<quoted_member_type, int>));
 }
 
 TEST_F(utils_test, quote) {
@@ -684,4 +694,13 @@ TEST_F(utils_test, not ) {
 
     EXPECT_TRUE((ctl::invert_c_t<false>::value));
     EXPECT_FALSE((ctl::invert_c_t<true>::value));
+
+    EXPECT_TRUE((ctl::invert_v<std::integral_constant<bool, false>>));
+    EXPECT_FALSE((ctl::invert_v<std::integral_constant<bool, true>>));
+
+    EXPECT_TRUE((ctl::invert_v<std::false_type>));
+    EXPECT_FALSE((ctl::invert_v<std::true_type>));
+
+    EXPECT_TRUE((ctl::invert_c_v<false>));
+    EXPECT_FALSE((ctl::invert_c_v<true>));
 }

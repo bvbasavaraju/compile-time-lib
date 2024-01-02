@@ -4291,3 +4291,142 @@ TEST_F(list_test, sort_qmf_p) {
         EXPECT_FALSE(expect_false);
     }
 }
+
+TEST_F(list_test, is_similar) {
+    using L1 = ctl::list<int, char, float>;
+    using L2 = ctl::list<double>;
+    using L3 = ctl::list<>;
+    using L4 = ctl::list<double, ctl::list<>>;
+    using L5 = ctl::list<double, ctl::list<char>>;
+    
+    EXPECT_TRUE((ctl::is_similar_v<L1, L2>));
+    EXPECT_TRUE((ctl::is_similar_v<L1, L3>));
+    EXPECT_TRUE((ctl::is_similar_v<L1, L4>));
+    EXPECT_TRUE((ctl::is_similar_v<L1, L5>));
+    EXPECT_TRUE((ctl::is_similar_v<L2, L3>));
+    EXPECT_TRUE((ctl::is_similar_v<L2, L4>));
+    EXPECT_TRUE((ctl::is_similar_v<L2, L5>));
+    EXPECT_TRUE((ctl::is_similar_v<L3, L4>));
+    EXPECT_TRUE((ctl::is_similar_v<L3, L5>));
+    EXPECT_TRUE((ctl::is_similar_v<L4, L5>));
+
+    using L6 = std::tuple<int, char, float>;
+    using L7 = std::tuple<double>;
+    using L8 = std::tuple<>;
+    using L9 = std::tuple<double, std::tuple<>>;
+    using L10 = std::tuple<double, std::tuple<char>>;
+    using L11 = std::tuple<double, ctl::list<char>>;
+
+    EXPECT_TRUE((ctl::is_similar_v<L6, L7>));
+    EXPECT_TRUE((ctl::is_similar_v<L6, L8>));
+    EXPECT_TRUE((ctl::is_similar_v<L6, L9>));
+    EXPECT_TRUE((ctl::is_similar_v<L6, L10>));
+    EXPECT_TRUE((ctl::is_similar_v<L6, L11>));
+    EXPECT_TRUE((ctl::is_similar_v<L7, L8>));
+    EXPECT_TRUE((ctl::is_similar_v<L7, L9>));
+    EXPECT_TRUE((ctl::is_similar_v<L7, L10>));
+    EXPECT_TRUE((ctl::is_similar_v<L7, L11>));
+    EXPECT_TRUE((ctl::is_similar_v<L8, L9>));
+    EXPECT_TRUE((ctl::is_similar_v<L8, L10>));
+    EXPECT_TRUE((ctl::is_similar_v<L8, L11>));
+    EXPECT_TRUE((ctl::is_similar_v<L9, L10>));
+    EXPECT_TRUE((ctl::is_similar_v<L9, L11>));
+    EXPECT_TRUE((ctl::is_similar_v<L10, L11>));
+
+    EXPECT_FALSE((ctl::is_similar_v<L1, L6>));
+    EXPECT_FALSE((ctl::is_similar_v<L1, L7>));
+    EXPECT_FALSE((ctl::is_similar_v<L1, L8>));
+    EXPECT_FALSE((ctl::is_similar_v<L1, L9>));
+    EXPECT_FALSE((ctl::is_similar_v<L1, L10>));
+    EXPECT_FALSE((ctl::is_similar_v<L1, L11>));
+    EXPECT_FALSE((ctl::is_similar_v<L2, L6>));
+    EXPECT_FALSE((ctl::is_similar_v<L2, L7>));
+    EXPECT_FALSE((ctl::is_similar_v<L2, L8>));
+    EXPECT_FALSE((ctl::is_similar_v<L2, L9>));
+    EXPECT_FALSE((ctl::is_similar_v<L2, L10>));
+    EXPECT_FALSE((ctl::is_similar_v<L2, L11>));
+    EXPECT_FALSE((ctl::is_similar_v<L3, L6>));
+    EXPECT_FALSE((ctl::is_similar_v<L3, L7>));
+    EXPECT_FALSE((ctl::is_similar_v<L3, L8>));
+    EXPECT_FALSE((ctl::is_similar_v<L3, L9>));
+    EXPECT_FALSE((ctl::is_similar_v<L3, L10>));
+    EXPECT_FALSE((ctl::is_similar_v<L3, L11>));
+    EXPECT_FALSE((ctl::is_similar_v<L4, L6>));
+    EXPECT_FALSE((ctl::is_similar_v<L4, L7>));
+    EXPECT_FALSE((ctl::is_similar_v<L4, L8>));
+    EXPECT_FALSE((ctl::is_similar_v<L4, L9>));
+    EXPECT_FALSE((ctl::is_similar_v<L4, L10>));
+    EXPECT_FALSE((ctl::is_similar_v<L4, L11>));
+    EXPECT_FALSE((ctl::is_similar_v<L5, L6>));
+    EXPECT_FALSE((ctl::is_similar_v<L5, L7>));
+    EXPECT_FALSE((ctl::is_similar_v<L5, L8>));
+    EXPECT_FALSE((ctl::is_similar_v<L5, L9>));
+    EXPECT_FALSE((ctl::is_similar_v<L5, L10>));
+    EXPECT_FALSE((ctl::is_similar_v<L5, L11>));
+}
+
+TEST_F(list_test, flatten) {
+    // {
+    //     using list = ctl::list<ctl::list<int>>;
+
+    //     // ctl::debug::show_type<ctl::flatten<list, std::tuple<>>::req>();
+    //     EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, ctl::list<int>>));
+    //     // EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    // }
+    {
+        using list = ctl::list<double, ctl::list<>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, ctl::list<double>>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    }
+
+    {
+        using list = ctl::list<double, ctl::list<char>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, ctl::list<double, char>>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    }
+
+    {
+        using list = std::tuple<double, std::tuple<>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, std::tuple<double>>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    }
+
+    {
+        using list = std::tuple<double, std::tuple<char>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, std::tuple<double, char>>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    }
+
+    {
+        using list = std::tuple<double, ctl::list<char>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, list>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, std::tuple<double, char>>));
+    }
+
+    {
+        using list = std::tuple<int, std::tuple<>, void, std::tuple<float, double>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, std::tuple<int, void, float, double>>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    }
+
+    {
+        using list = ctl::list<int, ctl::list<float>, std::tuple<void>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, ctl::list<int, float, std::tuple<void>>>));
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list, std::tuple<>>, ctl::list<int, ctl::list<float>, void>>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    }
+
+    {
+        using list = ctl::list<ctl::list<float>, ctl::list<ctl::list<void>>>;
+
+        EXPECT_TRUE((std::is_same_v<ctl::flatten_t<list>, ctl::list<float, ctl::list<void>>>));
+        EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
+    }
+}
