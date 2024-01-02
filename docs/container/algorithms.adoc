@@ -546,6 +546,27 @@ Variants:
 * `transform_if_qmf` => when `F` and predicate provided as quoted meta function
 * `transform_if_qmf_t` => to avoid `::type`
 
+==== flatten
+
+Usage:
+[source, cpp]
+using result = ctl::flatten<L1, L2=clear_t<L1>>::type
+
+----
+if 
+    `L1 = L1<T1, T2, std::tuple<T3>>
+    `L2 = std::tuple<>`
+then 
+    `result = L1<T1, T2, T3>
+----
+
+`L2` is `optional`. If `L2` is not provided, then `L2` will be assumed as `L1<>`
+
+Variants:
+
+* `flatten`
+* `flatten_t` => to avoid `::type`
+
 === Accessors
 
 Set of algorithms are used to retrieve the one or more types from the `original list`. In some case `conditional retrieval` is possible. *These algorithms will result in compiler error if the provided `list` is empty*. 
@@ -971,3 +992,23 @@ then
 * `iota_c_t` => to avoid `::type`
 * `iota` => when _count_ is provided as type. `::type` is needed to access the result type
 * `iota_t` => to avoid `::type`
+
+==== is_similar
+
+Usage:
+[source, cpp]
+using result = ctl::is_similar<T1, T2>::type
+
+----
+if 
+    T1 = std::tuple<Ts...>, 
+    T2 = std::tuple<Us...>
+then 
+    `result = std::integral_constant<bool, true>
+----
+
+if T1 or T2 are not similar list, then result will be false type
+
+* `is_similar`
+* `is_similar_t` => to avoid `::type`
+* `is_similar_v` => to avoid `::value`

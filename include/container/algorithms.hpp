@@ -1594,4 +1594,91 @@ using sort_qmf_p = sort_p<types, QMF::template fn>;
 template <typename types, typename QMF>
 using sort_qmf_p_t = typename sort_qmf_p<types, QMF>::type;
 
+//similar
+template <typename T1, typename T2>
+struct is_similar {
+  private:
+    template <typename U1, typename U2>
+    struct is_similar_impl : public std::false_type {};
+
+    template <template <typename...> typename L>
+    struct is_similar_impl<L<>, L<>> : public std::true_type {};
+
+    template <template <typename...> typename L, typename T, typename U>
+    struct is_similar_impl<L<T>, L<U>> : public std::true_type {};
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct is_similar_impl<L<Ts...>, L<>> : public std::true_type {};
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct is_similar_impl<L<>, L<Ts...>> : public std::true_type {};
+
+    template <template <typename...> typename L, typename ...Ts, typename ...Us>
+    struct is_similar_impl<L<Ts...>, L<Us...>> : public std::true_type {};
+
+  public:
+    using type = std::integral_constant<bool, is_similar_impl<T1, T2>::value>;
+};
+
+template <typename T1, typename T2>
+using is_similar_t = typename is_similar<T1, T2>::type;
+
+template <typename T1, typename T2>
+constexpr static bool is_similar_v = is_similar_t<T1, T2>::value;
+
+//  flatten
+template <typename types, typename flatten_with = clear_t<types>>
+struct flatten {
+  private:
+    template <typename P, typename L, typename T>
+    struct merge_if_similar;
+
+    template <template <typename...> typename P, template <typename...> typename L>
+    struct merge_if_similar<P<>, L<>, L<>> {
+        using type = P<>;
+    };
+
+    template <template <typename...> typename P, template <typename...> typename L, typename T>
+    struct merge_if_similar<P<>, L<>, L<T>> {
+        using type = P<T>;
+    };
+
+    template <template <typename...> typename P, template <typename...> typename L, typename ...Ts>
+    struct merge_if_similar<P<>, L<>, L<Ts...>> {
+        using type = P<Ts...>;
+    };
+
+    template <template <typename...> typename P, template <typename...> typename L, typename T>
+    struct merge_if_similar<P<>, L<>, T> {
+        using type = P<T>;
+    };
+
+    template <typename L>
+    struct flatten_impl;
+
+    template <template <typename...> typename L>
+    struct flatten_impl<L<>> {
+        using type = L<>;
+    };
+
+    template <template <typename...> typename L, typename T>
+    struct flatten_impl<L<T>> {
+        using type = typename merge_if_similar<L<>, flatten_with, T>::type;
+    };
+
+    template <template <typename...> typename L, typename T, typename ...Ts>
+    struct flatten_impl<L<T, Ts...>> {
+        using first = typename merge_if_similar<L<>, flatten_with, T>::type;
+        using rest = typename flatten_impl<L<Ts...>>::type;
+
+        using type = push_back_t<first, rest>;
+    };
+
+  public:
+    using type = typename flatten_impl<types>::type;
+};
+
+template <typename types, typename flatten_with = clear_t<types>>
+using flatten_t = typename flatten<types, flatten_with>::type;
+
 }  // namespace ctl
