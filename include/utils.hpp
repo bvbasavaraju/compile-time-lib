@@ -43,7 +43,7 @@ struct valid {
     struct helper<T, std::void_t<typename T::type>> : public std::true_type {};
 
   public:
-    using type = std::integral_constant<bool, helper<F<Ts...>>::value>;
+    using type = helper<F<Ts...>>;
 };
 
 template <template <typename...> typename F, typename... Ts>

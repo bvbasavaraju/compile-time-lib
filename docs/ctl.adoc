@@ -4,7 +4,7 @@
 :hardbreaks-option:
 
 This is a C++ library, created to include algorithms that can be worked out at compile time.
-It uses C++ template meta programming and functional programming techniques to execute many algorithms at compile time on one or more types. 
+It uses template meta programming and functional programming techniques to execute many algorithms at compile time on one or more types. 
 
 _The more work done at compile time, less time to complete the job at run time!_
 
