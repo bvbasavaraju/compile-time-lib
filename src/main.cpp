@@ -7,25 +7,25 @@ struct super_type {
     auto attendence() const {
         std::cout << "Present" << std::endl;
     }
+    
+    virtual void name() const = 0;
 };
-
 struct type1 : public super_type {
-    auto operator()() {
-        std::cout << "inside type1\n";
+    void name() const {
+        std::cout << "type1: ";
     }
 
-    auto operator||(auto val) {
-        return val || false;
+    auto operator()() const {
+        return false;
     }
 };
-
 struct type2 : public super_type {
-    auto operator()() {
-        std::cout << "inside type2\n";
+    void name() const {
+        std::cout << "type2: ";
     }
 
-    auto operator||(auto val) {
-        return val || false;
+    auto operator()() const {
+        return true;
     }
 };
 
@@ -50,16 +50,23 @@ int main() {
 
         // with predicate!
         constexpr auto fn = [](auto const& obj) {
+            obj.name();
             obj.attendence();
         };
+
         ctypes_all{}(fn);
 
-        // with operator logical OR
-        if (ctypes_all{} || false) {
-            std::cout << "Operation Logical OR returned true" << std::endl;
-        } else {
-            std::cout << "Operation Logical OR returned false" << std::endl;
-        }
+        // Operator overloading
+        using numList = ctl::clist<std::integral_constant<uint32_t, 1>,std::integral_constant<uint32_t, 2>, std::integral_constant<uint32_t, 3>>;
+        std::cout << "operator|: " << (numList{} | 0) << std::endl;
+        std::cout << "operator&: " << (numList{} & 0xFF) << std::endl;
+        std::cout << "operator^: " << (numList{} ^ 0) << std::endl;
+        std::cout << "operator^: " << (numList{} ^ 0xFF) << std::endl;
+        std::cout << "operator||: " << (ctypes_all{} || false) << std::endl;
+        std::cout << "operator&&: " << (ctypes_all{} && true) << std::endl; 
+        std::cout << "operator+: " << (numList{} + 10) << std::endl;
+        std::cout << "operator-: " << (numList{} - 10) << std::endl;
+        std::cout << "operator*: " << (numList{} * 10) << std::endl;
     }
 
     return 0;
