@@ -15,7 +15,7 @@ struct type1 : public super_type {
         std::cout << "type1: ";
     }
 
-    auto operator()() const {
+    auto operator()() const -> bool {
         return false;
     }
 };
@@ -24,7 +24,7 @@ struct type2 : public super_type {
         std::cout << "type2: ";
     }
 
-    auto operator()() const {
+    auto operator()() const -> bool {
         return true;
     }
 };
