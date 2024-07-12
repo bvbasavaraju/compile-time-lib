@@ -76,6 +76,18 @@ struct quoted_pred_type {
     using fn = predicate_type<T>;
 };
 
+struct callable_type {
+    constexpr auto operator()(){
+        // nothing to do!
+    };
+};
+
+struct not_callable_type {};
+
+void fun() {
+    //nothing to do!
+}
+
 // Tests
 TEST_F(utils_test, select) {
     using list = ctl::list<int, char, double, int>;
@@ -247,442 +259,450 @@ TEST_F(utils_test, quote) {
     }
 
     {// count if check using ctl::quote
-     {using empty_list = ctl::list<>;
-    auto val = ctl::count_if_qmf_t<empty_list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(0, val);
-}
+        {using empty_list = ctl::list<>;
+        auto val = ctl::count_if_qmf_t<empty_list, ctl::quote<pred_int_char>>::value;
+        EXPECT_EQ(0, val);
+        }
 
-{
-    using list = ctl::list<int>;
-    auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(1, val);
-}
+        {
+            using list = ctl::list<int>;
+            auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(1, val);
+        }
 
-{
-    using list = ctl::list<int, char>;
-    auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(2, val);
-}
+        {
+            using list = ctl::list<int, char>;
+            auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(2, val);
+        }
 
-{
-    using list = ctl::list<int, char, double, int>;
-    auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(3, val);
-}
+        {
+            using list = ctl::list<int, char, double, int>;
+            auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(3, val);
+        }
 
-{
-    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(8, val);
-}
-}
-
-{// find if check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-EXPECT_EQ(pos, 0);
-}
-
-{
-    using list = ctl::list<double, char, int, int>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(pos, 1);
-}
-
-{
-    using list = ctl::list<double, float, float, char>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(pos, 3);
-}
-
-{
-    using list = ctl::list<double, float, char, int, char>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(pos, 2);
-}
-
-{
-    using list = ctl::list<int>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(pos, 0);
-}
-
-{
-    using list = ctl::list<float>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(pos, 1);
-}
-
-{
-    using list = ctl::list<float, double, float, float>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(pos, 4);
-}
-
-{
-    using list = ctl::list<>;
-    constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_EQ(pos, 0);
-}
-}
-
-{// all of check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<char, int>;
-    constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<char>;
-    constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<int>;
-    constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<float>;
-    constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<>;
-    constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-}
-
-{// any of check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<char, int>;
-    constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<char>;
-    constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<int>;
-    constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<float>;
-    constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<>;
-    constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_FALSE(result);
-}
-}
-
-{// none of check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<char, int, int>;
-    constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<char, int>;
-    constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<char>;
-    constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<int>;
-    constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_FALSE(result);
-}
-
-{
-    using list = ctl::list<float>;
-    constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-
-{
-    using list = ctl::list<>;
-    constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
-    EXPECT_TRUE(result);
-}
-}
-
-{  // select check using ctl::quote
-    using list = ctl::list<int, char, double, int>;
-
-    {
-        constexpr auto expect_true =
-            std::is_same_v<ctl::select_qmf_c_t<true, list, ctl::quote<member_type>, float, double>,
-                           list>;
-        EXPECT_TRUE(expect_true);
-
-        constexpr auto expect_false =
-            std::is_same_v<ctl::select_qmf_c_t<true, list, ctl::quote<member_type>, float, double>,
-                           member_type<float, double>>;
-        EXPECT_FALSE(expect_false);
+        {
+            using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+            auto val = ctl::count_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(8, val);
+        }
     }
 
-    {
-        constexpr auto expect_true =
-            std::is_same_v<ctl::select_qmf_c_t<false, list, ctl::quote<member_type>, float, double>,
-                           member_type<float, double>>;
-        EXPECT_TRUE(expect_true);
+    {// find if check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 0);
+        }
 
-        constexpr auto expect_false =
-            std::is_same_v<ctl::select_qmf_c_t<false, list, ctl::quote<member_type>, float, double>,
-                           list>;
-        EXPECT_FALSE(expect_false);
+        {
+            using list = ctl::list<double, char, int, int>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 1);
+        }
+
+        {
+            using list = ctl::list<double, float, float, char>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 3);
+        }
+
+        {
+            using list = ctl::list<double, float, char, int, char>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 2);
+        }
+
+        {
+            using list = ctl::list<int>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 0);
+        }
+
+        {
+            using list = ctl::list<float>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 1);
+        }
+
+        {
+            using list = ctl::list<float, double, float, float>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 4);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto pos = ctl::find_if_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_EQ(pos, 0);
+        }
     }
 
-    {
-        constexpr auto expect_true = std::is_same_v<
-            ctl::select_qmf_t<std::true_type, list, ctl::quote<member_type>, float, double>, list>;
-        EXPECT_TRUE(expect_true);
+    {// all of check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
 
-        constexpr auto expect_false = std::is_same_v<
-            ctl::select_qmf_t<std::true_type, list, ctl::quote<member_type>, float, double>,
-            member_type<float, double>>;
-        EXPECT_FALSE(expect_false);
+        {
+            using list = ctl::list<char, int, int>;
+            constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<char, int>;
+            constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<char>;
+            constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<int>;
+            constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<float>;
+            constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto result = ctl::all_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
     }
 
-    {
-        constexpr auto expect_true = std::is_same_v<
-            ctl::select_qmf_t<std::false_type, list, ctl::quote<member_type>, float, double>,
-            member_type<float, double>>;
-        EXPECT_TRUE(expect_true);
+    {// any of check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
 
-        constexpr auto expect_false = std::is_same_v<
-            ctl::select_qmf_t<std::false_type, list, ctl::quote<member_type>, float, double>, list>;
-        EXPECT_FALSE(expect_false);
+        {
+            using list = ctl::list<char, int, int>;
+            constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<char, int>;
+            constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<char>;
+            constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<int>;
+            constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+
+        {
+            using list = ctl::list<float>;
+            constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto result = ctl::any_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
     }
-}
 
-{// filter check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>,
-                                            ctl::list<int, char, int>>;
-EXPECT_TRUE(expect_true);
+    {// none of check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
 
-constexpr auto expect_false =
-    std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, list>;
-EXPECT_FALSE(expect_false);
-}
+        {
+            using list = ctl::list<char, int, int>;
+            constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
 
-{
-    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true =
-        std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>,
-                       ctl::list<char, int, char, int, int, char, int, int>>;
-    EXPECT_TRUE(expect_true);
+        {
+            using list = ctl::list<char, int>;
+            constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
 
-    constexpr auto expect_false =
-        std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, list>;
-    EXPECT_FALSE(expect_false);
-}
+        {
+            using list = ctl::list<char>;
+            constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
 
-{
-    using list = ctl::list<>;
-    constexpr auto expect_true =
-        std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<>>;
-    EXPECT_TRUE(expect_true);
+        {
+            using list = ctl::list<int>;
+            constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_FALSE(result);
+        }
 
-    constexpr auto expect_false =
-        std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<char>>;
-    EXPECT_FALSE(expect_false);
-}
-}
+        {
+            using list = ctl::list<float>;
+            constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
 
-{// replace if check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto expect_true =
-    std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>,
-                   ctl::list<float, float, double, float>>;
-EXPECT_TRUE(expect_true);
+        {
+            using list = ctl::list<>;
+            constexpr auto result = ctl::none_of_qmf_t<list, ctl::quote<pred_int_char>>::value;
+            EXPECT_TRUE(result);
+        }
+    }
 
-constexpr auto expect_false =
-    std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>, list>;
-EXPECT_FALSE(expect_false);
-}
-
-{
-    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true = std::is_same_v<
-        ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>,
-        ctl::list<float, float, float, float, double, float, float, float, double, float, double>>;
-    EXPECT_TRUE(expect_true);
-
-    constexpr auto expect_false =
-        std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>, list>;
-    EXPECT_FALSE(expect_false);
-}
-
-{
-    using list = ctl::list<>;
-    constexpr auto expect_true =
-        std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>, ctl::list<>>;
-    EXPECT_TRUE(expect_true);
-
-    constexpr auto expect_false =
-        std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>,
-                       ctl::list<char>>;
-    EXPECT_FALSE(expect_false);
-}
-}
-
-{// copy if check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto expect_true =
-    std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<int, char, int>>;
-EXPECT_TRUE(expect_true);
-
-constexpr auto expect_false =
-    std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
-EXPECT_FALSE(expect_false);
-}
-
-{
-    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true =
-        std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>,
-                       ctl::list<char, int, char, int, int, char, int, int>>;
-    EXPECT_TRUE(expect_true);
-
-    constexpr auto expect_false =
-        std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
-    EXPECT_FALSE(expect_false);
-}
-
-{
-    using list = ctl::list<>;
-    constexpr auto expect_true =
-        std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<>>;
-    EXPECT_TRUE(expect_true);
-
-    constexpr auto expect_false =
-        std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char>>;
-    EXPECT_FALSE(expect_false);
-}
-}
-
-{// remove if check using ctl::quote
- {using list = ctl::list<int, char, double, int>;
-constexpr auto expect_true =
-    std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<double>>;
-EXPECT_TRUE(expect_true);
-
-constexpr auto expect_false =
-    std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
-EXPECT_FALSE(expect_false);
-}
-
-{
-    using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-    constexpr auto expect_true =
-        std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>,
-                       ctl::list<double, double, double>>;
-    EXPECT_TRUE(expect_true);
-
-    constexpr auto expect_false =
-        std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
-    EXPECT_FALSE(expect_false);
-}
-
-{
-    using list = ctl::list<>;
-    constexpr auto expect_true =
-        std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<>>;
-    EXPECT_TRUE(expect_true);
-
-    constexpr auto expect_false =
-        std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char>>;
-    EXPECT_FALSE(expect_false);
-}
-}
-
-{  // unique if check using ctl::quote
-    {
+    {  // select check using ctl::quote
         using list = ctl::list<int, char, double, int>;
-        constexpr auto expect_true =
-            std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>,
-                           ctl::list<double>>;
-        EXPECT_TRUE(expect_true);
 
-        constexpr auto expect_false =
-            std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
-        EXPECT_FALSE(expect_false);
+        {
+            constexpr auto expect_true =
+                std::is_same_v<ctl::select_qmf_c_t<true, list, ctl::quote<member_type>, float, double>,
+                            list>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::select_qmf_c_t<true, list, ctl::quote<member_type>, float, double>,
+                            member_type<float, double>>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            constexpr auto expect_true =
+                std::is_same_v<ctl::select_qmf_c_t<false, list, ctl::quote<member_type>, float, double>,
+                            member_type<float, double>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::select_qmf_c_t<false, list, ctl::quote<member_type>, float, double>,
+                            list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            constexpr auto expect_true = std::is_same_v<
+                ctl::select_qmf_t<std::true_type, list, ctl::quote<member_type>, float, double>, list>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false = std::is_same_v<
+                ctl::select_qmf_t<std::true_type, list, ctl::quote<member_type>, float, double>,
+                member_type<float, double>>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            constexpr auto expect_true = std::is_same_v<
+                ctl::select_qmf_t<std::false_type, list, ctl::quote<member_type>, float, double>,
+                member_type<float, double>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false = std::is_same_v<
+                ctl::select_qmf_t<std::false_type, list, ctl::quote<member_type>, float, double>, list>;
+            EXPECT_FALSE(expect_false);
+        }
     }
 
-    {
-        using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
-        constexpr auto expect_true =
-            std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>,
-                           ctl::list<double, double, double>>;
-        EXPECT_TRUE(expect_true);
+    {// filter check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto expect_true = std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>,
+                                                        ctl::list<int, char, int>>;
+            EXPECT_TRUE(expect_true);
 
-        constexpr auto expect_false =
-            std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
-        EXPECT_FALSE(expect_false);
+            constexpr auto expect_false =
+                std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>,
+                            ctl::list<char, int, char, int, int, char, int, int>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::filter_if_qmf_t<ctl::quote<pred_int_char>, list>, ctl::list<char>>;
+            EXPECT_FALSE(expect_false);
+        }
     }
 
-    {
-        using list = ctl::list<>;
-        constexpr auto expect_true =
-            std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<>>;
-        EXPECT_TRUE(expect_true);
+    {// replace if check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>,
+                            ctl::list<float, float, double, float>>;
+            EXPECT_TRUE(expect_true);
 
-        constexpr auto expect_false =
-            std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char>>;
-        EXPECT_FALSE(expect_false);
+            constexpr auto expect_false =
+                std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+            constexpr auto expect_true = std::is_same_v<
+                ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>,
+                ctl::list<float, float, float, float, double, float, float, float, double, float, double>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>, ctl::list<>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::replace_if_qmf_t<list, ctl::quote<pred_int_char>, float>,
+                            ctl::list<char>>;
+            EXPECT_FALSE(expect_false);
+        }
     }
-}
+
+    {// copy if check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<int, char, int>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>,
+                            ctl::list<char, int, char, int, int, char, int, int>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::copy_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char>>;
+            EXPECT_FALSE(expect_false);
+        }
+    }
+
+    {// remove if check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<double>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>,
+                            ctl::list<double, double, double>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::remove_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char>>;
+            EXPECT_FALSE(expect_false);
+        }
+    }
+
+    {  // unique if check using ctl::quote
+        {
+            using list = ctl::list<int, char, double, int>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>,
+                            ctl::list<double>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<char, int, char, int, double, int, char, int, double, int, double>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>,
+                            ctl::list<double, double, double>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, list>;
+            EXPECT_FALSE(expect_false);
+        }
+
+        {
+            using list = ctl::list<>;
+            constexpr auto expect_true =
+                std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<>>;
+            EXPECT_TRUE(expect_true);
+
+            constexpr auto expect_false =
+                std::is_same_v<ctl::unique_if_qmf_t<list, ctl::quote<pred_int_char>>, ctl::list<char>>;
+            EXPECT_FALSE(expect_false);
+        }
+    }
 }
 
 TEST_F(utils_test, not ) {
@@ -703,4 +723,18 @@ TEST_F(utils_test, not ) {
 
     EXPECT_TRUE((ctl::invert_c_v<false>));
     EXPECT_FALSE((ctl::invert_c_v<true>));
+}
+
+TEST_F(utils_test, is_function) {
+    EXPECT_FALSE(ctl::is_function_v<callable_type>);
+    EXPECT_FALSE(ctl::is_function_v<not_callable_type>);
+    EXPECT_FALSE(ctl::is_function_v<int>);
+    EXPECT_TRUE(ctl::is_function_v<decltype(fun)>);
+}
+
+TEST_F(utils_test, is_invocable) {
+    EXPECT_TRUE(ctl::is_invocable_v<callable_type>);
+    EXPECT_FALSE(ctl::is_invocable_v<not_callable_type>);
+    EXPECT_FALSE(ctl::is_invocable_v<int>);
+    EXPECT_TRUE(ctl::is_invocable_v<decltype(fun)>);
 }

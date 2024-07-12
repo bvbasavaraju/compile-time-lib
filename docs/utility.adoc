@@ -94,3 +94,41 @@ using select_f_c_t {
 * `select_qmf_c_t` => to avoid `::type`
 * `select_qmf` => when `false` type is captured with quoted meta function, and condition is a type
 * `select_qmf_t` => to avoid `::type`
+
+=== is_function
+
+This will check if the provided type is a function or not.
+
+[source, cpp]
+template <typename T>
+struct is_function {
+  ...
+};
+
+If the provided type is not a reference and adding const to type will not result in the const, then it is considered as function.
+
+variants of `is_function` are:
+
+* `is_function_t` => to avoid using `::type`
+* `is_function_v` => to avoid using `::value`
+
+=== is_invocable
+
+This will check if the provided type is a `function` OR a class which implements `operator()`
+
+[source, cpp]
+template <typename T>
+struct is_invocable {
+  ...
+};
+
+It makes use of the https://en.wikibooks.org/wiki/More_C++_Idioms/Member_Detector[CPP member detection idiom] technique.
+
+If the provided T is a function, then it will result in `std::true_type`
+If the provided T is a class, if it implements `operator()` then it will result in `std::true_type`
+otherwise it will result in `std::false_type`
+
+variants of `is_invocable` are:
+
+* `is_invocable_t` => to avoid using `::type`
+* `is_invocable_v` => to avoid using `::value`

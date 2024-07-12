@@ -126,4 +126,59 @@ using select_qmf = select_f<C, T, QMF::template fn, Ts...>;
 template <typename C, typename T, typename QMF, typename... Ts>
 using select_qmf_t = typename select_qmf<C, T, QMF, Ts...>::type;
 
+// is_function
+template <typename T>
+struct is_function {
+  private:
+    struct is_function_impl {
+        constexpr static bool value = !std::is_reference_v<T> && !std::is_const_v<std::add_const_t<T>>;
+    };
+
+  public:
+    using type = std::integral_constant<bool, is_function_impl::value>;
+};
+
+template <typename T>
+using is_function_t = typename is_function<T>::type;
+
+template <typename T>
+constexpr static auto is_function_v = is_function_t<T>::value;
+
+// is invocable
+/*
+    using member detection idiom:
+    https://en.wikibooks.org/wiki/More_C++_Idioms/Member_Detector
+*/
+template <typename T>
+struct is_invocable {
+  private:
+    // member detection idiom. member to detect here is 'operator()'
+    struct call_operator {
+        auto operator()() -> void {};
+    };
+
+    template <typename F, bool> 
+    struct derived : call_operator {};
+
+    template <typename F>
+    struct derived <F, true> : F, call_operator {};
+
+    //invocable impl
+    //if T also has operator() defined, then there will be ambiguity in the std::void_t<> will be ill-formed, so only true_type is accepted.
+    template <typename, typename = void>
+    struct is_invocable_impl : public std::true_type {};
+
+    template <typename U>
+    struct is_invocable_impl<U, std::void_t< decltype(& derived<U, std::is_class_v<U>>::operator()) > > : public std::false_type {};
+
+  public:
+    using type = std::integral_constant<bool, is_function_v<T> || is_invocable_impl<T>::value>;
+};
+
+template <typename T>
+using is_invocable_t = typename is_invocable<T>::type;
+
+template <typename T>
+constexpr static auto is_invocable_v = is_invocable_t<T>::value;
+
 }  // namespace ctl
