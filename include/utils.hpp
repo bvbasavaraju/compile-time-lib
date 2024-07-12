@@ -139,7 +139,7 @@ struct is_function {
 };
 
 template <typename T>
-using is_function_t = is_function<T>::type;
+using is_function_t = typename is_function<T>::type;
 
 template <typename T>
 constexpr static auto is_function_v = is_function_t<T>::value;
@@ -176,7 +176,7 @@ struct is_invocable {
 };
 
 template <typename T>
-using is_invocable_t = is_invocable<T>::type;
+using is_invocable_t = typename is_invocable<T>::type;
 
 template <typename T>
 constexpr static auto is_invocable_v = is_invocable_t<T>::value;
