@@ -963,7 +963,7 @@ then
     `result = ctl::list<std::integral_constant<unsigned int, 9>, std::integral_constant<unsigned int, 2>, std::integral_constant<unsigned int, 5> >`
 ----
 
-`RT` default type is `std::tuple`.
+`RT` default type is `ctl::list`.
 
 Variants:
 
@@ -986,7 +986,7 @@ then
 ----
 
 `DT` default type is `uint32_t`.
-`RT` default type is `std::tuple`.
+`RT` default type is `ctl::list`.
 
 * `iota_c`
 * `iota_c_t` => to avoid `::type`
@@ -1012,3 +1012,23 @@ if T1 or T2 are not similar list, then result will be false type
 * `is_similar`
 * `is_similar_t` => to avoid `::type`
 * `is_similar_v` => to avoid `::value`
+
+==== equal
+
+Usage:
+[source, cpp]
+using result = ctl::equal<T1, T2>::type
+
+----
+if 
+    T1 = std::tuple<Ts...>, 
+    T2 = std::tuple<Ts...>
+then 
+    `result = std::integral_constant<bool, true>
+----
+
+if T1 or T2 are not similar list or any entry in the list is not same or list are of different length, then result will be false type
+
+* `equal`
+* `equal_t` => to avoid `::type`
+* `equal_v` => to avoid `::value`

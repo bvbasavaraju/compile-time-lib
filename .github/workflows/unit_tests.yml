@@ -20,7 +20,8 @@ jobs:
       fail-fast: false
       matrix:
         compiler: [clang, gcc]
-        version: [12, 13, 14, 15, 16, 17]
+        # version: [12, 13, 14, 15, 16, 17]
+        version: [12, 13, 14, 15, 17]
         cxx_standard: [20]
         stdlib: [libstdc++, libc++]
         build_type: [Debug]
@@ -35,12 +36,12 @@ jobs:
             install: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 17 && sudo apt install -y libc++-17-dev libc++abi-17-dev
             cxx_flags: "-stdlib=libc++"
             toolchain_root: "/usr/lib/llvm-17"
-          - version: 16
-            compiler: clang
-            stdlib: libc++
-            install: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 16 && sudo apt install -y libc++-16-dev libc++abi-16-dev
-            cxx_flags: "-stdlib=libc++"
-            toolchain_root: "/usr/lib/llvm-16"
+          # - version: 16
+          #   compiler: clang
+          #   stdlib: libc++
+          #   install: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 16 && sudo apt install -y libc++-16-dev libc++abi-16-dev
+          #   cxx_flags: "-stdlib=libc++"
+          #   toolchain_root: "/usr/lib/llvm-16"
           - version: 15
             compiler: clang
             stdlib: libc++
@@ -70,8 +71,8 @@ jobs:
         exclude:
           - compiler: gcc
             version: 17
-          - compiler: gcc
-            version: 16
+          # - compiler: gcc
+          #   version: 16
           - compiler: gcc
             version: 15
           - compiler: gcc

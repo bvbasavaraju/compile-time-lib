@@ -4430,3 +4430,89 @@ TEST_F(list_test, flatten) {
         EXPECT_FALSE((std::is_same_v<ctl::flatten_t<list>, list>));
     }
 }
+
+TEST_F(list_test, equal) {
+    using L1 = ctl::list<int, char, float>;
+    using L1_1 = ctl::list<int, char>;
+    using L2 = ctl::list<double>;
+    using L3 = ctl::list<>;
+    using L4 = ctl::list<double, ctl::list<>>;
+    using L5 = ctl::list<double, ctl::list<char>>;
+    
+    EXPECT_TRUE((ctl::equal_v<L1, L1>));
+    EXPECT_TRUE((ctl::equal_v<L2, L2>));
+    EXPECT_TRUE((ctl::equal_v<L3, L3>));
+    EXPECT_TRUE((ctl::equal_v<L4, L4>));
+    EXPECT_TRUE((ctl::equal_v<L5, L5>));
+    EXPECT_FALSE((ctl::equal_v<L1, L1_1>));
+    EXPECT_FALSE((ctl::equal_v<L1, L2>));
+    EXPECT_FALSE((ctl::equal_v<L1, L3>));
+    EXPECT_FALSE((ctl::equal_v<L1, L4>));
+    EXPECT_FALSE((ctl::equal_v<L1, L5>));
+    EXPECT_FALSE((ctl::equal_v<L2, L3>));
+    EXPECT_FALSE((ctl::equal_v<L2, L4>));
+    EXPECT_FALSE((ctl::equal_v<L2, L5>));
+    EXPECT_FALSE((ctl::equal_v<L3, L4>));
+    EXPECT_FALSE((ctl::equal_v<L3, L5>));
+    EXPECT_FALSE((ctl::equal_v<L4, L5>));
+
+    using L6 = std::tuple<int, char, float>;
+    using L7 = std::tuple<double>;
+    using L8 = std::tuple<>;
+    using L9 = std::tuple<double, std::tuple<>>;
+    using L10 = std::tuple<double, std::tuple<char>>;
+    using L11 = std::tuple<double, ctl::list<char>>;
+
+    EXPECT_TRUE((ctl::equal_v<L6, L6>));
+    EXPECT_TRUE((ctl::equal_v<L7, L7>));
+    EXPECT_TRUE((ctl::equal_v<L8, L8>));
+    EXPECT_TRUE((ctl::equal_v<L9, L9>));
+    EXPECT_TRUE((ctl::equal_v<L10, L10>));
+    EXPECT_TRUE((ctl::equal_v<L11, L11>));
+    EXPECT_FALSE((ctl::equal_v<L6, L7>));
+    EXPECT_FALSE((ctl::equal_v<L6, L8>));
+    EXPECT_FALSE((ctl::equal_v<L6, L9>));
+    EXPECT_FALSE((ctl::equal_v<L6, L10>));
+    EXPECT_FALSE((ctl::equal_v<L6, L11>));
+    EXPECT_FALSE((ctl::equal_v<L7, L8>));
+    EXPECT_FALSE((ctl::equal_v<L7, L9>));
+    EXPECT_FALSE((ctl::equal_v<L7, L10>));
+    EXPECT_FALSE((ctl::equal_v<L7, L11>));
+    EXPECT_FALSE((ctl::equal_v<L8, L9>));
+    EXPECT_FALSE((ctl::equal_v<L8, L10>));
+    EXPECT_FALSE((ctl::equal_v<L8, L11>));
+    EXPECT_FALSE((ctl::equal_v<L9, L10>));
+    EXPECT_FALSE((ctl::equal_v<L9, L11>));
+    EXPECT_FALSE((ctl::equal_v<L10, L11>));
+
+    EXPECT_FALSE((ctl::equal_v<L1, L6>));
+    EXPECT_FALSE((ctl::equal_v<L1, L7>));
+    EXPECT_FALSE((ctl::equal_v<L1, L8>));
+    EXPECT_FALSE((ctl::equal_v<L1, L9>));
+    EXPECT_FALSE((ctl::equal_v<L1, L10>));
+    EXPECT_FALSE((ctl::equal_v<L1, L11>));
+    EXPECT_FALSE((ctl::equal_v<L2, L6>));
+    EXPECT_FALSE((ctl::equal_v<L2, L7>));
+    EXPECT_FALSE((ctl::equal_v<L2, L8>));
+    EXPECT_FALSE((ctl::equal_v<L2, L9>));
+    EXPECT_FALSE((ctl::equal_v<L2, L10>));
+    EXPECT_FALSE((ctl::equal_v<L2, L11>));
+    EXPECT_FALSE((ctl::equal_v<L3, L6>));
+    EXPECT_FALSE((ctl::equal_v<L3, L7>));
+    EXPECT_FALSE((ctl::equal_v<L3, L8>));
+    EXPECT_FALSE((ctl::equal_v<L3, L9>));
+    EXPECT_FALSE((ctl::equal_v<L3, L10>));
+    EXPECT_FALSE((ctl::equal_v<L3, L11>));
+    EXPECT_FALSE((ctl::equal_v<L4, L6>));
+    EXPECT_FALSE((ctl::equal_v<L4, L7>));
+    EXPECT_FALSE((ctl::equal_v<L4, L8>));
+    EXPECT_FALSE((ctl::equal_v<L4, L9>));
+    EXPECT_FALSE((ctl::equal_v<L4, L10>));
+    EXPECT_FALSE((ctl::equal_v<L4, L11>));
+    EXPECT_FALSE((ctl::equal_v<L5, L6>));
+    EXPECT_FALSE((ctl::equal_v<L5, L7>));
+    EXPECT_FALSE((ctl::equal_v<L5, L8>));
+    EXPECT_FALSE((ctl::equal_v<L5, L9>));
+    EXPECT_FALSE((ctl::equal_v<L5, L10>));
+    EXPECT_FALSE((ctl::equal_v<L5, L11>));
+}

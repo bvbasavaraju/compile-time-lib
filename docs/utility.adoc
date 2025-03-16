@@ -36,6 +36,24 @@ boolean value is accessed with the help of `C::value`
 * `invert_t` => to avoid `::type` 
 * `invert_v` => to avoid `::value` 
 
+=== is_same
+
+This helps to Check if the given 2 types are same
+
+[source, cpp]
+template <typename T1, typename T2>
+struct is_same {
+  ...
+};
+
+It results in `std::true_type` if `T1` and `T2` are same. `std::false_type` otherwise.
+
+variants of `is_same` are:
+
+* `is_same` 
+* `is_same_t` => to avoid using `::type` 
+* `is_same_v` => to avoid using `::value`
+
 === valid
 
 This helps to validate if the provided template type is valid or not.
