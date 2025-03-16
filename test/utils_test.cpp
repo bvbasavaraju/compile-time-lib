@@ -228,6 +228,17 @@ TEST_F(utils_test, select_qmf) {
     }
 }
 
+TEST_F(utils_test, is_same) {
+    EXPECT_TRUE((ctl::is_same_v<float, float>));
+    EXPECT_TRUE((ctl::is_same_v<int, int>));
+    EXPECT_TRUE((ctl::is_same_v<double, double>));
+    EXPECT_TRUE((ctl::is_same_v<callable_type, callable_type>));
+    EXPECT_FALSE((ctl::is_same_v<callable_type, int>));
+    EXPECT_FALSE((ctl::is_same_v<float, int>));
+    EXPECT_FALSE((ctl::is_same_v<int, float>));
+    EXPECT_FALSE((ctl::is_same_v<float, double>));
+}
+
 TEST_F(utils_test, valid) {
     EXPECT_FALSE((ctl::valid_t<member_type>::value));
     EXPECT_FALSE((ctl::valid_t<member_type, void>::value));

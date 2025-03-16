@@ -1681,4 +1681,41 @@ struct flatten {
 template <typename types, typename flatten_with = clear_t<types>>
 using flatten_t = typename flatten<types, flatten_with>::type;
 
+// Equal
+template <typename T1, typename T2>
+struct equal {
+  private:
+    template <typename L1, typename L2>
+    struct equal_impl;
+
+    template <template <typename...> typename L1, template <typename...> typename L2, typename ...Ts, typename ...Us>
+    struct equal_impl<L1<Ts...>, L2<Us...>> : std::false_type {};
+
+    template <template <typename...> typename L>
+    struct equal_impl<L<>, L<>> : std::true_type {};
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct equal_impl<L<>, L<Ts...>> : std::false_type {};
+
+    template <template <typename...> typename L, typename ...Ts>
+    struct equal_impl<L<Ts...>, L<>> : std::false_type {};
+
+    template <template <typename...> typename L, typename T, typename U, typename ...Ts, typename ...Us>
+    struct equal_impl<L<T, Ts...>, L<U, Us...>> {
+        constexpr static auto first = is_same_v<T, U>;
+        constexpr static auto rest = equal_impl<L<Ts...>, L<Us...>>::value;
+
+        constexpr static auto value = first && rest;
+    };
+
+  public:
+    using type = std::integral_constant<bool, equal_impl<T1, T2>::value>;
+};
+
+template <typename T1, typename T2>
+using equal_t = typename equal<T1, T2>::type;
+
+template <typename T1, typename T2>
+constexpr static bool equal_v = equal_t<T1, T2>::value;
+
 }  // namespace ctl

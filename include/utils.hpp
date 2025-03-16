@@ -32,6 +32,26 @@ using invert_t = typename invert<C>::type;
 template <typename C>
 constexpr static bool invert_v = invert_t<C>::value;
 
+// same
+template <typename T1, typename T2>
+struct is_same {
+  private:
+    template <typename U1, typename U2>
+    struct is_same_impl : std::false_type{};
+
+    template <typename U>
+    struct is_same_impl<U, U> : std::true_type{};
+
+  public:
+    using type = is_same_impl<T1, T2>;
+};
+
+template <typename T1, typename T2>
+using is_same_t = typename is_same<T1, T2>::type;
+
+template <typename T1, typename T2>
+constexpr static auto is_same_v = is_same_t<T1, T2>::value;
+
 // valid
 template <template <typename...> typename F, typename... Ts>
 struct valid {
