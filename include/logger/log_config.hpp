@@ -12,8 +12,21 @@ struct dispatcher_t {
 
 }   // namespace dummy
 
+namespace log_level {
+
+struct none_t {};
+struct critical_t : none_t {};
+struct error_t : critical_t {};
+struct warning_t : error_t {};
+struct debug_t : warning_t {};
+struct info_t : debug_t {};
+
+}   // log_level
+
 //  Global definition
 template <typename ...>
 inline auto dispatcherConfig = dummy::dispatcher_t{};
+
+using logLevelConfig = log_level::info_t;
 
 }   // namespace ctl

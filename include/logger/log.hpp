@@ -23,7 +23,17 @@ constexpr static auto to_dispatcher(Args&& ...msg) {
     dispConfig.send_log_data(std::forward<Args>(msg)...);
 }
 
-}   // namespace 
+}   // namespace details
 
+// common log define
+#define LOG(logLevel, MSG) []{ \
+    if constexpr (std::is_base_of_v<logLevel, ::ctl::logLevelConfig>) { \
+        details::to_dispatcher(MSG##_log); \
+    } \
+}();
 
-#define LOG(MSG) details::to_dispatcher(MSG##_log);
+#define LOG_INFO(MSG) LOG(::ctl::log_level::info_t, MSG);
+#define LOG_DEBUG(MSG) LOG(::ctl::log_level::debug_t, MSG);
+#define LOG_WARNING(MSG) LOG(::ctl::log_level::warning_t, MSG);
+#define LOG_ERROR(MSG) LOG(::ctl::log_level::error_t, MSG);
+#define LOG_CRITICAL(MSG) LOG(::ctl::log_level::critical_t, MSG);
