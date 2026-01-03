@@ -26,40 +26,31 @@ The logger system works by:
 
 === Components
 
-==== Core Headers
+==== Configuration
+The logger behavior is configured via template specializations. Multiple loggers can be defined by
+specializing template variables in `log_config.hpp` to customize logging behavior.
 
-===== `logger/metadata.hpp`
-
-Contains the fundamental types and templates for the logger system.
-
-[source, cpp]
-----
-// Compile-time string representation using variadic templates
-template <typename T, T... ch>
-struct string_variadic_t;
-
-// Log metadata structure for storing log information
-template <typename T>
-struct log_metadata_t{};
-
-// Token type - unique identifier for each log message
-using log_token_t = std::uint32_t;
-
-// Get the token value for a given log message type
-template <typename T>
-extern auto get_token() -> log_token_t;
-----
-
-===== `logger/log_dispatcher.hpp`
-
-Provides the interface for dispatching log messages.
+All loggers should be move assignable and move constructable and has to implement is following method:
 
 [source, cpp]
 ----
-template <typename T>
-auto log_message(const T& message) {
-    return get_token<T>();
-}
+struct console_logger_t {
+    auto dispatch(std::uint32_t token) -> void {
+        // Handle the log message identified by 'token'
+        // e.g., print the token, broadcast over network, etc.
+    }
+};
+----
+
+All loggers configured with the help of template specialization like below:
+
+[source, cpp]
+----
+// specialize the global dispatcher config variable
+template <> 
+inline auto ctl::dispatcherConfig <> = log_destinations_t<
+    console_logger_t /* Add any other loggers as a comma separated list */
+    >{};
 ----
 
 ==== CMake Build Integration
