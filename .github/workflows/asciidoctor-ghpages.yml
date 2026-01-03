@@ -1,0 +1,46 @@
+name: Publish Ascii Doc
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+    - name: Install asciidoctor
+      run: |
+        sudo apt update
+        sudo apt install -y asciidoctor
+    - name: Build documentation
+      run: |
+        mkdir -p ./generated-html
+        asciidoctor docs/index.adoc -D ./generated-html
+        ls -la ./generated-html
+    - name: Upload artifacts
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./generated-html
+
+  deploy:
+    needs: [build]
+    name: Deploy Documentation
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,343 @@
+
+== Logger
+:hardbreaks-option:
+
+The Logger component provides compile-time logging functionality using template meta-programming.
+It captures log messages as compile-time strings and generates unique tokens for each message at compile time.
+This enables efficient, zero-overhead logging with minimal runtime overhead.
+
+=== Overview
+
+The logger system works by:
+
+1. Creating log messages using `string_variadic_t` - a compile-time string representation
+2. Automatically generating unique token identifiers at compile time via `get_token<T>()`
+3. Capturing undefined symbol information from object files during the build
+4. Generating token-to-message mappings at build time via Python script
+5. Linking the generated token implementations into the final executable
+
+=== Features
+
+* **Compile-Time Message Capture**: Log messages are captured at compile time as template parameters
+* **Zero-Runtime Overhead**: Message content doesn't need to be stored in the executable
+* **Unique Token Generation**: Each unique message gets a deterministic hash-based token ID
+* **Build-Time Source Generation**: The CMake build system automatically generates the required C++ source code
+* **Multiple Output Formats**: Generates C++, JSON, and XML representations of captured tokens
+
+=== Components
+
+==== Configuration
+The logger behavior is configured via template specializations. Multiple loggers can be defined by
+specializing template variables in `log_config.hpp` to customize logging behavior.
+
+All loggers should be move assignable and move constructable and has to implement is following method:
+
+[source, cpp]
+----
+struct console_logger_t {
+    auto dispatch(std::uint32_t token) -> void {
+        // Handle the log message identified by 'token'
+        // e.g., print the token, broadcast over network, etc.
+    }
+};
+----
+
+All loggers configured with the help of template specialization like below:
+
+[source, cpp]
+----
+// specialize the global dispatcher config variable
+template <> 
+inline auto ctl::dispatcherConfig <> = log_destinations_t<
+    console_logger_t /* Add any other loggers as a comma separated list */
+    >{};
+----
+
+==== CMake Build Integration
+
+The logger system integrates with CMake to automatically generate token source files.
+
+===== `cmake/GenerateGetTokenSource.cmake`
+
+A CMake module that handles the automatic generation of token implementations.
+
+**Function**: `extract_symbols_and_generate_source(TARGET_NAME)`
+
+This function orchestrates the entire token generation process:
+
+1. Compiles the target and captures undefined `get_token<T>()` symbols
+2. Parses the demangled symbols to extract template parameters
+3. Decodes compile-time strings from the template parameters
+4. Generates C++ source with template specializations
+5. Produces JSON and XML documentation of all captured tokens
+
+===== Python Script: `scripts/generate_get_token_source.py`
+
+Processes captured undefined symbols and generates the token source files.
+
+*Inputs*:
+* `undefined_symbols_captured.txt` - Demangled undefined symbols from object files
+
+*Outputs*:
+* `log_tokens.cpp` - C++ source with `get_token<T>()` specializations
+* `log_tokens.xml` - XML documentation of all tokens (indented and readable)
+* `log_tokens.json` - JSON representation of all tokens with message strings
+
+*Features*:
+* Extracts ASCII character codes from variadic template parameters
+* Reconstructs original message strings
+* Generates deterministic hash-based token IDs
+* Provides both human-readable and machine-readable output formats
+
+=== Usage
+
+==== Quick Start: Setting up your CMakeLists.txt
+
+To enable automatic token generation in your project, follow these simple steps:
+
+===== Step 1: Include the CMake Module
+
+At the beginning of your `CMakeLists.txt` file, include the logger generation module:
+
+[source, cmake]
+----
+include(${PROJECT_SOURCE_DIR}/cmake/GenerateGetTokenSource.cmake)
+----
+
+===== Step 2: Create Your Executable Target
+
+Define your main executable as usual:
+
+[source, cmake]
+----
+set(MAIN my_app)
+set(SRC_FILES ./main.cpp)
+
+add_executable(${MAIN} ${SRC_FILES})
+target_include_directories(${MAIN} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(${MAIN} PUBLIC ctl)
+----
+
+===== Step 3: Create temporary target to create object files
+For the sources which need to be scanned for get_token<> calls, create an object library first:
+
+[source, cmake]
+----
+set(OBJ_LIB my_app_objlib)
+add_library(${OBJ_LIB} OBJECT ${SRC_FILES})
+target_include_directories(${OBJ_LIB} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+----
+
+===== Step 4: Enable Automatic Token Generation
+
+Call the provided function to automatically handle all token generation:
+
+[source, cmake]
+----
+# Automatically extract symbols and generate log_tokens source
+extract_symbols_and_generate_source(${MAIN} ${OBJ_LIB})
+----
+
+The `extract_symbols_and_generate_source()` function handles everything:
+
+* Extracts undefined `get_token<T>()` symbols from your executable
+* Parses the demangled symbols to extract compile-time strings
+* Generates `log_tokens.cpp` with all required template specializations
+* Creates JSON and XML documentation files
+* Automatically manages all dependencies
+
+===== Step 5: Generating Token Library
+
+Now with the help of source files generated, create a library to link to main project:
+
+[source, cmake]
+----
+set(TOKEN_LIB my_app_token_lib)
+add_library(${TOKEN_LIB} STATIC ${CMAKE_CURRENT_BINARY_DIR}/log_tokens.cpp)
+target_include_directories(${TOKEN_LIB} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+add_dependencies(${TOKEN_LIB} generate_source)
+----
+
+===== Step 6: Link Generated Token Library
+
+Finally, link the generated token library to your main executable:
+
+[source, cmake]
+----
+target_link_libraries(${MAIN} PUBLIC ${TOKEN_LIB})
+----
+
+===== Complete Example
+
+Here's a complete `CMakeLists.txt` example showing all 6 steps:
+
+[source, cmake]
+----
+cmake_minimum_required(VERSION 3.25.1)
+project(MyLoggerApp)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Step 1: Include the logger generation module
+include(${CMAKE_SOURCE_DIR}/cmake/GenerateGetTokenSource.cmake)
+
+# Step 2: Define source files
+set(MAIN my_app)
+set(SRC_FILES src/main.cpp)
+
+# Step 3: Create temporary object library to capture symbols
+set(OBJ_LIB my_app_objlib)
+add_library(${OBJ_LIB} OBJECT ${SRC_FILES})
+target_include_directories(${OBJ_LIB} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+# Step 4: Enable automatic token generation from object files
+extract_symbols_and_generate_source(${MAIN} ${OBJ_LIB})
+
+# Step 5: Create library from generated log_tokens.cpp
+set(TOKEN_LIB my_app_token_lib)
+add_library(${TOKEN_LIB} STATIC ${CMAKE_CURRENT_BINARY_DIR}/log_tokens.cpp)
+target_include_directories(${TOKEN_LIB} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+add_dependencies(${TOKEN_LIB} generate_source)
+
+# Create main executable
+add_executable(${MAIN} ${SRC_FILES})
+target_include_directories(${MAIN} PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(${MAIN} PUBLIC ctl)
+
+# Step 6: Link the generated token library to main executable
+target_link_libraries(${MAIN} PUBLIC ${TOKEN_LIB})
+----
+
+==== Writing Log Messages
+
+Create compile-time string messages and log them:
+
+[source, cpp]
+----
+#include "logger/log_dispatcher.hpp"
+
+struct console_logger_t {
+    auto dispatch(std::uint32_t token) -> void {
+        std::cout << token << std::endl;
+    }
+};  
+
+// specialize the global dispatcher config variable
+template <> 
+inline auto ctl::dispatcherConfig <> = log_destinations_t<console_logger_t>{};
+
+
+int main() {
+    LOG("Hello World");
+    
+    return 0;
+}
+----
+
+==== Generated Output Files
+
+After building, check the build directory for:
+
+===== log_tokens.cpp
+
+The generated C++ source file containing template specializations:
+
+[source, cpp]
+----
+// Auto-generated file - Do not edit manually
+#include <cstdint>
+#include "logger/metadata.hpp"
+
+// Message: "Hello World"
+template <>
+auto get_token<log_metadata_t<string_variadic_t<char, (char)72, (char)101, (char)108, (char)108, (char)111, (char)32, (char)87, (char)111, (char)114, (char)108, (char)100> >>() -> log_token_t {
+    return 2323707410U;
+}
+----
+
+===== log_tokens.json
+
+Machine-readable format with complete token information:
+
+[source, json]
+----
+{
+  "tokens": [
+    {
+      "token": 2323707410,
+      "in-hex": "0x8a80f612",
+      "string": "Hello World"
+    }
+  ]
+}
+----
+
+===== log_tokens.xml
+
+Formatted XML documentation of all tokens:
+
+[source, xml]
+----
+<?xml version='1.0' encoding='utf-8'?>
+<log_tokens>
+  <log_token>
+    <token>2323707410</token>
+    <in-hex>0x8a80f612</in-hex>
+    <string>Hello World</string>
+  </log_token>
+</log_tokens>
+----
+
+=== Build Process Flow
+
+The logger system follows this build process:
+
+1. **Compile Phase**: Your source files are compiled, creating object files with undefined `get_token<T>()` references
+2. **Symbol Extraction**: The `nm` utility extracts demangled symbols from object files
+3. **Symbol Parsing**: The Python script parses the captured symbols and decodes message strings
+4. **Code Generation**: C++ source code is generated with all required template specializations
+5. **Compilation**: The generated `log_tokens.cpp` is compiled into a static library
+6. **Linking**: The token library is linked into the final executable, resolving all undefined symbols
+
+=== Configuration Requirements
+
+- **CMake** >= 3.25.1
+- **Python 3** (for the token generation script)
+- **nm** utility (standard with GNU binutils - used to extract symbols)
+- **C++20** compiler (required for the library features)
+
+=== Future Extensions
+
+The current token capture system is designed to be extensible. Future enhancements could include:
+
+* **Line Number Capture**: Extract source file location information
+* **Log Level Support**: Include log levels (INFO, WARNING, ERROR, DEBUG) in tokens
+* **Context Information**: Capture additional compile-time context
+* **Runtime Token Database**: Automatic generation of a token lookup database
+
+The token structure already supports this through the metadata system and can be extended
+by modifying the `string_variadic_t` template parameters and the extraction logic in the Python script.
+
+=== Troubleshooting
+
+===== Build Fails: "missing and no known rule to make it"
+
+*Cause*: The Python script path is incorrect in CMakeLists.txt
+*Solution*: Verify the `${PROJECT_SOURCE_DIR}/cmake/GenerateGetTokenSource.cmake` module exists and the `scripts/generate_get_token_source.py` path is correct
+
+===== No Tokens Generated
+
+*Cause*: No `get_token<T>()` calls found in the code
+*Solution*: Ensure you have at least one call to `get_token<>()` in your source code
+
+===== Python Script Not Found
+
+*Cause*: Incorrect path to Python or the script
+*Solution*: Ensure `python3` is in your PATH and the script exists at the specified location
+
+===== Function Call Fails: "extract_symbols_and_generate_source not found"
+
+*Cause*: The CMake module was not included before calling the function
+*Solution*: Make sure to call `include(${PROJECT_SOURCE_DIR}/cmake/GenerateGetTokenSource.cmake)` before calling `extract_symbols_and_generate_source()`
+

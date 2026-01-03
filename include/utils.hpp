@@ -1,338 +1,204 @@
 #pragma once
 
+#include <type_traits>
+
 namespace ctl {
 
-// push_front
+// quote
+template <template <typename...> typename F>
+struct quote {
+    template <typename... Ts>
+    using fn = F<Ts...>;
+};
+
+// not
+template <bool C>
+struct invert_c {
+    using type = std::integral_constant<bool, !C>;
+};
+
+template <bool C>
+using invert_c_t = typename invert_c<C>::type;
+
+template <bool C>
+constexpr static bool invert_c_v = invert_c_t<C>::value;
+
+template <typename C>
+using invert = invert_c<C::value>;
+
+template <typename C>
+using invert_t = typename invert<C>::type;
+
+template <typename C>
+constexpr static bool invert_v = invert_t<C>::value;
+
+// same
 template <typename T1, typename T2>
-struct push_front{
+struct is_same {
   private:
-    template <typename L1, typename L2>
-    struct push_front_impl;
+    template <typename U1, typename U2>
+    struct is_same_impl : std::false_type{};
 
-    template <template <typename...> typename L>
-    struct push_front_impl<L<>, L<>> {
-      using type = L<>;
-    };
-
-    template <template <typename...> typename L, typename T>
-    struct push_front_impl<L<>, T> {
-      using type = L<T>;
-    };
-
-    template <template <typename...> typename L, typename T>
-    struct push_front_impl<T, L<>> {
-      using type = L<T>;
-    };
-
-    template <template <typename...> typename L, typename ...T>
-    struct push_front_impl<L<T...>, L<>> {
-      using type = L<T...>;
-    };
-
-    template <template <typename...> typename L, typename ...T>
-    struct push_front_impl<L<>, L<T...>> {
-      using type = L<T...>;
-    };
-
-    template <template <typename...> typename L, typename ...T1s, typename T2_>
-    struct push_front_impl<L<T1s...>, T2_> {
-      using type = L<T2, T1s...>;
-    };
-
-    template <template <typename...> typename L, typename ...T2s, typename T1_>
-    struct push_front_impl<T1_, L<T2s...>> {
-      using type = L<T1_, T2s...>;
-    };
-
-    template <template <typename...> typename L, typename ...T1s, typename ...T2s>
-    struct push_front_impl<L<T1s...>, L<T2s...>> {
-      using type = L<T2s..., T1s...>;
-    };
+    template <typename U>
+    struct is_same_impl<U, U> : std::true_type{};
 
   public:
-    using type = push_front_impl<T1, T2>::type;
+    using type = is_same_impl<T1, T2>;
 };
 
 template <typename T1, typename T2>
-using push_front_t = push_front<T1, T2>::type;
-
-// push_back
-template <typename T1, typename T2>
-struct push_back{
-  private:
-    template <typename L1, typename L2>
-    struct push_back_impl;
-
-    template <template <typename...> typename L>
-    struct push_back_impl<L<>, L<>> {
-      using type = L<>;
-    };
-
-    template <template <typename...> typename L, typename T>
-    struct push_back_impl<L<>, T> {
-      using type = L<T>;
-    };
-
-    template <template <typename...> typename L, typename T>
-    struct push_back_impl<T, L<>> {
-      using type = L<T>;
-    };
-
-    template <template <typename...> typename L, typename ...T>
-    struct push_back_impl<L<T...>, L<>> {
-      using type = L<T...>;
-    };
-
-    template <template <typename...> typename L, typename ...T>
-    struct push_back_impl<L<>, L<T...>> {
-      using type = L<T...>;
-    };
-
-    template <template <typename...> typename L, typename ...T1s, typename T2_>
-    struct push_back_impl<L<T1s...>, T2_> {
-      using type = L<T1s..., T2_>;
-    };
-
-    template <template <typename...> typename L, typename ...T2s, typename T1_>
-    struct push_back_impl<T1_, L<T2s...>> {
-      using type = L<T2s..., T1_>;
-    };
-
-    template <template <typename...> typename L, typename ...T1s, typename ...T2s>
-    struct push_back_impl<L<T1s...>, L<T2s...>> {
-      using type = L<T1s..., T2s...>;
-    };
-
-  public:
-    using type = push_back_impl<T1, T2>::type;
-};
+using is_same_t = typename is_same<T1, T2>::type;
 
 template <typename T1, typename T2>
-using push_back_t = push_back<T1, T2>::type;
+constexpr static auto is_same_v = is_same_t<T1, T2>::value;
 
-template <typename T1, typename T2>
-using append = push_back<T1, T2>;
-
-template <typename T1, typename T2>
-using append_t = push_back<T1, T2>::type;
-
-// first
-template <typename types>
-struct first {
+// valid
+template <template <typename...> typename F, typename... Ts>
+struct valid {
   private:
-    template <typename L>
-    struct first_impl;
+    template <typename, typename = void>
+    struct helper : public std::false_type {};
 
-    template <template <typename...> typename L, typename T>
-    struct first_impl<L<T>> {
-      using type = T;
+    template <typename T>
+    struct helper<T, std::void_t<typename T::type>> : public std::true_type {};
+
+  public:
+    using type = helper<F<Ts...>>;
+};
+
+template <template <typename...> typename F, typename... Ts>
+using valid_t = typename valid<F, Ts...>::type;
+
+template <template <typename...> typename F, typename... Ts>
+constexpr static bool valid_v = valid_t<F, Ts...>::value;
+
+template <typename QMF, typename... Ts>
+using valid_qmf = valid<QMF::template fn, Ts...>;
+
+template <typename QMF, typename... Ts>
+using valid_qmf_t = typename valid_qmf<QMF, Ts...>::type;
+
+template <typename QMF, typename... Ts>
+constexpr static bool valid_qmf_v = valid_qmf_t<QMF, Ts...>::value;
+
+// select
+template <bool C, typename T, typename F>
+struct select_c {
+  private:
+    template <bool COND, typename TT>
+    struct select_c_impl {
+        using type = F;
     };
 
-    template <template <typename...> typename L, typename T, typename ...Ts>
-    struct first_impl<L<T, Ts...>> {
-      using type = T;
-    };
-
-    template <template <typename...> typename L, typename ...Ts>
-    struct first_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "types can't be empty");
+    template <typename TT>
+    struct select_c_impl<true, TT> {
+        using type = TT;
     };
 
   public:
-    using type = first_impl<types>::type;
+    using type = typename select_c_impl<C, T>::type;
 };
 
-template <typename types>
-using first_t = first<types>::type;
+template <bool C, typename T, typename F>
+using select_c_t = typename select_c<C, T, F>::type;
 
-// last
-template <typename types>
-struct last {
+template <typename C, typename T, typename F>
+using select = select_c<C::value, T, F>;
+
+template <typename C, typename T, typename F>
+using select_t = typename select<C, T, F>::type;
+
+template <bool C, typename T, template <typename...> typename F, typename... Ts>
+struct select_f_c {
   private:
-    template <typename L>
-    struct last_impl;
-
-    template <template <typename...> typename L, typename T>
-    struct last_impl<L<T>> {
-      using type = T;
+    template <bool COND, typename TT>
+    struct select_c_impl {
+        using type = F<Ts...>;
     };
 
-    template <template <typename...> typename L, typename T, typename ...Ts>
-    struct last_impl<L<T, Ts...>> {
-      using type = last_impl<L<Ts...>>::type;
-    };
-
-    template <template <typename...> typename L, typename ...Ts>
-    struct last_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "types can't be empty");
+    template <typename TT>
+    struct select_c_impl<true, TT> {
+        using type = TT;
     };
 
   public:
-    using type = last_impl<types>::type;
+    using type = typename select_c_impl<C, T>::type;
 };
 
-template <typename types>
-using last_t = last<types>::type;
+template <bool C, typename T, template <typename...> typename F, typename... Ts>
+using select_f_c_t = typename select_f_c<C, T, F, Ts...>::type;
 
-// head or front
-template <typename types>
-struct head {
+template <typename C, typename T, template <typename...> typename F, typename... Ts>
+using select_f = select_f_c<C::value, T, F, Ts...>;
+
+template <typename C, typename T, template <typename...> typename F, typename... Ts>
+using select_f_t = typename select_f<C, T, F, Ts...>::type;
+
+template <bool C, typename T, typename QMF, typename... Ts>
+using select_qmf_c = select_f_c<C, T, QMF::template fn, Ts...>;
+
+template <bool C, typename T, typename QMF, typename... Ts>
+using select_qmf_c_t = typename select_qmf_c<C, T, QMF, Ts...>::type;
+
+template <typename C, typename T, typename QMF, typename... Ts>
+using select_qmf = select_f<C, T, QMF::template fn, Ts...>;
+
+template <typename C, typename T, typename QMF, typename... Ts>
+using select_qmf_t = typename select_qmf<C, T, QMF, Ts...>::type;
+
+// is_function
+template <typename T>
+struct is_function {
   private:
-    template <typename L>
-    struct head_impl;
-
-    template <template <typename...> typename L, typename T>
-    struct head_impl<L<T>> {
-      using type = L<>;
-    };
-
-    template <template <typename...> typename L, typename T, typename ...Ts>
-    struct head_impl<L<T, Ts...>> {
-      using first = L<T>;
-      using rest = head_impl<L<Ts...>>::type;
-      using type = push_back_t<first, rest>;
-    };
-
-    template <template <typename...> typename L, typename ...Ts>
-    struct head_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "types can't be empty");
+    struct is_function_impl {
+        constexpr static bool value = !std::is_reference_v<T> && !std::is_const_v<std::add_const_t<T>>;
     };
 
   public:
-    using type = head_impl<types>::type;
+    using type = std::integral_constant<bool, is_function_impl::value>;
 };
 
-template <typename types>
-using head_t = head<types>::type;
+template <typename T>
+using is_function_t = typename is_function<T>::type;
 
-template <typename types>
-using front = head<types>;
+template <typename T>
+constexpr static auto is_function_v = is_function_t<T>::value;
 
-template <typename types>
-using front_t = front<types>::type;
-
-template <typename types>
-using pop_back = head<types>;
-
-template <typename types>
-using pop_back_t = pop_back<types>::type;
-
-// tail or back
-template <typename types>
-struct tail {
+// is invocable
+/*
+    using member detection idiom:
+    https://en.wikibooks.org/wiki/More_C++_Idioms/Member_Detector
+*/
+template <typename T>
+struct is_invocable {
   private:
-    template <typename L>
-    struct tail_impl;
-
-    template <template <typename...> typename L, typename T>
-    struct tail_impl<L<T>> {
-      using type = L<>;
+    // member detection idiom. member to detect here is 'operator()'
+    struct call_operator {
+        auto operator()() -> void {};
     };
 
-    template <template <typename...> typename L, typename T, typename ...Ts>
-    struct tail_impl<L<T, Ts...>> {
-      using type = L<Ts...>;
-    };
+    template <typename F, bool> 
+    struct derived : call_operator {};
 
-    template <template <typename...> typename L, typename ...Ts>
-    struct tail_impl<L<Ts...>> {
-      static_assert((sizeof...(Ts) > 0), "types can't be empty");
-    };
+    template <typename F>
+    struct derived <F, true> : F, call_operator {};
+
+    //invocable impl
+    //if T also has operator() defined, then there will be ambiguity in the std::void_t<> will be ill-formed, so only true_type is accepted.
+    template <typename, typename = void>
+    struct is_invocable_impl : public std::true_type {};
+
+    template <typename U>
+    struct is_invocable_impl<U, std::void_t< decltype(& derived<U, std::is_class_v<U>>::operator()) > > : public std::false_type {};
 
   public:
-    using type = tail_impl<types>::type;
+    using type = std::integral_constant<bool, is_function_v<T> || is_invocable_impl<T>::value>;
 };
 
-template <typename types>
-using tail_t = tail<types>::type;
+template <typename T>
+using is_invocable_t = typename is_invocable<T>::type;
 
-template <typename types>
-using back = tail<types>;
+template <typename T>
+constexpr static auto is_invocable_v = is_invocable_t<T>::value;
 
-template <typename types>
-using back_t = back<types>::type;
-
-template <typename types>
-using pop_front = tail<types>;
-
-template <typename types>
-using pop_front_t = pop_front<types>::type;
-
-template <typename types>
-struct size {
-  private:
-    template <typename L>
-    struct size_impl;
-
-    template <template <typename...> typename L>
-    struct size_impl<L<>> {
-      using type = std::integral_constant<uint32_t, 0>;
-    };
-
-    template <template <typename...> typename L, typename T, typename ...Ts>
-    struct size_impl<L<T, Ts...>> {
-      using type = std::integral_constant<uint32_t, 1 + size_impl<L<Ts...>>::type::value>;
-    };
-
-  public:
-    using type = size_impl<types>::type;
-};
-
-template <typename types>
-using size_t = size<types>::type;
-
-template <typename types>
-using count = size<types>;
-
-template <typename types>
-using count_t = count<types>::type;
-
-template <typename types>
-struct empty {
-  private:
-    template <typename L>
-    struct empty_impl;
-
-    template <template <typename...> typename L>
-    struct empty_impl<L<>> {
-      // using type = std::integral_constant<bool, true>;
-      using type = std::true_type;
-    };
-
-    template <template <typename...> typename L, typename ...Ts>
-    struct empty_impl<L<Ts...>> {
-      // using type = std::integral_constant<bool, false>;
-      using type = std::false_type;
-    };
-
-  public:
-    using type = empty_impl<types>::type;
-};
-
-template <typename types>
-using empty_t = empty<types>::type;
-
-template <typename types>
-struct clear {
-  private:
-    template <typename L>
-    struct clear_impl;
-
-    template <template <typename...> typename L>
-    struct clear_impl<L<>> {
-      using type = L<>;
-    };
-
-    template <template <typename...> typename L, typename ...Ts>
-    struct clear_impl<L<Ts...>> {
-      using type = L<>;
-    };
-
-  public:
-    using type = clear_impl<types>::type;
-};
-
-template <typename types>
-using clear_t = clear<types>::type;
-
-} // namespace ctl
+}  // namespace ctl

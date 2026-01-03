@@ -1,0 +1,152 @@
+
+== Utility
+:hardbreaks-option:
+
+Following struct(s)/algorithm(s) can be applied on the types. To use algorithms make sure to add `#include <utils.hpp>` in source file.
+
+=== quote
+
+This helps to wrap template type inside a structure called `quote`. 
+Template type can be accessed with the help of nested type `fn`.
+
+[source, cpp]
+template <template <typename...> typename F>
+struct quote {
+    template <typename... Ts>
+    using fn = F<Ts...>;
+};
+
+=== invert
+
+This helps to invert the provided type/value.
+
+[source, cpp]
+template <bool C>
+struct invert_c {
+  ...
+};
+
+variants of `invert` are:
+
+* `invert_c` 
+* `invert_c_t` => to avoid `::type` 
+* `invert_c_v` => to avoid `::value` 
+* `invert` => to pass typename as template parameter. 
+boolean value is accessed with the help of `C::value`
+* `invert_t` => to avoid `::type` 
+* `invert_v` => to avoid `::value` 
+
+=== is_same
+
+This helps to Check if the given 2 types are same
+
+[source, cpp]
+template <typename T1, typename T2>
+struct is_same {
+  ...
+};
+
+It results in `std::true_type` if `T1` and `T2` are same. `std::false_type` otherwise.
+
+variants of `is_same` are:
+
+* `is_same` 
+* `is_same_t` => to avoid using `::type` 
+* `is_same_v` => to avoid using `::value`
+
+=== valid
+
+This helps to validate if the provided template type is valid or not.
+
+[source, cpp]
+template <template <typename...> typename F, typename... Ts>
+struct valid {
+  ...
+};
+
+It results in `std::true_type` if `F<Ts...>::type` is valid. `std::false_type` otherwise.
+
+variants of `valid` are:
+
+* `valid` 
+* `valid_t` => to avoid using `::type` 
+* `valid_v` => to avoid using `::value` 
+* `valid_qmf` => to pass template function as a quoted meta function
+* `valid_qmf_t` => to avoid using `::type`
+* `valid_qmf_v` => to avoid using `::value`
+
+=== select
+
+This is equivalent of ternary operator but for types.
+
+[source, cpp]
+template <bool C, typename T, typename F>
+struct select_c {
+  ...
+};
+
+If condition `C` is `true`, select_c<>::type will be alias to `T`, to `F` otherwise.
+
+variants of `select` are:
+
+* `select_c` => when condition is `true/false` value. `::type` required to retrieve the type
+* `select_c_t` => to avoid `::type`
+* `select`  => when condition is a type. 
+boolean value is accessed with the help of `C::value`
+* `select_t`  => to avoid `::type`
+
+Following variants of select is used to get the false type as templated function. 
+i.e. if condition results in `false` then selected type is `F<Ts...>`.
+
+[source, cpp]
+template <bool C, typename T, template <typename...> typename F, typename... Ts>
+using select_f_c_t {
+  ...
+};
+
+* `select_f_c`  => when condition is `true/false` value. `::type` required to retrieve the type
+* `select_f_c_t` => to avoid `::type`
+* `select_f` => when condition is a type. boolean value is accessed with the help of `C::value`
+* `select_f_t` => to avoid `::type`
+* `select_qmf_c` => when `false` type is captured with quoted meta function, and condition is `true/false` value
+* `select_qmf_c_t` => to avoid `::type`
+* `select_qmf` => when `false` type is captured with quoted meta function, and condition is a type
+* `select_qmf_t` => to avoid `::type`
+
+=== is_function
+
+This will check if the provided type is a function or not.
+
+[source, cpp]
+template <typename T>
+struct is_function {
+  ...
+};
+
+If the provided type is not a reference and adding const to type will not result in the const, then it is considered as function.
+
+variants of `is_function` are:
+
+* `is_function_t` => to avoid using `::type`
+* `is_function_v` => to avoid using `::value`
+
+=== is_invocable
+
+This will check if the provided type is a `function` OR a class which implements `operator()`
+
+[source, cpp]
+template <typename T>
+struct is_invocable {
+  ...
+};
+
+It makes use of the https://en.wikibooks.org/wiki/More_C++_Idioms/Member_Detector[CPP member detection idiom] technique.
+
+If the provided T is a function, then it will result in `std::true_type`
+If the provided T is a class, if it implements `operator()` then it will result in `std::true_type`
+otherwise it will result in `std::false_type`
+
+variants of `is_invocable` are:
+
+* `is_invocable_t` => to avoid using `::type`
+* `is_invocable_v` => to avoid using `::value`

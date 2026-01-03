@@ -1,0 +1,108 @@
+name: Build and Run Unit Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DEFAULT_CXX_STANDARD: 20
+  DEFAULT_LLVM_VERSION: 17
+  DEFAULT_GCC_VERSION: 12
+  CMAKE_GENERATOR: Ninja
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [clang, gcc]
+        # version: [12, 13, 14, 15, 16, 17]
+        version: [12, 13, 14, 15, 17]
+        cxx_standard: [20]
+        stdlib: [libstdc++, libc++]
+        build_type: [Debug]
+        include:
+          - compiler: clang
+            cc: "clang"
+            cxx: "clang++"
+            cxx_flags: "-stdlib=libstdc++"
+          - version: 17
+            compiler: clang
+            stdlib: libc++
+            install: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 17 && sudo apt install -y libc++-17-dev libc++abi-17-dev
+            cxx_flags: "-stdlib=libc++"
+            toolchain_root: "/usr/lib/llvm-17"
+          # - version: 16
+          #   compiler: clang
+          #   stdlib: libc++
+          #   install: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 16 && sudo apt install -y libc++-16-dev libc++abi-16-dev
+          #   cxx_flags: "-stdlib=libc++"
+          #   toolchain_root: "/usr/lib/llvm-16"
+          - version: 15
+            compiler: clang
+            stdlib: libc++
+            install: sudo apt update && sudo apt install -y clang-15 libc++-15-dev libc++abi-15-dev
+            cxx_flags: "-stdlib=libc++"
+            toolchain_root: "/usr/lib/llvm-15"
+          - version: 14
+            compiler: clang
+            stdlib: libc++
+            install: sudo apt update && sudo apt install -y clang-14 libc++-14-dev libc++abi-14-dev
+            cxx_flags: "-stdlib=libc++"
+            toolchain_root: "/usr/lib/llvm-14"
+          - compiler: gcc
+            toolchain_root: "/usr"
+            cxx_flags: ""
+          - version: 13
+            compiler: gcc
+            install: sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test && sudo apt update && sudo apt-get install -y gcc-13 g++-13
+            cc: "gcc-13"
+            cxx: "g++-13"
+          - version: 12
+            compiler: gcc
+            install: sudo apt update && sudo apt install -y gcc-12
+            cc: "gcc-12"
+            cxx: "g++-12"
+            cxx_flags: ""
+        exclude:
+          - compiler: gcc
+            version: 17
+          # - compiler: gcc
+          #   version: 16
+          - compiler: gcc
+            version: 15
+          - compiler: gcc
+            version: 14
+          - compiler: clang
+            version: 13
+          - compiler: clang
+            version: 12
+          - compiler: gcc
+            stdlib: libc++
+          - compiler: clang
+            stdlib: libstdc++
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          ${{ matrix.install }}
+          sudo apt install -y ninja-build
+
+      - name: Configure CMake
+        env:
+          CC: ${{matrix.toolchain_root}}/bin/${{matrix.cc}}
+          CXX: ${{matrix.toolchain_root}}/bin/${{matrix.cxx}}
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_CXX_STANDARD=${{matrix.cxx_standard}} -DCMAKE_CXX_FLAGS_INIT=${{matrix.cxx_flags}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+
+      - name: Build Unit Tests
+        run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} -v -t all
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build/test
+        run: ctest -j $(nproc) -C ${{matrix.build_type}}
