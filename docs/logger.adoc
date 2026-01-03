@@ -26,7 +26,63 @@ The logger system works by:
 
 === Components
 
+==== Log Levels
+
+The logger supports a hierarchical log level system that allows you to control which messages get logged at runtime.
+
+===== Log Level Hierarchy
+
+The log levels form an inheritance hierarchy from least severe (most verbose) to most severe (least verbose):
+
+[source, cpp]
+----
+none_t (no logs)
+ ↑
+critical_t (most severe)
+ ↑
+error_t
+ ↑
+warning_t
+ ↑
+debug_t
+ ↑
+info_t (least severe, most verbose)
+----
+
+The inheritance relationship allows compile-time filtering: a message is logged if the configured
+minimum log level is a base class of (or equal to) the message's log level.
+
+===== Available Log Levels
+
+* `none_t` - Disables all logging
+* `critical_t` - Only critical messages are logged
+* `error_t` - Error and critical messages are logged
+* `warning_t` - Warning, error, and critical messages are logged
+* `debug_t` - Debug and above messages are logged
+* `info_t` - All messages are logged (default)
+
+===== Configuring the Minimum Log Level
+
+You configure the minimum log level by updating the `logLevelConfig` value to the desired log level in `log_config.hpp`
+
+An important feature of the logger is that the filtering happens at compile-time using `if constexpr`.
+This means:
+
+* **No runtime overhead**: Disabled log messages are completely removed by the compiler
+* **Zero-cost abstraction**: Filtered logs don't generate any executable code
+* **Type-safe**: Errors in log level configuration are caught at compile time
+
+Example of compile-time optimization:
+
+[source, cpp]
+----
+// With logLevelConfig set to error_t
+LOG_DEBUG("This won't be in the binary");  // Compiled away completely
+LOG_ERROR("This will be in the binary");   // Included in executable
+----
+
 ==== Configuration
+
 The logger behavior is configured via template specializations. Multiple loggers can be defined by
 specializing template variables in `log_config.hpp` to customize logging behavior.
 
@@ -312,7 +368,6 @@ The logger system follows this build process:
 The current token capture system is designed to be extensible. Future enhancements could include:
 
 * **Line Number Capture**: Extract source file location information
-* **Log Level Support**: Include log levels (INFO, WARNING, ERROR, DEBUG) in tokens
 * **Context Information**: Capture additional compile-time context
 * **Runtime Token Database**: Automatic generation of a token lookup database
 

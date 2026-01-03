@@ -41,13 +41,15 @@ struct console_logger_t {
 
 // specialize the global dispatcher config variable
 template <> 
-inline auto ctl::dispatcherConfig <> = log_destinations_t<console_logger_t>{};
+inline auto ctl::dispatcherConfig<> = log_destinations_t<console_logger_t>{};
 
 int main() {
 
-    LOG("Hello World");
-
-    LOG("Myself BV");
+    LOG_INFO("INFO: Hello World");
+    LOG_DEBUG("DEBUG: Hello World");
+    LOG_WARNING("WARNING: Hello World");
+    LOG_ERROR("ERROR: Hello World");
+    LOG_CRITICAL("CRITICAL: Hello World");
 
     std::cout << "This is CompileTimeLibrary main" << std::endl;
 
