@@ -3,6 +3,10 @@
 #include <debug/show_type.hpp>
 #include <iostream>
 
+#include <logger/log.hpp>
+#include <logger/log_config.hpp>
+#include <logger/log_dispatcher.hpp>
+
 struct super_type {
     auto attendence() const {
         std::cout << "Present" << std::endl;
@@ -29,7 +33,22 @@ struct type2 : public super_type {
     }
 };
 
+struct console_logger_t {
+    auto dispatch(std::uint32_t token) -> void {
+        std::cout << token << std::endl;
+    }
+};  
+
+// specialize the global dispatcher config variable
+template <> 
+inline auto ctl::dispatcherConfig <> = log_destinations_t<console_logger_t>{};
+
 int main() {
+
+    LOG("Hello World");
+
+    LOG("Myself BV");
+
     std::cout << "This is CompileTimeLibrary main" << std::endl;
 
     using empty_list = ctl::list<>;
