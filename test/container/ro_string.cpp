@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <cstdint>
 
 #include "container/ro_string.hpp"
 
