@@ -17,9 +17,10 @@ using udl::operator""_log;
 
 namespace details {
 
-template <typename ...Ts, typename ...Args>
+template <typename ...Args>
 constexpr static auto to_dispatcher(Args&& ...msg) {
-    auto &dispConfig = ::ctl::dispatcherConfig<Ts...>;
+    // specialized the global dispatcher config variable
+    auto &dispConfig = ::ctl::dispatcherConfig<>;
     dispConfig.send_log_data(std::forward<Args>(msg)...);
 }
 

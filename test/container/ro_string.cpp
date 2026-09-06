@@ -26,6 +26,7 @@ TEST_F(ro_string_test, ro_string_size) {
 
     using helloType = ROST("Hello");
     static_assert(helloType::size() == 5, "Expected size of 5");
+    static_assert(helloType::hash() == HASH("Hello"), "Expected hash of match!!");
 
     using appendedT = append_t<helloType, helloWorldType>;    // Concatenate "Hello" and "Hello, World!" ==> "HelloHello, World!"
     static_assert(appendedT::size() == 18, "Expected size of 18");

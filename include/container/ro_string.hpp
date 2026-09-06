@@ -5,11 +5,15 @@ namespace ctl {
 namespace details {
 
 // Hash
-constexpr static std::uint64_t PRIME_NUM = 0x01000193ULL;
-constexpr static std::uint64_t OFFSET_BASIS = 0x811C9DC5ULL;
+constexpr static std::uint64_t PRIME_NUM = 0x100000001b3ULL;
+constexpr static std::uint64_t OFFSET_BASIS = 0xcbf29ce484222325ULL;
 
 struct hash {
-    constexpr auto operator()(const char* str, std::size_t len) const -> std::uint64_t {
+    constexpr auto operator()(const char* str, std::size_t len) const noexcept -> std::uint64_t {
+        if(str == nullptr) {
+            return 0;
+        }
+
         std::uint64_t hash = OFFSET_BASIS;
         for (std::size_t i = 0; i < len; ++i) {
             hash ^= static_cast<std::uint64_t>(str[i]);
@@ -18,7 +22,7 @@ struct hash {
         return hash;
     }
 
-    constexpr auto operator()(const char* str) const -> std:: uint64_t {
+    constexpr auto operator()(const char* str) const noexcept -> std:: uint64_t {
         return operator()(str, std::strlen(str));
     }
 };
@@ -27,22 +31,26 @@ inline constexpr auto getHash(const char* str) -> std::uint64_t {
     return details::hash{}(str);
 }
 
+// TODO: Hash Collision detection!!
+
 // Read Only String
 template <typename ch, ch... chs>
 struct ro_string {
-    constexpr static std::size_t size() {
-        return sizeof...(chs);
-    }
-
-    static auto data() -> const char* {
+    private:
         constexpr static char storage[] = {chs..., 0};
-        return storage;
-    }
+    public:
+        constexpr static auto size() noexcept -> std::size_t {
+            return sizeof...(chs);
+        }
 
-    constexpr static auto getHash() -> std::uint64_t {
-        constexpr char str[] = {chs..., 0};
-        return hash{}(str, sizeof...(chs));
-    }
+        constexpr static auto c_str() noexcept -> const char* {
+            return storage;
+        }
+
+        constexpr static auto hash() noexcept -> std::uint64_t {
+            constexpr char str[] = {chs..., 0};
+            return ::ctl::details::hash{}(str, sizeof...(chs));
+        }
 };
 }   // namespace details
 
@@ -120,3 +128,6 @@ constexpr auto operator+(details::ro_string<Ch, chs1...>, details::ro_string<Ch,
 }
 
 }   // namespace ctl
+
+// export operator""_ros to global namespace for convenience
+using ctl::operator""_ros;

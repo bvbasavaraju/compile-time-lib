@@ -9,9 +9,11 @@ namespace ctl {
 template <typename...>
 struct list;
 
+// Instantiable list
 template <typename...>
 struct ilist {};
 
+// Callable list
 template <typename... types>
 struct clist : public ilist<types...> {
   private:
