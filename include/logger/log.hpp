@@ -19,6 +19,7 @@ namespace details {
 
 template <typename ...Ts, typename ...Args>
 constexpr static auto to_dispatcher(Args&& ...msg) {
+    // specialized the global dispatcher config variable
     auto &dispConfig = ::ctl::dispatcherConfig<Ts...>;
     dispConfig.send_log_data(std::forward<Args>(msg)...);
 }

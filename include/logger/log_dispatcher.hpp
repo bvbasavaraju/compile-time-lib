@@ -6,6 +6,7 @@ namespace ctl {
 
 namespace details {
 
+// Converting the string back to string_variadic_t<> at compile time!!
 template <typename Msg>
 constexpr static auto to_log_metadata(Msg msg) {
     constexpr auto m = msg.data();
