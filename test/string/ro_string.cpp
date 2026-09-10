@@ -2,7 +2,7 @@
 #include <cstring>
 #include <cstdint>
 
-#include "container/ro_string.hpp"
+#include "string/ro_string.hpp"
 
 #include <gtest/gtest.h>
 
