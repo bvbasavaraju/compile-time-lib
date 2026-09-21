@@ -26,15 +26,15 @@ using namespace ctl::string;
 TEST_F(ro_string_test, ro_string_basic) {
     using helloType = ROST("Hello");
     static_assert(helloType::size() == 5, "Expected size of 5");
-    static_assert(std::strcmp(helloType::c_str(), "Hello") == 0, "Expected string to be 'Hello'");
+    ASSERT_EQ(std::strcmp(helloType::c_str(), "Hello"), 0) << "Expected string to be 'Hello'";
 
     using worldType = ROST("World");
     static_assert(worldType::size() == 5, "Expected size of 5");
-    static_assert(std::strcmp(worldType::c_str(), "World") == 0, "Expected string to be 'World'");
+    ASSERT_EQ(std::strcmp(worldType::c_str(), "World"), 0) << "Expected string to be 'World'";
 
     using helloWorldType = ROST("Hello, World!");
     static_assert(helloWorldType::size() == 13, "Expected size of 13");
-    static_assert(std::strcmp(helloWorldType::c_str(), "Hello, World!") == 0, "Expected string to be 'Hello, World!'");
+    ASSERT_EQ(std::strcmp(helloWorldType::c_str(), "Hello, World!"), 0) << "Expected string to be 'Hello, World!'";
 }
 
 TEST_F(ro_string_test, ro_string_size) {
