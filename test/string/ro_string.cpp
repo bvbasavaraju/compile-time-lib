@@ -81,19 +81,19 @@ TEST_F(ro_string_test, hash_collision_detection) {
 
 TEST_F(ro_string_test, hash_check) {
     static_assert(HASH("Hello") == ROST("Hello")::hash(), "Hash mismatch for 'Hello'");
-    static_assert(HASH("Hello") == hash{}("Hello"), "Hash mismatch for 'Hello'");
     static_assert(HASH("Hello") == HASH("Hello"), "Hash mismatch for 'Hello'");
     static_assert(HASH("Hello") == "Hello"_ros.hash(), "Hash mismatch for 'Hello'");
+    ASSERT_EQ(HASH("Hello"), hash{}("Hello")) << "Hash mismatch for 'Hello'";
 
     static_assert(HASH("World") == ROST("World")::hash(), "Hash mismatch for 'World'");
-    static_assert(HASH("World") == hash{}("World"), "Hash mismatch for 'World'");
     static_assert(HASH("World") == HASH("World"), "Hash mismatch for 'World'");
     static_assert(HASH("World") == "World"_ros.hash(), "Hash mismatch for 'World'");
+    ASSERT_EQ(HASH("World"), hash{}("World")) << "Hash mismatch for 'World'";
 
     static_assert(HASH("Hello World") == ROST("Hello World")::hash(), "Hash mismatch for 'Hello World'");
-    static_assert(HASH("Hello World") == hash{}("Hello World"), "Hash mismatch for 'Hello World'");
     static_assert(HASH("Hello World") == HASH("Hello World"), "Hash mismatch for 'Hello World'");
     static_assert(HASH("Hello World") == "Hello World"_ros.hash(), "Hash mismatch for 'Hello World'");
+    ASSERT_EQ(HASH("Hello World"), hash{}("Hello World")) << "Hash mismatch for 'Hello World'";
 }
 
 TEST_F(ro_string_test, RegistrarTest) {
