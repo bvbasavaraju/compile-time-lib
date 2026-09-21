@@ -4,6 +4,7 @@
 
 #include "string/algorithms.hpp"
 #include "string/registrar.hpp"
+#include "debug/show_type.hpp"
 
 #include <gtest/gtest.h>
 
@@ -103,22 +104,40 @@ TEST_F(ro_string_test, RegistrarTest) {
     static_assert(std::is_same_v<list1, ::ctl::string::registrar_t<ROST("Hello")>>, "Expected list with Hello");
     static_assert(std::is_same_v<list1, ::ctl::list<ROST("Hello")>>, "Expected list with Hello");
 
+    using list1b = REGISTRAR_ADD(list1, ROST("Hello"));
+    static_assert(std::is_same_v<list1b, ::ctl::string::registrar_t<ROST("Hello")>>, "Expected list with Hello");
+    static_assert(std::is_same_v<list1b, ::ctl::list<ROST("Hello")>>, "Expected list with Hello");
 
     using list2 = REGISTRAR_ADD(list1, ROST("World"));
     static_assert(std::is_same_v<list2, ::ctl::string::registrar_t<ROST("Hello"), ROST("World")>>, "Expected list with Hello and World");
     static_assert(std::is_same_v<list2, ::ctl::list<ROST("Hello"), ROST("World")>>, "Expected list with Hello and World");
 
-    using list3 = REGISTRAR_ADD(list2, ROST("Hello"));
-    static_assert(std::is_same_v<list3, ::ctl::string::registrar_t<ROST("Hello"), ROST("World")>>, "Expected list with Hello, World");
-    static_assert(std::is_same_v<list3, ::ctl::list<ROST("Hello"), ROST("World")>>, "Expected list with Hello, World");
-    static_assert(std::is_same_v<list3, list2>, "Expected that list2 and list3 are same as Hello is already present in list2");
+    using list2b = REGISTRAR_ADD(list2, ROST("Hello"));
+    static_assert(std::is_same_v<list2b, ::ctl::string::registrar_t<ROST("Hello"), ROST("World")>>, "Expected list with Hello, World");
+    static_assert(std::is_same_v<list2b, ::ctl::list<ROST("Hello"), ROST("World")>>, "Expected list with Hello, World");
+    static_assert(std::is_same_v<list2b, list2>, "Expected that list2 and list3 are same as Hello is already present in list2");
 
-    using list4 = REGISTRAR_ADD(list2, ROST("HelloWorld"));
-    static_assert(std::is_same_v<list4, ::ctl::string::registrar_t<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
-    static_assert(std::is_same_v<list4, ::ctl::list<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    using list2c = REGISTRAR_ADD(list2, ROST("World"));
+    static_assert(std::is_same_v<list2c, ::ctl::string::registrar_t<ROST("Hello"), ROST("World")>>, "Expected list with Hello, World");
+    static_assert(std::is_same_v<list2c, ::ctl::list<ROST("Hello"), ROST("World")>>, "Expected list with Hello, World");
+    static_assert(std::is_same_v<list2c, list2>, "Expected that list2 and list4 are same as World is already present in list2");
 
-    using list5 = REGISTRAR_ADD(list3, ROST("HelloWorld"));
-    static_assert(std::is_same_v<list5, ::ctl::string::registrar_t<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
-    static_assert(std::is_same_v<list5, ::ctl::list<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
-    static_assert(std::is_same_v<list4, list5>, "Expected that list4 and list5 are same as HelloWorld is already present in both");
+    using list3 = REGISTRAR_ADD(list2, ROST("HelloWorld"));
+    static_assert(std::is_same_v<list3, ::ctl::string::registrar_t<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    static_assert(std::is_same_v<list3, ::ctl::list<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+
+    using list3b = REGISTRAR_ADD(list3, ROST("HelloWorld"));
+    static_assert(std::is_same_v<list3b, ::ctl::string::registrar_t<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    static_assert(std::is_same_v<list3b, ::ctl::list<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    static_assert(std::is_same_v<list3b, list3>, "Expected that list3 and list3b are same as HelloWorld is already present in both");
+
+    using list3c = REGISTRAR_ADD(list3, ROST("Hello"));
+    static_assert(std::is_same_v<list3c, ::ctl::string::registrar_t<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    static_assert(std::is_same_v<list3c, ::ctl::list<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    static_assert(std::is_same_v<list3c, list3>, "Expected that list3 and list3c are same as HelloWorld is already present in both");
+
+    using list3d = REGISTRAR_ADD(list3, ROST("World"));
+    static_assert(std::is_same_v<list3d, ::ctl::string::registrar_t<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    static_assert(std::is_same_v<list3d, ::ctl::list<ROST("Hello"), ROST("World"), ROST("HelloWorld")>>, "Expected list with Hello, World, and HelloWorld");
+    static_assert(std::is_same_v<list3d, list3>, "Expected that list3 and list3d are same as HelloWorld is already present in both");
 }
