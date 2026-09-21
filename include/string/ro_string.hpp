@@ -2,7 +2,7 @@
 
 #include <string/hash.hpp>
 
-namespace ctl {
+namespace ctl::string {
 
 // Read Only String
 template <typename ch, ch... chs>
@@ -20,7 +20,7 @@ struct ro_string {
 
         constexpr static auto hash() noexcept -> std::uint64_t {
             constexpr char str[] = {chs..., 0};
-            return ::ctl::hash{}(str, sizeof...(chs));
+            return ::ctl::string::hash{}(str, sizeof...(chs));
         }
 };
 
@@ -38,7 +38,7 @@ constexpr auto operator""_ros() -> ro_string<Char, chs...> {
 #define ROST(data) decltype(data##_ros)
 #define HASH(data) ROST(data)::hash()
 
-}   // namespace ctl
+}   // namespace ctl::string
 
 // export operator""_ros to global namespace for convenience
-using ctl::operator""_ros;
+using ctl::string::operator""_ros;

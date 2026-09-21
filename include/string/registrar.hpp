@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string/ro_string.hpp>
+#include <container/algorithms.hpp>
 
-namespace ctl {
+namespace ctl::string {
 
 namespace details {
 
@@ -24,7 +24,7 @@ struct collision_detector {
         // For same type it is expected that hashes matches!!
         template <template <typename...> typename L, typename T>
         struct collision_detector_impl<L<T>, T> {
-            using type = std::false_type;
+            using type = std::conditional_t<T::hash() == T::hash(), std::false_type, std::true_type>;
             static_assert(T::hash() == T::hash(), "Hash did not match for same type!!");
         };
 
@@ -52,19 +52,22 @@ using collision_detector_t = typename collision_detector<ListT, NewT>::type;
 template <typename ListT, typename NewT>
 constexpr static auto collision_detector_v = collision_detector_t<ListT, NewT>::value;
 
-// Push Back
-// TODO: reuse the Push_back and Unique from container/algorithms.hpp instead of duplicating the code here!!??
-
 }   // namespace details
 
 template <typename ... T>
-struct Registrar;
+using registrar_t = ::ctl::list<T...>;
 
-template <Typename R, typename NewT>
-struct RegisterEntry {
+template <typename R, typename NewT>
+struct register_entry {
+    public:
     static_assert(!details::collision_detector_v<R, NewT>, "Hash collision detected!!");
-    // using type = typename details::push_back_t<R, NewT>;
+    using type = remove_duplicates_t<push_back_t<R, NewT>>;
 };
 
+template <typename R, typename NewT>
+using register_entry_t = typename register_entry<R, NewT>::type;
 
-}   // namespace ctl
+// Convenience alias for register_entry_t
+#define REGISTRAR_INIT          registrar_t<>
+#define REGISTRAR_ADD(R, NewT)  register_entry_t<R, NewT>
+}   // namespace ctl::string

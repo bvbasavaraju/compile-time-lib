@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ctl {
+namespace ctl::string {
 
 // Hash
 constexpr static std::uint64_t PRIME_NUM = 0x100000001b3ULL;
@@ -29,4 +29,4 @@ inline constexpr auto getHash(const char* str) -> std::uint64_t {
     return hash{}(str);
 }
 
-}   // namespace ctl
+}   // namespace ctl::string

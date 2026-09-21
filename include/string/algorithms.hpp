@@ -2,7 +2,7 @@
 
 #include <string/ro_string.hpp>
 
-namespace ctl {
+namespace ctl::string {
 
 // String operations
 // Append two ro_string
@@ -73,4 +73,4 @@ constexpr auto operator+(ro_string<Ch, chs1...>, ro_string<Ch, chs2...>) -> ro_s
     return {};
 }
 
-}   // namespace ctl
+}   // namespace ctl::string
