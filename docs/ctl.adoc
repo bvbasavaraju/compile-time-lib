@@ -14,6 +14,8 @@ Features available to use:
 
 * <<_container>>
 * <<_utility>>
+* <<_string>>
+* <<_logger>>
 
 *Note:*
 
