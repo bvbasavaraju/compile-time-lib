@@ -6,6 +6,12 @@ include::ctl.adoc[]
 ////
 ////
 include::container.adoc[]
-include::string.adoc[]
+////
+////
 include::utility.adoc[]
+////
+////
+include::string.adoc[]
+////
+////
 include::logger.adoc[]
