@@ -1,0 +1,29 @@
+== Hash
+:hardbreaks-option:
+
+`ctl::string::hash` calculates a 64-bit FNV-1a hash. It can hash a null-terminated string or a character range with an explicit length.
+
+To use it, add `#include <string/hash.hpp>` in the source file.
+
+=== Hashing a string
+
+[source, cpp]
+constexpr ctl::string::hash hasher;
+
+static_assert(hasher("Hello") == ctl::string::getHash("Hello"));
+static_assert(hasher("Hello", 5) == hasher("Hello"));
+
+`getHash` is a convenience function for hashing a null-terminated string.
+
+=== Hashing compile-time strings
+
+`ro_string::hash()` uses the same hash implementation, so a string type and its runtime spelling produce the same value.
+
+[source, cpp]
+static_assert(ROST("Hello")::hash() == ctl::string::getHash("Hello"));
+static_assert(HASH("Hello") == "Hello"_ros.hash());
+
+The implementation uses these FNV-1a constants:
+
+* `PRIME_NUM` => `0x100000001b3`
+* `OFFSET_BASIS` => `0xcbf29ce484222325`

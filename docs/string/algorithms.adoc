@@ -1,0 +1,53 @@
+== Algorithms
+:hardbreaks-option:
+
+String algorithms operate on `ctl::string::ro_string` types and always produce a new type. The original type is never modified.
+
+To use them, add `#include <string/algorithms.hpp>` in the source file.
+
+=== append
+
+Appends the characters of the second string to the first string.
+
+[source, cpp]
+using hello_type = ROST("Hello");
+using world_type = ROST(" World");
+using result = ctl::string::append_t<hello_type, world_type>;
+
+static_assert(result::size() == 11);
+static_assert(std::strcmp(result::c_str(), "Hello World") == 0);
+
+Variants:
+
+* `append` => result is accessed with `::type`
+* `append_t` => alias which avoids `::type`
+* `concat_t` => convenience alias for `append_t`
+
+The `+` operator is also available for two `ro_string` values:
+
+[source, cpp]
+constexpr auto result = "Hello"_ros + " World"_ros;
+static_assert(result.size() == 11);
+
+=== remove_prefix
+
+Removes a prefix from a string. An empty prefix returns the original string.
+
+[source, cpp]
+using result = ctl::string::remove_prefix_t<ROST("Hello World"), ROST("Hello")>;
+
+static_assert(std::strcmp(result::c_str(), " World") == 0);
+
+When the prefix does not match, the original string type is returned unchanged:
+
+[source, cpp]
+using unchanged = ctl::string::remove_prefix_t<ROST("Hello World"), ROST("World")>;
+
+static_assert(std::is_same_v<unchanged, ROST("Hello World")>);
+
+Variants:
+
+* `remove_prefix` => result is accessed with `::type`
+* `remove_prefix_t` => alias which avoids `::type`
+
+The prefix is compared from the beginning of the string. A matching prefix is removed; an empty or non-matching prefix leaves the original string unchanged.

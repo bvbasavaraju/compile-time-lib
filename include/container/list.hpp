@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utils.hpp>
+#include <utils/general.hpp>
 // #include <type_traits>
 
 namespace ctl {
@@ -9,9 +9,11 @@ namespace ctl {
 template <typename...>
 struct list;
 
+// Instantiable list
 template <typename...>
 struct ilist {};
 
+// Callable list
 template <typename... types>
 struct clist : public ilist<types...> {
   private:

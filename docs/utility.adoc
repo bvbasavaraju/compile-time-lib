@@ -2,7 +2,7 @@
 == Utility
 :hardbreaks-option:
 
-Following struct(s)/algorithm(s) can be applied on the types. To use algorithms make sure to add `#include <utils.hpp>` in source file.
+Following struct(s)/algorithm(s) can be applied on the types. To use algorithms make sure to add `#include <utils/general.hpp>` in source file.
 
 === quote
 
