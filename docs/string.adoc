@@ -6,3 +6,8 @@ There are 4 parts here.
 * <<_algorithms_2>> => operations which create new compile-time strings
 * <<_hash>> => runtime and compile-time compatible string hashing
 * <<_registrar>> => a duplicate-free registry of hashed string types
+
+include::string/ro_string.adoc[leveloffset=+1]
+include::string/algorithms.adoc[leveloffset=+1]
+include::string/hash.adoc[leveloffset=+1]
+include::string/registrar.adoc[leveloffset=+1]
