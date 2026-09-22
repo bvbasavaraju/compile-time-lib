@@ -1,0 +1,35 @@
+== Registrar
+:hardbreaks-option:
+
+The registrar stores `ro_string` types in a `ctl::list` and prevents duplicate entries. It also checks at compile time that a new string does not hash to the same value as a different registered string.
+
+To use it, add `#include <string/registrar.hpp>` in the source file.
+
+=== Registering entries
+
+`registrar_t` is an alias for `ctl::list`. `REGISTRAR_INIT` creates an empty registrar and `REGISTRAR_ADD` adds an entry.
+
+[source, cpp]
+using registry = REGISTRAR_INIT;
+using registry_with_hello = REGISTRAR_ADD(registry, ROST("Hello"));
+using registry_with_world = REGISTRAR_ADD(registry_with_hello, ROST("World"));
+
+static_assert(std::is_same_v<
+    registry_with_world,
+    ctl::string::registrar_t<ROST("Hello"), ROST("World")>>);
+
+static_assert(std::is_same_v<
+    registry_with_world,
+    ::ctl::list<ROST("Hello"), ROST("World")>>);
+
+Adding an entry which is already registered leaves the registry unchanged:
+
+[source, cpp]
+using same_registry = REGISTRAR_ADD(registry_with_world, ROST("Hello"));
+static_assert(std::is_same_v<same_registry, registry_with_world>);
+
+=== Collision detection
+
+Each new entry is checked against the existing registry. Registering the same type again is valid because matching hashes for the same type are expected. If two different types have the same hash, compilation fails with `Hash collision detected!!`.
+
+The registry result is a type and can be passed to the algorithms from `container/algorithms.hpp`.

@@ -41,9 +41,15 @@ private:
         using type = ro_string<T, Ts...>;
     };
 
-    template <typename T, T t, T... Ts1, T... Ts2>
-    struct remove_prefix_impl<ro_string<T, t, Ts1...>, ro_string<T, t, Ts2...>> {
-        using type = typename remove_prefix_impl<ro_string<T, Ts1...>, ro_string<T, Ts2...>>::type;
+    template <typename T, T t0, T... ts1, T... ts2>
+    struct remove_prefix_impl<ro_string<T, t0, ts1...>, ro_string<T, t0, ts2...>> {
+        using type = typename remove_prefix_impl<ro_string<T, ts1...>, ro_string<T, ts2...>>::type;
+    };
+
+    // If there is no match then return type will become the given string!!
+    template <typename T, T t01, T t02, T... ts1, T... ts2>
+    struct remove_prefix_impl<ro_string<T, t01, ts1...>, ro_string<T, t02, ts2...>> {
+        using type = Str;
     };
 
 public:

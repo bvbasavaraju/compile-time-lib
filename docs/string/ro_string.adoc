@@ -1,0 +1,44 @@
+== Read Only String
+:hardbreaks-option:
+
+`ctl::string::ro_string` stores a string as a type. The characters are template parameters, so the string can be used during compilation and has no runtime object state.
+
+To use it, add `#include <string/ro_string.hpp>` in the source file.
+
+=== Creating a string
+
+The `_ros` user-defined literal creates a `ro_string` type. `ROST` is a convenience macro which exposes the type of a literal.
+
+[source, cpp]
+using hello_type = ROST("Hello");
+using world_type = decltype("World"_ros);
+
+// The literal is also available directly as a value.
+constexpr auto hello = "Hello"_ros;
+
+`operator""_ros` is exported to the global namespace for convenience. `ROST` expands to `decltype(data##_ros)`.
+
+=== Members
+
+==== size
+
+Returns the number of characters, excluding the terminating null character.
+
+[source, cpp]
+static_assert(ROST("Hello")::size() == 5);
+
+==== c_str
+
+Returns a null-terminated `const char*` representation of the string.
+
+[source, cpp]
+static_assert(std::strcmp(ROST("Hello")::c_str(), "Hello") == 0);
+
+==== hash
+
+Returns the compile-time hash of the string as a `std::uint64_t`.
+
+[source, cpp]
+static_assert(ROST("Hello")::hash() == HASH("Hello"));
+
+`HASH(data)` is a convenience macro equivalent to `ROST(data)::hash()`.

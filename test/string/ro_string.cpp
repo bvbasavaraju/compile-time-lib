@@ -40,19 +40,97 @@ TEST_F(ro_string_test, ro_string_basic) {
 TEST_F(ro_string_test, ro_string_size) {
     using helloWorldType = ROST("Hello, World!");
     static_assert(helloWorldType::size() == 13, "Expected size of 13");
+    static_assert(helloWorldType::hash() == HASH("Hello, World!"), "Expected hash of match!!");
 
     using helloType = ROST("Hello");
     static_assert(helloType::size() == 5, "Expected size of 5");
     static_assert(helloType::hash() == HASH("Hello"), "Expected hash of match!!");
 
     using appendedT = append_t<helloType, helloWorldType>;    // Concatenate "Hello" and "Hello, World!" ==> "HelloHello, World!"
-    static_assert(appendedT::size() == 18, "Expected size of 18");
+    static_assert(appendedT::size() == 18, "Expected size of 18");\
+    static_assert(appendedT::hash() == HASH("HelloHello, World!"), "Expected hash of match!!");
+    static_assert(std::is_same_v<appendedT, ROST("HelloHello, World!")>, "Expected type to be 'HelloHello, World!'");
 
     using removedPrefixT = remove_prefix_t<appendedT, helloType>;   // Remove "Hello" prefix from "HelloHello, World!" ==> "Hello, World!"
     static_assert(removedPrefixT::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT::hash() == HASH("Hello, World!"), "Expected hash of match!!");
+    static_assert(std::is_same_v<removedPrefixT, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
+}
+
+TEST_F(ro_string_test, remove_prefix) {
+    using helloWorldType = ROST("Hello, World!");
+    static_assert(helloWorldType::size() == 13, "Expected size of 13");
+    static_assert(helloWorldType::hash() == HASH("Hello, World!"), "Expected hash of match!!");
+
+    using helloType = ROST("Hello");
+    static_assert(helloType::size() == 5, "Expected size of 5");
+    static_assert(helloType::hash() == HASH("Hello"), "Expected hash of match!!");
+
+    using appendedT = append_t<helloType, helloWorldType>;    // Concatenate "Hello" and "Hello, World!" ==> "HelloHello, World!"
+    static_assert(appendedT::size() == 18, "Expected size of 18");\
+    static_assert(appendedT::hash() == HASH("HelloHello, World!"), "Expected hash of match!!");
+    static_assert(std::is_same_v<appendedT, ROST("HelloHello, World!")>, "Expected type to be 'HelloHello, World!'");
+
+    using removedPrefixT = remove_prefix_t<appendedT, helloType>;   // Remove "Hello" prefix from "HelloHello, World!" ==> "Hello, World!"
+    static_assert(removedPrefixT::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT::hash() == HASH("Hello, World!"), "Expected hash of match!!");
+    static_assert(std::is_same_v<removedPrefixT, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
 
     using removedPrefixT2 = remove_prefix_t<helloWorldType, helloType>;  // Remove "Hello" prefix from "Hello, World!" ==> ", World!"
     static_assert(removedPrefixT2::size() == 8, "Expected size of 8");
+    static_assert(removedPrefixT2::hash() == HASH(", World!"), "Expected hash of match!!");
+    static_assert(std::is_same_v<removedPrefixT2, ROST(", World!")>, "Expected type to be ', World!'");
+
+    // try Remove "hello" prefix from "Hello, World!". As, it is not a prefix, it will return the original string "Hello, World!"
+    using removedPrefixT2a = remove_prefix_t<helloWorldType, ROST("hello")>; 
+    static_assert(removedPrefixT2a::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT2a::hash() == helloWorldType::hash(), "Expected hash of match of Hello, World!!");
+    static_assert(std::is_same_v<removedPrefixT2a, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT2a, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
+
+    // try Remove "HEllo" prefix from "Hello, World!". As, it is not a prefix, it will return the original string "Hello, World!"
+    using removedPrefixT2b = remove_prefix_t<helloWorldType, ROST("HEllo")>; 
+    static_assert(removedPrefixT2b::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT2b::hash() == helloWorldType::hash(), "Expected hash of match of Hello, World!!");
+    static_assert(std::is_same_v<removedPrefixT2b, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT2b, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
+
+    // try Remove "HeLlo" prefix from "Hello, World!". As, it is not a prefix, it will return the original string "Hello, World!"
+    using removedPrefixT2c = remove_prefix_t<helloWorldType, ROST("HeLlo")>; 
+    static_assert(removedPrefixT2c::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT2c::hash() == helloWorldType::hash(), "Expected hash of match of Hello, World!!");
+    static_assert(std::is_same_v<removedPrefixT2c, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT2c, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
+
+    // try Remove "HelLo" prefix from "Hello, World!". As, it is not a prefix, it will return the original string "Hello, World!"
+    using removedPrefixT2d = remove_prefix_t<helloWorldType, ROST("HelLo")>; 
+    static_assert(removedPrefixT2d::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT2d::hash() == helloWorldType::hash(), "Expected hash of match of Hello, World!!");
+    static_assert(std::is_same_v<removedPrefixT2d, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT2d, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
+
+    // try Remove "HellO" prefix from "Hello, World!". As, it is not a prefix, it will return the original string "Hello, World!"
+    using removedPrefixT2e = remove_prefix_t<helloWorldType, ROST("HellO")>; 
+    static_assert(removedPrefixT2e::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT2e::hash() == helloWorldType::hash(), "Expected hash of match of Hello, World!!");
+    static_assert(std::is_same_v<removedPrefixT2e, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT2e, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
+
+    // try Remove "HELLO" prefix from "Hello, World!". As, it is not a prefix, it will return the original string "Hello, World!"
+    using removedPrefixT2f = remove_prefix_t<helloWorldType, ROST("HELLO")>; 
+    static_assert(removedPrefixT2f::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT2f::hash() == helloWorldType::hash(), "Expected hash of match of Hello, World!!");
+    static_assert(std::is_same_v<removedPrefixT2f, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT2f, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
+
+    // Try to remove ",World!" prefix from "Hello, World!". As, it is not a prefix, it will return the original string "Hello, World!"
+    using removedPrefixT3 = remove_prefix_t<helloWorldType, ROST(", World!")>;  
+    static_assert(removedPrefixT3::size() == 13, "Expected size of 13");
+    static_assert(removedPrefixT3::hash() == helloWorldType::hash(), "Expected hash of match of Hello, World!!");
+    static_assert(std::is_same_v<removedPrefixT3, helloWorldType>, "Expected type to be 'Hello, World!'");
+    static_assert(std::is_same_v<removedPrefixT3, ROST("Hello, World!")>, "Expected type to be 'Hello, World!'");
 }
 
 TEST_F(ro_string_test, hash_collision_detection) {
