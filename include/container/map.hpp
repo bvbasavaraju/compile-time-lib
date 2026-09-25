@@ -1,96 +1,107 @@
 #pragma once
 
-#include <variant>
+#include <array>
+#include <concepts>
+#include <cstdint>
+#include <type_traits>
+#include <utility>
 
 namespace ctl {
 
-template <typename T, T ... Ts>
+template <typename T>
+    requires(std::is_integral_v<T>)
+struct map_entry {
+private:
+    T val;
+
+public:
+    constexpr map_entry(T val_) : val(val_) {}
+
+    constexpr auto key() const noexcept -> std::uint64_t {
+        return static_cast<std::uint64_t>(val);
+    }
+
+    constexpr auto value() const noexcept -> T const {
+        return val;
+    }
+};
+
+template <typename T, std::size_t N>
 // TODO: Add a requirement where T should have following constexpr member functions:
 //  - key() that returns a non floating number type
 struct map {
 public:
-    using key_t = typename std::decay_t<decltype(T{}.key())>;
+    using key_t = std::decay_t<decltype(std::declval<T>().key())>;
     using value_t = T;
+
 private:
-    constexpr static auto data = []() {
-        std::array<std::pair<key_t, T>, sizeof...(Ts)> arr{std::pair<key_t, T>(T{}.key(), Ts)...};
-        // Sort the array based on the key values in ascending order
-        for(std::size_t i = 0; i < arr.size(); ++i) {
-            for (std::size_t j = i + 1; j < arr.size(); ++j) {
-                if (arr[i].first > arr[j].first) {
-                    std::swap(arr[i], arr[j]);
+    using data_t = std::array<std::pair<key_t, value_t>, N>;
+
+    template <typename U>
+    struct data_initializer {
+        template <typename ...Us>
+            requires(std::is_same_v<U, Us> && ...)
+        constexpr auto operator()(U first, Us... rest) -> data_t {
+            data_t arr{ std::pair<key_t, value_t>(first.key(), first),
+                        std::pair<key_t, value_t>(rest.key(), rest)...};
+            // Sort the array based on the key values in ascending order
+            for(std::size_t i = 0; i < arr.size(); ++i) {
+                for (std::size_t j = i + 1; j < arr.size(); ++j) {
+                    if (arr[i].first > arr[j].first) {
+                        std::swap(arr[i], arr[j]);
+                    }
                 }
             }
-        }
-        return arr;
-    }();
+            return arr;
+        };
+    };
+
+    // members
+    const data_t data;
 
     constexpr auto get_value(key_t key) const -> value_t const* {
-        key_t low = 0;
-        key_t high = data.size() - 1;
-        while (low <= high) {
-            key_t mid = low + (high - low) / 2;
+        std::size_t low = 0;
+        std::size_t high = data.size();
+        while (low < high) {
+            std::size_t mid = low + (high - low) / 2;
             if ((data[mid].first) == key) {
                 return &data[mid].second;
             } else if ((data[mid].first) < key) {
                 low = mid + 1;
             } else {
-                high = mid - 1;
+                high = mid;
             }
         }
 
         return nullptr;
     };
-
 public:
-    constexpr auto find(key_t key) const -> value_t const* {
+    template <typename... Ts>
+        requires(std::is_same_v<T, Ts> && ...)
+    constexpr map(T first, Ts... rest) : data(data_initializer<T>{}(first, rest...)) {}
+
+    constexpr map() requires (N == 0) : data{} {}
+
+    constexpr auto find(key_t key) const noexcept -> value_t const* {
         return get_value(key);
     }
+
+    constexpr auto size() const noexcept -> std::size_t {
+        return data.size();
+    }
+
+#ifdef DEBUG_MAP
+    auto print() const -> void {
+        for(auto entry : data) {
+            std::cout << entry.second.value() << "\n";
+        }
+    }
+#endif  // DEBUG_MAP
     
 };  // struct map
 
-template <typename... T>
-// TODO: Add a requirement where T should have following constexpr member functions:
-//  - key() that returns a non floating number type
-struct mixed_map {
-public:
-    using key_t = std::common_type_t<std::decay_t<decltype(std::declval<T>().key())>...>;
-    using value_t = std::variant<T...>;
-private:
-    constexpr static auto data = []() {
-        std::array<std::pair<key_t, value_t>, sizeof...(T)> arr{std::pair<key_t, value_t>(T{}.key(), value_t{T{}})...};
-        for (std::size_t i = 0; i < arr.size(); ++i) {
-            for (std::size_t j = i + 1; j < arr.size(); ++j) {
-                if (arr[i].first > arr[j].first) {
-                    std::swap(arr[i], arr[j]);
-                }
-            }
-        }
-        return arr;
-    }();
-
-    constexpr auto get_value(key_t key) const -> value_t const* {
-        key_t low = 0;
-        key_t high = data.size() - 1;
-        while (low <= high) {
-            key_t mid = low + (high - low) / 2;
-            if ((data[mid].first) == key) {
-                return &data[mid].second;
-            } else if ((data[mid].first) < key) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
-        }
-
-        return nullptr;
-    };
-
-public:
-    constexpr auto find(key_t key) const {
-        return get_value(key);
-    }
-    
-};  // struct map
+template <typename T, typename... Ts>
+    requires(std::is_same_v<T, Ts> && ...)
+map(T, Ts...) -> map<T, sizeof...(Ts) + 1>;
 
 }   // namespace ctl
