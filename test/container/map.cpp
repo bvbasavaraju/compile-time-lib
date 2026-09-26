@@ -1,28 +1,18 @@
-#include <iostream>
-#include <cstring>
 #include <cstdint>
-#include <array>
+#include <iterator>
 #include <limits>
 
 #include "container/map.hpp"
-#include "debug/show_type.hpp"
 
 #include <gtest/gtest.h>
 
-#include <type_traits>
-
-class map_test : public ::testing::Test {
-  protected:
-    void SetUp() override {
-        // Add Test setup code here!
-    }
-
-    void TearDown() override {
-        // Add Test teardown code here!
-    }
-};
+class map_test : public ::testing::Test {};
 
 using namespace ctl;
+
+static_assert(details::is_unique_key{}(12, 10));
+static_assert(!details::is_unique_key{}(12, 12));
+static_assert(!details::is_unique_key{}(1.25, 1.75));
 
 struct uint64_entry {
     std::uint64_t stored_value;
@@ -36,88 +26,125 @@ struct uint64_entry {
     }
 };
 
-constexpr auto constexpr_lookup(auto &map_, auto valueToFind) {
-    return map_.find(valueToFind)->value();
+static_assert(details::is_unique_key{}(uint64_entry{0}, uint64_entry{1}));
+static_assert(!details::is_unique_key{}(uint64_entry{1}, uint64_entry{1}));
+
+constexpr auto constexpr_lookup(auto const& map_, auto value_to_find) {
+    return map_.find(value_to_find)->second;
 }
 
-constexpr auto constexpr_lookup_non_entry(auto &map_, auto valueToFind) {
-    return map_.find(valueToFind);
+constexpr auto constexpr_lookup_non_entry(auto const& map_, auto value_to_find) {
+    return map_.find(value_to_find);
+}
+
+constexpr auto keys_are_sorted(auto const& map_) -> bool {
+    if (map_.begin() == map_.end()) {
+        return true;
+    }
+
+    auto previous = map_.begin()->first;
+    for (auto entry = map_.begin() + 1; entry != map_.end(); ++entry) {
+        if (previous >= entry->first) {
+            return false;
+        }
+        previous = entry->first;
+    }
+    return true;
 }
 
 TEST_F(map_test, basic_test) {
-    constexpr auto map1 = map(map_entry{12}, map_entry{10}, map_entry{4}, map_entry{21}, map_entry{216}, map_entry{24}, map_entry{16});
-    static_assert(map1.size() == 7, "Size of map should be 7!!");
-    static_assert(map1.size() != 0, "Size of map should be 7!!");
+    constexpr auto values = map(12, 10, 4, 21, 216, 24, 16);
 
-    const auto val12 = map1.find(12);
-    static_assert(constexpr_lookup(map1, 12) == 12, "Matching value not found!!");
-    ASSERT_EQ(val12->value(), 12) << "Matching value not found!!";
+    static_assert(values.size() == 7);
+    static_assert(values.size() != 0);
+    static_assert(constexpr_lookup(values, 12) == 12);
+    static_assert(constexpr_lookup_non_entry(values, 11) == nullptr);
+    static_assert(keys_are_sorted(values));
 
-    const auto val11 = map1.find(11);
-    static_assert(constexpr_lookup_non_entry(map1, 11) == nullptr, "Non Entry value has been found!!??");
-    ASSERT_EQ(val11, nullptr) << "Non Entry value has been found!!??";
+    ASSERT_EQ(values.find(12)->second, 12);
+    ASSERT_EQ(values.find(11), nullptr);
+    ASSERT_TRUE(keys_are_sorted(values));
 }
 
 TEST_F(map_test, empty_map_test) {
-    constexpr ::ctl::map<ctl::map_entry<int>, 0> empty_map{};
-    static_assert(empty_map.size() == 0, "Size of empty map is more than 0!!??");
-    static_assert(!(empty_map.size() > 0), "Size of empty map is more than 0!!??");
-    static_assert(constexpr_lookup_non_entry(empty_map, 0) == nullptr, "Non Entry value has been found!!??");
-    static_assert(constexpr_lookup_non_entry(empty_map, std::numeric_limits<std::uint64_t>::max()) == nullptr, "Non Entry value has been found!!??");
+    constexpr map<int, 0> empty_map{};
 
-    ASSERT_EQ(empty_map.find(0), nullptr) << "Value found in an empty map!!??";
-    ASSERT_EQ(empty_map.find(std::numeric_limits<std::uint64_t>::max()), nullptr)
-        << "Value found in an empty map!!??";
+    static_assert(empty_map.size() == 0);
+    static_assert(empty_map.begin() == empty_map.end());
+    static_assert(empty_map.count(0) == 0);
+    static_assert(!empty_map.contains(0));
+    static_assert(constexpr_lookup_non_entry(empty_map, 0) == nullptr);
+    static_assert(constexpr_lookup_non_entry(empty_map, std::numeric_limits<std::uint64_t>::max()) == nullptr);
+
+    ASSERT_EQ(empty_map.find(0), nullptr);
+    ASSERT_EQ(empty_map.find(std::numeric_limits<std::uint64_t>::max()), nullptr);
+    ASSERT_EQ(std::distance(empty_map.begin(), empty_map.end()), 0);
+    ASSERT_EQ(empty_map.count(0), 0);
+    ASSERT_FALSE(empty_map.contains(0));
 }
 
 TEST_F(map_test, single_entry_boundary_test) {
-    constexpr auto single_map = map(map_entry{12});
+    constexpr auto single_map = map(12);
 
     static_assert(single_map.size() == 1);
-    static_assert(constexpr_lookup(single_map, 12) == 12, "Matching value not found!!");
-    static_assert(constexpr_lookup_non_entry(single_map, 11) == nullptr, "Non Entry value has been found!!??");
-    static_assert(constexpr_lookup_non_entry(single_map, 13) == nullptr, "Non Entry value has been found!!??");
+    static_assert(single_map.begin()->first == 12);
+    static_assert(single_map.begin() + 1 == single_map.end());
+    static_assert(constexpr_lookup(single_map, 12) == 12);
+    static_assert(constexpr_lookup_non_entry(single_map, 11) == nullptr);
+    static_assert(constexpr_lookup_non_entry(single_map, 13) == nullptr);
+    static_assert(single_map.count(12) == 1);
+    static_assert(single_map.contains(12));
 
-    ASSERT_EQ(single_map.size(), 1);
-    ASSERT_NE(single_map.find(12), nullptr);
-    ASSERT_EQ(single_map.find(12)->value(), 12);
+    ASSERT_EQ(single_map.find(12)->second, 12);
     ASSERT_EQ(single_map.find(11), nullptr);
     ASSERT_EQ(single_map.find(13), nullptr);
+    ASSERT_EQ(std::distance(single_map.begin(), single_map.end()), 1);
+    ASSERT_EQ(single_map.count(13), 0);
+    ASSERT_FALSE(single_map.contains(13));
 }
 
 TEST_F(map_test, unsorted_entries_are_searchable_test) {
-    constexpr auto values = map(map_entry{30}, map_entry{10}, map_entry{40}, map_entry{20});
+    constexpr auto values = map(30, 10, 40, 20);
 
     static_assert(values.size() == 4);
-    static_assert(constexpr_lookup(values, 10) == 10, "Matching value not found!!");
-    static_assert(constexpr_lookup(values, 20) == 20, "Matching value not found!!");
-    static_assert(constexpr_lookup(values, 30) == 30, "Matching value not found!!");
-    static_assert(constexpr_lookup(values, 40) == 40, "Matching value not found!!");
-    static_assert(constexpr_lookup_non_entry(values, 9) == nullptr, "Non Entry value has been found!!??");
-    static_assert(constexpr_lookup_non_entry(values, 41) == nullptr, "Non Entry value has been found!!??");
+    static_assert(constexpr_lookup(values, 10) == 10);
+    static_assert(constexpr_lookup(values, 20) == 20);
+    static_assert(constexpr_lookup(values, 30) == 30);
+    static_assert(constexpr_lookup(values, 40) == 40);
+    static_assert(constexpr_lookup_non_entry(values, 9) == nullptr);
+    static_assert(constexpr_lookup_non_entry(values, 41) == nullptr);
+    static_assert(keys_are_sorted(values));
 
-    ASSERT_EQ(values.size(), 4);
-    ASSERT_EQ(values.find(10)->value(), 10);
-    ASSERT_EQ(values.find(20)->value(), 20);
-    ASSERT_EQ(values.find(30)->value(), 30);
-    ASSERT_EQ(values.find(40)->value(), 40);
+    ASSERT_EQ(values.find(10)->second, 10);
+    ASSERT_EQ(values.find(20)->second, 20);
+    ASSERT_EQ(values.find(30)->second, 30);
+    ASSERT_EQ(values.find(40)->second, 40);
     ASSERT_EQ(values.find(9), nullptr);
     ASSERT_EQ(values.find(41), nullptr);
+    ASSERT_EQ(values.count(10), 1);
+    ASSERT_EQ(values.count(9), 0);
+    ASSERT_TRUE(values.contains(40));
+    ASSERT_FALSE(values.contains(41));
+    ASSERT_EQ(std::distance(values.begin(), values.end()), 4);
+    ASSERT_EQ(values.begin()->first, 10);
+    ASSERT_EQ((values.end() - 1)->first, 40);
 }
 
-TEST_F(map_test, duplicate_keys_test) {
-    constexpr auto values = map(map_entry{12}, map_entry{12}, map_entry{24});
+TEST_F(map_test, signed_integer_key_boundaries_test) {
+    constexpr auto values = map(std::numeric_limits<int>::min(), -1, 0);
+    constexpr auto minimum_key = static_cast<std::uint64_t>(std::numeric_limits<int>::min());
 
     static_assert(values.size() == 3);
-    static_assert(constexpr_lookup(values, 12) == 12, "Matching value not found!!");
-    static_assert(constexpr_lookup(values, 24) == 24, "Matching value not found!!");
-    static_assert(constexpr_lookup_non_entry(values, 11) == nullptr, "Non Entry value has been found!!??");
+    static_assert(values.contains(minimum_key));
+    static_assert(values.contains(std::numeric_limits<std::uint64_t>::max()));
+    static_assert(values.contains(0));
+    static_assert(values.find(minimum_key)->second == std::numeric_limits<int>::min());
+    static_assert(values.find(std::numeric_limits<std::uint64_t>::max())->second == -1);
+    static_assert(values.find(1) == nullptr);
 
-    ASSERT_EQ(values.size(), 3);
-    ASSERT_NE(values.find(12), nullptr);
-    ASSERT_EQ(values.find(12)->value(), 12);
-    ASSERT_EQ(values.find(24)->value(), 24);
-    ASSERT_EQ(values.find(11), nullptr);
+    ASSERT_EQ(values.count(minimum_key), 1);
+    ASSERT_EQ(values.find(std::numeric_limits<std::uint64_t>::max())->second, -1);
+    ASSERT_EQ(values.find(1), nullptr);
 }
 
 TEST_F(map_test, key_type_boundaries_test) {
@@ -126,15 +153,45 @@ TEST_F(map_test, key_type_boundaries_test) {
         uint64_entry{0});
 
     static_assert(values.size() == 2);
-    static_assert(constexpr_lookup(values, 0) == 0, "Matching value not found!!");
-    static_assert(constexpr_lookup(values, std::numeric_limits<std::uint64_t>::max()) ==
-                      std::numeric_limits<std::uint64_t>::max(),
-                  "Matching value not found!!");
-    static_assert(constexpr_lookup_non_entry(values, 1) == nullptr, "Non Entry value has been found!!??");
+    static_assert(constexpr_lookup(values, 0).value() == 0);
+    static_assert(constexpr_lookup(values, std::numeric_limits<std::uint64_t>::max()).value() ==
+                  std::numeric_limits<std::uint64_t>::max());
+    static_assert(constexpr_lookup_non_entry(values, 1) == nullptr);
+    static_assert(keys_are_sorted(values));
 
-    ASSERT_EQ(values.size(), 2);
-    ASSERT_EQ(values.find(0)->value(), 0);
-    ASSERT_EQ(values.find(std::numeric_limits<std::uint64_t>::max())->value(),
+    ASSERT_EQ(values.find(0)->second.value(), 0);
+    ASSERT_EQ(values.find(std::numeric_limits<std::uint64_t>::max())->second.value(),
               std::numeric_limits<std::uint64_t>::max());
     ASSERT_EQ(values.find(1), nullptr);
+    ASSERT_EQ(values.count(std::numeric_limits<std::uint64_t>::max()), 1);
+}
+
+TEST_F(map_test, floating_point_key_conversion_test) {
+    constexpr auto values = map(12.75, 3.5, 11.25);
+
+    static_assert(values.size() == 3);
+    static_assert(values.find(12)->second == 12.75);
+    static_assert(values.find(3)->second == 3.5);
+    static_assert(values.find(11)->second == 11.25);
+    static_assert(values.find(13) == nullptr);
+    static_assert(keys_are_sorted(values));
+
+    ASSERT_EQ(values.count(12), 1);
+    ASSERT_TRUE(values.contains(3));
+    ASSERT_FALSE(values.contains(13));
+    ASSERT_EQ(values.find(11)->second, 11.25);
+    ASSERT_EQ(std::distance(values.begin(), values.end()), 3);
+}
+
+TEST_F(map_test, double_test) {
+    constexpr auto values = map(12.1, 11.2);
+
+    static_assert(values.size() == 2);
+    static_assert(values.find(12)->second == 12.1);
+    static_assert(values.find(11)->second == 11.2);
+    static_assert(values.find(23) == nullptr);
+
+    ASSERT_EQ(values.find(12)->second, 12.1);
+    ASSERT_EQ(values.find(11)->second, 11.2);
+    ASSERT_EQ(values.find(23), nullptr);
 }
