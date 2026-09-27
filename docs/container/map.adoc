@@ -9,9 +9,11 @@ Include `container/map.hpp` to use the map.
 
 * **Homogeneous Fixed-Size Storage**: Store values of one type in a compile-time-sized map; values are not wrapped in a variant.
 * **Constructor-Based CTAD**: Infer the value type and entry count from `ctl::map(value, ...)`.
-* **Compile-Time Construction Checks**: Construct non-empty maps during constant evaluation and reject duplicate converted keys at compile time.
+* **Compile-Time Construction**: Non-empty maps are created during constant evaluation, and duplicate converted keys make construction fail at compile time.
 * **Sorted Entries and Binary Search**: Entries are ordered by their `std::uint64_t` keys, enabling binary-search lookup.
 * **Integral, Floating-Point, and Custom Keys**: Derive keys from numeric values or a custom value's `key()` member, with uniqueness checked after conversion.
+* **Inline Fixed-Size Storage**: The map stores entries directly in a fixed-size `std::array`; the map implementation does not dynamically allocate its storage.
+* **Immutable Access**: The stored array is `const`, and public iteration exposes only const iterators, so entries cannot be modified through the map API.
 * **Lookup and Read-Only Iteration**: Query with `find`, `contains`, or `count`, and traverse entries in ascending key order.
 
 === Creating a map
