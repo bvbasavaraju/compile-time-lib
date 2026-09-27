@@ -62,8 +62,8 @@ private:
     using data_t = std::array<std::pair<key_t, value_t>, N>;
 
 public:
-    using iterator = data_t::iterator;
-    using const_iterator = data_t::const_iterator;
+    using iterator = typename data_t::iterator;
+    using const_iterator = typename data_t::const_iterator;
 
 private:
 
