@@ -1,0 +1,39 @@
+== Destinations and Usage
+
+Include `logger/log.hpp` to use the logging macros. Messages are string literals converted by the `_log` user-defined literal into `ctl::log_message_t` compile-time string types. The dispatcher converts the message type to metadata, obtains its token with `get_token<T>()`, and sends the resulting `std::uint32_t` token to each configured destination.
+
+=== Destination contract
+
+A destination type must be move-constructible, move-assignable, and provide `dispatch(std::uint32_t)` returning `void`. `ctl::log_destinations_t<...>` stores destination instances in a tuple and calls each destination for every enabled message.
+
+[source,cpp]
+----
+#include <cstdint>
+#include <iostream>
+
+#include "logger/log.hpp"
+#include "logger/log_dispatcher.hpp"
+
+struct console_logger {
+    auto dispatch(std::uint32_t token) -> void {
+        std::cout << "log token: " << token << '\\n';
+    }
+};
+
+template <>
+inline auto ctl::dispatcherConfig<> = ctl::log_destinations_t<console_logger>{};
+
+void run() {
+    LOG_INFO("Service started");
+}
+----
+
+The primary template `ctl::dispatcherConfig` is a no-op dispatcher. Without a specialization, enabled log calls do not reach an application destination; token references can still be emitted by the logging path and must be considered when setting up token generation.
+
+Multiple destinations can be configured by listing their types in `log_destinations_t`. Each destination receives the same token; this API dispatches tokens, not the original message string.
+
+=== Token identity
+
+The generated token is a 32-bit hash of the demangled `get_token` template parameter. It is deterministic for a given parameter spelling and is not a collision-free identifier. Consumers that require a unique message lookup should retain the generated message metadata and handle possible hash collisions.
+
+The generated JSON and XML files are metadata outputs; the logger does not provide a runtime token-to-string lookup facility by itself. An application can use those files to build or integrate its own lookup table.

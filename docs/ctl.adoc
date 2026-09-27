@@ -16,6 +16,7 @@ Features available to use:
 * <<_utility>>
 * <<_string>>
 * <<_logger>>
+* <<_debug_type_inspection>>
 
 *Note:*
 

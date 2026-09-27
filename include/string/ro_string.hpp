@@ -22,6 +22,10 @@ struct ro_string {
             constexpr char str[] = {chs..., 0};
             return ::ctl::string::hash{}(str, sizeof...(chs));
         }
+
+        constexpr static auto key() noexcept -> std::uint64_t {
+            return hash();
+        }
 };
 
 // User-defined literal for ro_string

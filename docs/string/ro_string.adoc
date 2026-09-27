@@ -1,44 +1,78 @@
 == Read Only String
 :hardbreaks-option:
 
-`ctl::string::ro_string` stores a string as a type. The characters are template parameters, so the string can be used during compilation and has no runtime object state.
+`ctl::string::ro_string<Char, Chars...>` represents a character sequence as a type by storing each character in a non-type template parameter. Its object has no per-instance data; its contents and operations are available during constant evaluation. It is primarily intended for narrow string literals (`char`).
 
 To use it, add `#include <string/ro_string.hpp>` in the source file.
 
+=== Features
+
+* **Type-Based String Representation**: Encode each character in the type, making string contents available during compilation without per-object storage.
+* **Literal and Type Conveniences**: Create values with the `_ros` literal and refer to literal types with `ROST`.
+* **Compile-Time String Inspection**: Query the length, get a null-terminated C-string pointer, and compute a 64-bit FNV-1a hash.
+* **Map-Compatible Hash Keys**: `key()` exposes the string hash for APIs such as `ctl::map`; hashes are not collision-free string identities.
+* **Composable String Operations**: Concatenate strings and remove matching prefixes at compile time; see <<_algorithms_2>>.
+* **Hashing and Registration Support**: Share the hash algorithm with runtime strings and use the registrar to reject duplicate entries and detect hash collisions; see <<_hash>> and <<_registrar>>.
+
 === Creating a string
 
-The `_ros` user-defined literal creates a `ro_string` type. `ROST` is a convenience macro which exposes the type of a literal.
+The `_ros` user-defined literal creates a `ro_string` value whose type encodes the literal characters. `ROST` is a convenience macro which exposes that type; use `decltype` when spelling the literal directly as a type.
 
-[source, cpp]
+[source,cpp]
+----
 using hello_type = ROST("Hello");
 using world_type = decltype("World"_ros);
 
 // The literal is also available directly as a value.
 constexpr auto hello = "Hello"_ros;
+----
 
-`operator""_ros` is exported to the global namespace for convenience. `ROST` expands to `decltype(data##_ros)`.
+`operator""_ros` is exported to the global namespace for convenience. If the literal is not found in scope, bring it in with `using ctl::string::operator""_ros;` (or a suitable `using namespace` declaration). `ROST(data)` expands to `decltype(data##_ros)` and `HASH(data)` expands to `ROST(data)::hash()`.
 
 === Members
 
-==== size
+==== `size()`
 
 Returns the number of characters, excluding the terminating null character.
 
-[source, cpp]
+[source,cpp]
+----
 static_assert(ROST("Hello")::size() == 5);
+----
 
-==== c_str
+The length excludes the terminating null character. An empty literal has size zero.
+
+==== `c_str()`
 
 Returns a null-terminated `const char*` representation of the string.
 
-[source, cpp]
+[source,cpp]
+----
 static_assert(std::strcmp(ROST("Hello")::c_str(), "Hello") == 0);
+----
 
-==== hash
+The returned pointer refers to static storage and is null-terminated. It can be used where a conventional C string is required; it is not a `std::string` and does not own dynamically allocated storage.
+
+==== `hash()` and `key()`
 
 Returns the compile-time hash of the string as a `std::uint64_t`.
 
-[source, cpp]
+[source,cpp]
+----
 static_assert(ROST("Hello")::hash() == HASH("Hello"));
+static_assert(ROST("Hello")::key() == ROST("Hello")::hash());
+----
 
-`HASH(data)` is a convenience macro equivalent to `ROST(data)::hash()`.
+`hash()` returns the 64-bit FNV-1a hash of the characters, excluding the terminating null. `key()` returns the same hash and lets a `ro_string` be used as a key-bearing value in `ctl::map`. A hash is not a collision-free representation of the original string; compare the string types or contents when identity must be exact.
+
+NOTE: To check compile-time hash collisions among strings, add their `ro_string` types to the registrar. The registrar permits registering the same type more than once, but compilation fails if two different registered types have the same hash. See <<_registrar>>.
+
+=== Related operations
+
+`ro_string` types can be combined at compile time with the string algorithms. The current operations include concatenation (`append_t`/`concat_t`, and `operator+`) and prefix removal (`remove_prefix_t`). String hashing and duplicate/collision-aware registries are described separately:
+
+* <<_algorithms_2>>
+* <<_hash>>
+* <<_registrar>>
+
+These operations work on compatible character types. Prefix removal returns the original type when the prefix is empty or does not match.

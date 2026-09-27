@@ -1,0 +1,36 @@
+== Debug Type Inspection
+:hardbreaks-option:
+
+`ctl::debug::show_type` is a compile-time debugging aid for inspecting a type in compiler diagnostics. Include `debug/show_type.hpp` to use it.
+
+=== Features
+
+* **Inspect a Deduced Type**: Pass an expression to let the function template deduce its type.
+* **Inspect an Explicit Type**: Provide the type as a template argument when there is no expression to pass.
+* **Display Through Compiler Diagnostics**: The type is exposed as part of an intentionally failing `static_assert` instantiation.
+* **No Runtime Output**: The utility works only by producing a compile-time diagnostic; it does not print or return type information at runtime.
+
+=== Usage
+
+Pass an expression to inspect the deduced template parameter:
+
+[source,cpp]
+----
+#include <type_traits>
+
+#include "debug/show_type.hpp"
+
+auto value = 42;
+ctl::debug::show_type(value);
+----
+
+Or specify the type explicitly:
+
+[source,cpp]
+----
+ctl::debug::show_type<std::integral_constant<int, 7>>();
+----
+
+Compilation is expected to fail at the `static_assert`. Read the compiler's diagnostic around `always_false<T>` to find the instantiated type. Compiler versions format and abbreviate types differently, especially for deeply nested templates, so this is a debugging technique rather than a stable type-to-string facility.
+
+Remove or comment out the `show_type` call after inspecting the diagnostic; leaving it in place will keep the translation unit ill-formed.

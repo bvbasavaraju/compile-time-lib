@@ -2,17 +2,66 @@
 == List
 :hardbreaks-option:
 
-It is a container which holds the types. It is an heterogenous container. 
+`ctl::list<Ts...>` is a type-level, heterogeneous sequence. It stores no objects and has no runtime operations; use it to describe and transform packs of types during compilation. Algorithms in `container/algorithms.hpp` generally work with other variadic type containers too, such as `std::tuple`.
 
-To use make sure to add `#include <container/list.hpp>` in source file. 
+Include `container/list.hpp` for the list declarations. Include `container/algorithms.hpp` for the algorithms documented in <<_algorithms>>.
 
-There are 3 variants of list
+=== Features
 
-* `clt::list<>` => non-instantiable list
-* `ctl::ilist<>` => instantiable list
-* `ctl::clist<>` => instantiable and callable list. 
-It has many operator over-loadings which can be called at runtime. 
-Example for the same can be found in `src/main.cpp` file
+* **Compile-Time Heterogeneous Sequences**: Represent an ordered pack of different types without storing runtime values.
+* **Three List Forms**: Choose `list` for type-level work, `ilist` for an instantiable list object, or `clist` for callable and reducible type packs.
+* **Extensive Type Algorithms**: Add, remove, select, search, filter, transform, sort, compare, and reorganize types; see <<_algorithms>> for the operation catalog.
+* **Compatible Type-List Inputs**: Many algorithms also work with variadic containers such as `std::tuple`, subject to each algorithm's constraints.
+* **Callable Reductions**: `clist` supports bitwise, logical, and arithmetic folds over callable or `value`-bearing types.
 
-Many algorithms can be applied on the created list type. 
-Even algorithms from MP11 can also be used with the list type.
+=== List forms
+
+* `ctl::list<Ts...>` is the primary type-list template. It is declared but not defined, so it is intended for type-level use rather than object construction.
+* `ctl::ilist<Ts...>` is an empty, instantiable class template. It can be used where a type list also needs to be represented by an object.
+* `ctl::clist<Ts...>` derives from `ilist<Ts...>` and adds call and reduction operators.
+
+Correct namespace and spelling: the type is `ctl::list`, not `clt::list`.
+
+=== Callable lists
+
+`clist` can default-construct each listed type and invoke it with `operator()`. Its predicate overload accepts an lvalue callable and calls it once for each default-constructed type. These operations therefore require the listed types to be default-constructible and suitable for the requested call; the predicate overload also requires the callable to accept each element type.
+
+[source,cpp]
+----
+struct first {
+	constexpr auto operator()() const -> int { return 2; }
+};
+
+struct second {
+	constexpr auto operator()() const -> int { return 3; }
+};
+
+using callable_types = ctl::clist<first, second>;
+
+constexpr auto values = callable_types{} + 10;
+static_assert(values == 15);
+----
+
+The reduction operators combine the supplied initial value with each type's value, in pack order. `clist` obtains an element value by invoking `T{}()` when `ctl::is_invocable_v<T>` is true; otherwise it uses `T::value`. The available operators are `|`, `&`, `^`, `||`, `&&`, `+`, `-`, and `*`. Their expressions must be valid for the initial value and every element value. Logical reductions return `bool`.
+
+=== Algorithms
+
+The algorithms create new types and do not mutate the input list. The detailed reference covers list modification, access, filtering, search, transforms, sorting, and integer-sequence utilities, including their aliases and predicate forms: <<_algorithms>>.
+
+For example, a list can be extended and inspected at compile time:
+
+[source,cpp]
+----
+#include "container/list.hpp"
+#include "container/algorithms.hpp"
+
+#include <type_traits>
+
+using types = ctl::list<int, char>;
+using extended = ctl::push_back_t<types, double>;
+
+static_assert(ctl::size_v<extended> == 3);
+static_assert(std::is_same_v<ctl::at_c_t<extended, 2>, double>);
+----
+
+Most algorithms accept any variadic type-list template with compatible shape, but individual algorithms can impose additional requirements on their arguments (for example, sorting needs comparable compile-time values). See the algorithm entry for its exact constraints and edge cases.

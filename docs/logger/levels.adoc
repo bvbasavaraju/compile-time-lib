@@ -1,0 +1,26 @@
+== Log Levels
+
+The logger defines its levels in `ctl::log_level`. The types form this inheritance chain:
+
+[source,cpp]
+----
+none_t
+  `-- critical_t
+        `-- error_t
+              `-- warning_t
+                    `-- debug_t
+                          `-- info_t
+----
+
+`ctl::logLevelConfig` defaults to `ctl::log_level::info_t`. The `LOG_*` macros use `if constexpr` with `std::is_base_of_v<message_level, logLevelConfig>` to decide whether to dispatch a message. With the default, all five macros are enabled. Specialize the alias in `log_config.hpp` to select a different threshold:
+
+[source,cpp]
+----
+namespace ctl {
+using logLevelConfig = log_level::warning_t;
+}
+----
+
+With `warning_t`, `LOG_WARNING`, `LOG_ERROR`, and `LOG_CRITICAL` pass the filter; `LOG_INFO` and `LOG_DEBUG` do not. `none_t` disables every provided macro. Filtering removes the dispatch expression during compilation, but should not be described as removing the message text from all build artifacts: message types are present in compiled symbol names so the build-time generator can recover them.
+
+The available macros are `LOG_INFO(MSG)`, `LOG_DEBUG(MSG)`, `LOG_WARNING(MSG)`, `LOG_ERROR(MSG)`, and `LOG_CRITICAL(MSG)`. `LOG(level, MSG)` is the lower-level macro used to define them.
