@@ -1,0 +1,24 @@
+== Logger
+
+The logger captures message text in compile-time types, resolves each message to a 32-bit token, and dispatches that token to configured destinations. The build-time generator provides the `get_token<T>()` specializations needed to link the application.
+
+Include `logger/log.hpp` for the logging macros and configure a destination through `ctl::dispatcherConfig`.
+
+=== Features
+
+* **Compile-Time Message Capture**: String-literal messages are encoded in template types so the build tooling can recover their text from compiled symbols.
+* **Severity Filtering**: `LOG_INFO`, `LOG_DEBUG`, `LOG_WARNING`, `LOG_ERROR`, and `LOG_CRITICAL` are filtered at compile time using the configured log level.
+* **32-Bit Message Tokens**: Messages resolve to deterministic hash-based `std::uint32_t` tokens; collisions are possible, so tokens are not guaranteed unique.
+* **Configurable Destinations**: Dispatch tokens to one or more application-defined destinations, each implementing `dispatch(std::uint32_t)`.
+* **Build-Time Source Generation**: The CMake helper and Python generator emit the `get_token<T>()` definitions needed to link logged messages.
+* **Metadata Outputs**: The generator writes C++, JSON, and XML token artifacts; JSON and XML are not automatically loaded at runtime.
+
+The logger documentation is organized into:
+
+* <<_log_levels>> for severity filtering
+* <<_destinations_and_usage>> for configuring dispatch and writing messages
+* <<_build_integration>> for generating and linking token definitions
+
+include::levels.adoc[leveloffset=+1]
+include::destinations.adoc[leveloffset=+1]
+include::build.adoc[leveloffset=+1]

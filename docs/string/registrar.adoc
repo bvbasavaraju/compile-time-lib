@@ -5,6 +5,13 @@ The registrar stores `ro_string` types in a `ctl::list` and prevents duplicate e
 
 To use it, add `#include <string/registrar.hpp>` in the source file.
 
+=== Features
+
+* **Compile-Time String Registry**: Represent the set of registered strings as a `ctl::list` type.
+* **Duplicate Registration Is Idempotent**: Adding the same `ro_string` type again leaves the registry unchanged.
+* **Compile-Time Hash Collision Detection**: Reject a new string when its hash matches a different registered string type.
+* **Composable with Type Algorithms**: Use the resulting list with algorithms from `container/algorithms.hpp`.
+
 === Registering entries
 
 `registrar_t` is an alias for `ctl::list`. `REGISTRAR_INIT` creates an empty registrar and `REGISTRAR_ADD` adds an entry.

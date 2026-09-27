@@ -25,16 +25,16 @@ private:
     }();
 
     constexpr auto get_value(key_t key) const -> value_t const* {
-        key_t low = 0;
-        key_t high = data.size() - 1;
-        while (low <= high) {
-            key_t mid = low + (high - low) / 2;
+        std::size_t low = 0;
+        std::size_t high = data.size();
+        while (low < high) {
+            std::size_t mid = low + (high - low) / 2;
             if ((data[mid].first) == key) {
                 return &data[mid].second;
             } else if ((data[mid].first) < key) {
                 low = mid + 1;
             } else {
-                high = mid - 1;
+                high = mid;
             }
         }
 
@@ -45,7 +45,6 @@ public:
     constexpr auto find(key_t key) const {
         return get_value(key);
     }
-    
 };  // struct mixed_map
 
 }   // namespace ctl

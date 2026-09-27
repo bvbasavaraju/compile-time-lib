@@ -5,6 +5,13 @@
 
 To use it, add `#include <string/hash.hpp>` in the source file.
 
+=== Features
+
+* **Compile-Time FNV-1a Hashing**: Hash string data during constant evaluation and at runtime.
+* **Explicit-Length and Null-Terminated Inputs**: Hash a character range with a supplied length or pass a null-terminated C string.
+* **`ro_string` Integration**: `ro_string::hash()` and `HASH("...")` use the same hash implementation.
+* **64-Bit Results**: Return a `std::uint64_t` hash suitable for compact lookup keys, but not a collision-free string identity.
+
 === Hashing a string
 
 [source, cpp]
@@ -27,3 +34,5 @@ The implementation uses these FNV-1a constants:
 
 * `PRIME_NUM` => `0x100000001b3`
 * `OFFSET_BASIS` => `0xcbf29ce484222325`
+
+NOTE: Hash equality alone cannot prove that two different strings are identical. To check for hash collisions between compile-time string types, add them to the compile-time registrar. Registering two different strings with the same hash fails compilation. See <<_registrar>>.

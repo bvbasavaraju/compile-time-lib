@@ -1,0 +1,62 @@
+== Build Integration
+
+The logger declares `get_token<T>()` in `logger/metadata.hpp`. The Python generator scans undefined, demangled `get_token` symbols in compiled object files and emits C++ specializations that resolve those references. It also emits JSON and XML token metadata.
+
+=== Requirements
+
+* C++20 compiler
+* CMake 3.25.1 or newer for the provided CMake helper
+* Python 3
+* GNU `nm` with demangling support
+
+The helper uses `find`, `grep`, and `nm` in its build commands; use a compatible shell and toolchain.
+
+=== CMake helper
+
+Include `cmake/GenerateGetTokenSource.cmake`, define the executable target, then call `extract_symbols_and_generate_source()` with the executable target and one or more build dependencies. The helper scans all `*.o` files under `${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles`; the additional arguments are dependencies that trigger symbol recapture when rebuilt. The helper adds the symbol gathering and source-generation dependencies to the executable.
+
+[source,cmake]
+----
+include(${PROJECT_SOURCE_DIR}/cmake/GenerateGetTokenSource.cmake)
+
+set(APP_SOURCES src/main.cpp)
+add_executable(my_app ${APP_SOURCES})
+target_include_directories(my_app PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(my_app PRIVATE ctl)
+
+add_library(my_app_objects OBJECT ${APP_SOURCES})
+target_include_directories(my_app_objects PRIVATE ${PROJECT_SOURCE_DIR}/include)
+
+extract_symbols_and_generate_source(my_app my_app_objects)
+----
+
+The first argument is the existing target to which dependencies are attached. Additional arguments are dependencies of the symbol-capture command, typically object libraries. The helper generates `${CMAKE_CURRENT_BINARY_DIR}/log_tokens.cpp`, `log_tokens.xml`, and `log_tokens.json`. Since the scan is directory-wide, avoid unrelated object files with unresolved `get_token` calls in the same binary directory.
+
+The generated C++ file must be compiled and linked into the final executable so its `get_token<T>()` specializations satisfy the references. Because the source is created during the build, declare it as generated before adding it to the target:
+
+[source,cmake]
+----
+set(GENERATED_TOKEN_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/log_tokens.cpp)
+set_source_files_properties(${GENERATED_TOKEN_SOURCE} PROPERTIES GENERATED TRUE)
+target_sources(my_app PRIVATE ${GENERATED_TOKEN_SOURCE})
+----
+
+If it is compiled as a separate target, ensure that target depends on `generate_source` and that its library is linked to the executable. The helper defines `generate_source` and `gather_symbols` targets in the current CMake directory.
+
+=== Generator outputs
+
+* `log_tokens.cpp` defines explicit `get_token<T>()` specializations.
+* `log_tokens.json` records each token, its hexadecimal representation, and the recovered message when available.
+* `log_tokens.xml` contains equivalent token metadata.
+
+The numeric token is calculated from the first 32 bits of an MD5 digest of the demangled template parameter. The generated identifiers are deterministic, but collisions are possible. The JSON/XML metadata is generated for external tooling; it is not automatically loaded by the logger at runtime.
+
+=== Troubleshooting
+
+**Undefined `get_token<T>()` at link time**: Ensure the generated `log_tokens.cpp` is compiled and linked into the final executable, and that the symbol-capture step scanned the object files containing the logging calls.
+
+**No tokens generated**: Check that the object files passed to the helper contain undefined `get_token` references and that `nm --demangle --undefined-only` is available.
+
+**`extract_symbols_and_generate_source` is unknown**: Include `GenerateGetTokenSource.cmake` before calling the helper.
+
+**Generator script not found**: The helper uses `${CMAKE_SOURCE_DIR}/scripts/generate_get_token_source.py`; verify the project root and script path.

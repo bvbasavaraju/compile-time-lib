@@ -1,0 +1,95 @@
+== Map
+:hardbreaks-option:
+
+`ctl::map` is a fixed-size, homogeneous map. Every stored value has the same type `T`; unlike a mixed map, it does not store a variant of different value types. Entries are kept in ascending key order and can be searched with binary search.
+
+Include `container/map.hpp` to use the map.
+
+=== Features
+
+* **Homogeneous Fixed-Size Storage**: Store values of one type in a compile-time-sized map; values are not wrapped in a variant.
+* **Constructor-Based CTAD**: Infer the value type and entry count from `ctl::map(value, ...)`.
+* **Compile-Time Construction Checks**: Construct non-empty maps during constant evaluation and reject duplicate converted keys at compile time.
+* **Sorted Entries and Binary Search**: Entries are ordered by their `std::uint64_t` keys, enabling binary-search lookup.
+* **Integral, Floating-Point, and Custom Keys**: Derive keys from numeric values or a custom value's `key()` member, with uniqueness checked after conversion.
+* **Lookup and Read-Only Iteration**: Query with `find`, `contains`, or `count`, and traverse entries in ascending key order.
+
+=== Creating a map
+
+Class template argument deduction infers the value type and map size from the arguments:
+
+[source,cpp]
+----
+#include "container/map.hpp"
+
+constexpr auto numbers = ctl::map(12, 10, 4, 21);
+----
+
+All arguments must have the same type. Non-empty maps are constructed during constant evaluation, so their values and keys must be usable in a constant expression. To create an empty map, provide its element type and zero capacity explicitly:
+
+[source,cpp]
+----
+constexpr ctl::map<int, 0> empty{};
+----
+
+=== Keys and uniqueness
+
+Map keys have type `std::uint64_t`.
+
+* Integral and floating-point values are converted to `std::uint64_t` and that converted value is used as the key.
+* A custom value type can be used if it has a `key()` member whose result is convertible to `std::uint64_t`. Its `key()` value becomes the map key.
+* Keys must be unique after conversion. If two input values produce the same key, map construction fails during constant evaluation.
+
+Floating-point conversion truncates the fractional part. For example, `12.75` is stored with key `12`. Thus `ctl::map(12.25, 12.75)` is invalid because both values convert to key `12`. Floating values must also be in the representable range for conversion to `std::uint64_t`; values outside that range are not valid map keys.
+
+Signed integers convert according to the standard integer conversion to `std::uint64_t`. For example, `-1` maps to `std::numeric_limits<std::uint64_t>::max()`. Query with the converted key, not the original signed value's type.
+
+[source,cpp]
+----
+struct named_value {
+    std::uint64_t id;
+
+    constexpr auto key() const noexcept -> std::uint64_t {
+        return id;
+    }
+};
+
+constexpr auto named = ctl::map(named_value{42}, named_value{7});
+----
+
+=== Lookup
+
+The lookup functions accept a `std::uint64_t` key. `find()` returns an iterator to the stored `std::pair<std::uint64_t, T>` when the key exists, or `end()` otherwise. Check the result against `end()` before accessing its members. The pair's `.first` is the key and `.second` is the stored value.
+
+[source,cpp]
+----
+constexpr auto values = ctl::map(12, 10, 4);
+
+static_assert(values.contains(10));
+static_assert(values.count(99) == 0);
+
+constexpr auto entry = values.find(10);
+static_assert(entry != values.end());
+static_assert(entry->first == 10);
+static_assert(entry->second == 10);
+----
+
+* `find(key)` returns an iterator to the entry, or `end()` if not found.
+* `contains(key)` returns whether an entry exists.
+* `count(key)` returns `1` when found and `0` otherwise; duplicate keys are not allowed.
+* `size()` returns the number of entries.
+
+=== Iteration
+
+The map supports range-based iteration through `begin()` and `end()`. Iteration follows ascending key order and yields references to `std::pair<std::uint64_t, T>` entries. The map's storage is `const`, and its public iterators are `const_iterator`s, so iteration is read-only. Iterators are contiguous array iterators; the public API does not expose mutating operations.
+
+[source,cpp]
+----
+constexpr auto values = ctl::map(30, 10, 20);
+
+for (auto const& [key, value] : values) {
+    // Entries are visited in key order: 10, 20, 30.
+}
+----
+
+An empty map has `begin() == end()` and can be iterated safely without yielding entries.

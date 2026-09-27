@@ -1,11 +1,6 @@
 #pragma once
 
 #include <array>
-#include <concepts>
-#include <cstdlib>
-#include <cstdint>
-#include <type_traits>
-#include <utility>
 
 namespace ctl {
 
@@ -28,30 +23,30 @@ struct is_unique_key {
     template <typename... Entries>
         requires (HasKey<Entries> && ...)
     constexpr auto operator()(Entries const&... entries) -> bool {
-            const std::array keys{static_cast<std::uint64_t>(entries.key())...};
-            for (std::size_t i = 0; i < keys.size(); ++i) {
-                for (std::size_t j = i + 1; j < keys.size(); ++j) {
-                    if (keys[i] == keys[j]) {
-                        return false;
-                    }
+        const std::array keys{static_cast<std::uint64_t>(entries.key())...};
+        for (std::size_t i = 0; i < keys.size(); ++i) {
+            for (std::size_t j = i + 1; j < keys.size(); ++j) {
+                if (keys[i] == keys[j]) {
+                    return false;
                 }
             }
-            return true;
         }
+        return true;
+    }
 
     template <typename... Entries>
         requires (((std::is_integral_v<Entries>) || (std::is_floating_point_v<Entries>)) && ...)
     constexpr auto operator()(Entries const&... entries) -> bool {
-            const std::array keys{static_cast<std::uint64_t>(entries)...};
-            for (std::size_t i = 0; i < keys.size(); ++i) {
-                for (std::size_t j = i + 1; j < keys.size(); ++j) {
-                    if (keys[i] == keys[j]) {
-                        return false;
-                    }
+        const std::array keys{static_cast<std::uint64_t>(entries)...};
+        for (std::size_t i = 0; i < keys.size(); ++i) {
+            for (std::size_t j = i + 1; j < keys.size(); ++j) {
+                if (keys[i] == keys[j]) {
+                    return false;
                 }
             }
-            return true;
         }
+        return true;
+    }
 };
 
 }   // namespace details
@@ -74,36 +69,36 @@ private:
 
     template <typename U>
     struct data_initializer {
-            template <typename ...Us>
-                requires((std::is_same_v<U, Us> && ...))
-            consteval auto operator()(U first, Us... rest) -> data_t {
-                if (!details::is_unique_key{}(first, rest...)) {
-                    std::abort();
-                }
+        template <typename ...Us>
+            requires((std::is_same_v<U, Us> && ...))
+        consteval auto operator()(U first, Us... rest) -> data_t {
+            if (!details::is_unique_key{}(first, rest...)) {
+                std::abort();
+            }
 
-                // Sort the array based on the key values in ascending order
-                constexpr auto sort_entries = [](auto &arr) -> void {
-                    for(std::size_t i = 0; i < arr.size(); ++i) {
-                        for (std::size_t j = i + 1; j < arr.size(); ++j) {
-                            if (arr[i].first > arr[j].first) {
-                                std::swap(arr[i], arr[j]);
-                            }
+            // Sort the array based on the key values in ascending order
+            constexpr auto sort_entries = [](auto &arr) -> void {
+                for(std::size_t i = 0; i < arr.size(); ++i) {
+                    for (std::size_t j = i + 1; j < arr.size(); ++j) {
+                        if (arr[i].first > arr[j].first) {
+                            std::swap(arr[i], arr[j]);
                         }
                     }
-                };
-
-                if constexpr (details::HasKey<U>) {
-                    data_t arr{ std::pair<key_t, value_t>(first.key(), first),
-                            std::pair<key_t, value_t>(rest.key(), rest)...};
-                    sort_entries(arr);
-                    return arr;
-                } else {
-                    data_t arr{ std::pair<key_t, value_t>(static_cast<std::uint64_t>(first), first),
-                            std::pair<key_t, value_t>(static_cast<std::uint64_t>(rest), rest)...};
-                    sort_entries(arr);
-                    return arr;
                 }
             };
+
+            if constexpr (details::HasKey<U>) {
+                data_t arr{ std::pair<key_t, value_t>(first.key(), first),
+                        std::pair<key_t, value_t>(rest.key(), rest)...};
+                sort_entries(arr);
+                return arr;
+            } else {
+                data_t arr{ std::pair<key_t, value_t>(static_cast<std::uint64_t>(first), first),
+                        std::pair<key_t, value_t>(static_cast<std::uint64_t>(rest), rest)...};
+                sort_entries(arr);
+                return arr;
+            }
+        };
     };
 
     // members
@@ -123,7 +118,7 @@ private:
             }
         }
 
-        return nullptr;
+        return data.end();
     };
 public:
     template <typename... Ts>
@@ -135,7 +130,7 @@ public:
     constexpr map() requires (N == 0) : data{} {}
 
     constexpr auto count(key_t key) const noexcept -> std::size_t {
-        return (get_value(key) == nullptr) ? 0 : 1;
+        return (get_value(key) == data.end()) ? 0 : 1;
     }
 
     constexpr auto find(key_t key) const noexcept -> const_iterator {
@@ -143,7 +138,7 @@ public:
     }
 
     constexpr auto contains(key_t key) const noexcept -> bool {
-        return (get_value(key) != nullptr); 
+        return (get_value(key) != data.end()); 
     }
 
     constexpr auto size() const noexcept -> std::size_t {
