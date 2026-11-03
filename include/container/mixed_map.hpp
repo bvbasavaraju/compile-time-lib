@@ -27,25 +27,24 @@ private:
             std::abort();
         }
 
-        constexpr auto sort = [](auto &arr) -> void {
-            for (std::size_t i = 0; i < arr.size(); ++i) {
-                for (std::size_t j = i + 1; j < arr.size(); ++j) {
-                    if (arr[i].first > arr[j].first) {
-                        std::swap(arr[i], arr[j]);
-                    }
+        data_t arr = []() constexpr -> data_t {
+            if constexpr ((details::HasKey<T> && ...)) {
+                return {std::pair<key_t, value_t>(T{}.key(), value_t{T{}})...};
+            } else {
+                return {std::pair<key_t, value_t>(static_cast<std::uint64_t>(T{}), value_t{T{}})...};
+            }
+        }();
+
+        for (std::size_t i = 0; i < arr.size(); ++i) {
+            for (std::size_t j = i + 1; j < arr.size(); ++j) {
+                if (arr[i].first > arr[j].first) {
+                    auto entry = std::move(arr[i]);
+                    arr[i] = std::move(arr[j]);
+                    arr[j] = std::move(entry);
                 }
             }
-        };
-
-        if constexpr ((details::HasKey<T> && ...)) {
-            data_t arr{std::pair<key_t, value_t>(T{}.key(), value_t{T{}})...};
-            sort(arr);
-            return arr;
-        } else {
-            data_t arr{std::pair<key_t, value_t>(static_cast<std::uint64_t>(T{}), value_t{T{}})...};
-            sort(arr);
-            return arr;
         }
+        return arr;
     }();
 
     constexpr auto get_value(key_t key) const -> const_iterator {
