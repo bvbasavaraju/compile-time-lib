@@ -1,0 +1,86 @@
+== Mixed Map
+:hardbreaks-option:
+
+`ctl::mixed_map` is a fixed-size map whose values may have different types. Each value is stored as an alternative in a `std::variant`, and entries are kept in ascending `std::uint64_t` key order for binary-search lookup.
+
+Include `container/mixed_map.hpp` to use the mixed map.
+
+=== Features
+
+* **Heterogeneous Values**: Store distinct value types in one map; each entry's value is a `std::variant<T...>`.
+* **Compile-Time Construction**: Entries are formed from default-constructed types in the template argument list.
+* **Sorted Entries and Binary Search**: Entries are ordered by key and searched with binary search.
+* **Custom or Numeric Keys**: Custom types provide a `key()` member convertible to `std::uint64_t`; numeric types use their value converted to `std::uint64_t`.
+* **Duplicate-Key Check**: Keys must be unique; duplicate keys make constant evaluation fail.
+* **Inline Fixed-Size Storage**: Entries are stored in a fixed-size `std::array`; the map does not dynamically allocate storage.
+* **Read-Only Lookup and Iteration**: Query with `find`, `contains`, or `count`, or iterate entries in ascending key order.
+
+=== Creating a mixed map
+
+Specify the value types as template arguments. Each type is default-constructed to create its entry, so custom types must be default-constructible and must provide the desired key through their default state:
+
+[source,cpp]
+----
+#include <cstdint>
+#include <variant>
+
+#include "container/mixed_map.hpp"
+
+struct user_entry {
+    std::uint64_t id = 42;
+    constexpr auto key() const noexcept -> std::uint64_t { return id; }
+};
+
+struct product_entry {
+    std::uint64_t id = 7;
+    constexpr auto key() const noexcept -> std::uint64_t { return id; }
+};
+
+constexpr ctl::mixed_map<user_entry, product_entry> records{};
+----
+
+The supplied/default-constructed values and keys are fixed at compile time. `mixed_map` does not accept runtime values for its entries.
+
+=== Keys and supported types
+
+Keys have type `std::uint64_t`.
+
+* A custom type with a `key()` member convertible to `std::uint64_t` uses the result of `key()` as its key.
+* An integral or floating-point type uses its default-constructed value converted to `std::uint64_t`.
+* Keys must be unique after conversion. If two types produce the same key, construction fails during constant evaluation.
+
+All types in one `mixed_map` must use the same key mechanism: either every type provides `key()`, or every type is numeric. Mixing custom keyed types and numeric types is not supported. Also, numeric types are default-constructed (for example, `int{}` is `0`), so multiple numeric types with their usual default values produce duplicate keys. Custom keyed types are generally the useful way to create a map with multiple distinct entries.
+
+Floating-point key conversion truncates the fractional part and must be representable as a `std::uint64_t`. Signed integer conversion follows the standard conversion to `std::uint64_t`.
+
+=== Lookup
+
+`find()` accepts a `std::uint64_t` key and returns an iterator to a stored `std::pair<std::uint64_t, std::variant<T...>>`, or `end()` if the key is not found. Check the iterator against `end()` before accessing it. Use `std::get_if<T>` when checking for a particular value type, or `std::visit` to handle the active type.
+
+[source,cpp]
+----
+constexpr auto entry = records.find(42);
+if (entry != records.end()) {
+    if (auto const* user = std::get_if<user_entry>(&entry->second)) {
+        // user has type user_entry const*
+    }
+}
+----
+
+* `find(key)` returns an iterator to the entry, or `end()` if not found.
+* `contains(key)` returns whether an entry exists.
+* `count(key)` returns `1` when found and `0` otherwise; duplicate keys are not allowed.
+* `size()` returns the number of entries.
+
+=== Iteration
+
+The map supports range-based iteration through `begin()` and `end()`. Iteration yields entries in ascending key order, with the key in `.first` and the variant value in `.second`. Access the stored value with `std::get<T>`, `std::get_if<T>`, or `std::visit`.
+
+[source,cpp]
+----
+for (auto const& [key, value] : records) {
+    std::visit([](auto const& item) {
+        // item has the active alternative's actual type
+    }, value);
+}
+----
