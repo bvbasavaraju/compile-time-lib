@@ -3,6 +3,7 @@
 #include <limits>
 
 #include "container/map.hpp"
+#include "container/mixed_map.hpp"
 
 #include <gtest/gtest.h>
 

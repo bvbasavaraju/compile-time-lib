@@ -5,6 +5,7 @@ set(CTL_TEST ctl_test)
 add_executable(${CTL_TEST} 
     container/list_test.cpp 
     container/map.cpp 
+    container/mixed_map.cpp
     string/ro_string.cpp
     utils_test.cpp)
 
